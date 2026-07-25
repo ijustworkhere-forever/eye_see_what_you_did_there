@@ -6,6 +6,7 @@
 #include "EyeController.h"
 #include "IdleBehaviorStub.h"
 #include "Logger.h"
+#include "OtaManager.h"
 #include "Pca9685ServoOutput.h"
 #include "PassthroughAnimationEngine.h"
 #include "PreferencesStore.h"
@@ -28,6 +29,7 @@ PreferencesStore preferencesStore;
 WebServer webServer;
 RestApi restApi;
 WebSocketServer webSocketServer;
+OtaManager otaManager;
 }
 
 void setup() {
@@ -38,6 +40,7 @@ void setup() {
     webServer.begin();
     restApi.begin();
     webSocketServer.begin();
+    otaManager.begin();
     eyeController.setIdle();
     behaviorEngine.setState(EyeState::Startup);
 }

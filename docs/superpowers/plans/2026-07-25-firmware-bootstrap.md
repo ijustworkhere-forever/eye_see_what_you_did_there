@@ -26,11 +26,12 @@
 
 ## Notes on turning the spec into code (read before starting)
 
-Three small decisions were needed to make the approved spec concrete; flagging them here rather than burying them in a task:
+Four small decisions were needed to make the approved spec concrete; flagging them here rather than burying them in a task:
 
 1. **`CalibrationManager` lives in `lib/Configuration/`**, not its own `lib/` folder. The spec's own top-level directory layout (from the original project brief) only lists `EyeController/ ServoDriver/ Animation/ Behavior/ Networking/ Storage/ OTA/ Logger/ Configuration/` — `CalibrationManager` was never its own folder, and it operates entirely on `Configuration`'s structs, so it's colocated with them.
 2. **`IAnimationEngine` has four `animate*` methods, not one.** The spec's `EyeCommand`/`CommandType` enum includes `WinkLeft`, `WinkRight`, `Sleep`, `Wake` alongside `Look`/`Blink`/`SetExpression`, but the spec's `IAnimationEngine` sketch only showed `animateGaze`/`animateBlink`/`animateExpression`. For `BehaviorEngine` to dispatch every `CommandType` without ever calling `EyeController` directly (the whole point of the command-queue arbitration), `IAnimationEngine` needs `animateWinkLeft`, `animateWinkRight`, `animateSleep`, and `animateWake` too. Added below.
 3. **`CommandQueue` is a real, fully-working fixed-capacity ring buffer**, not a stubbed contract. The spec listed its ring-buffer indexing as out of scope, but a correct fixed-size circular buffer is a few lines of uncontroversial data-structure code — nothing "advanced" (that term refers to animation/behavior/networking domain logic) — and leaving it half-implemented would mean the one task most exercised by later tests (`BehaviorEngine`) has an untested foundation.
+4. **All native tests share one `test/test_native/test_main.cpp` runner.** Discovered during Task 4: PlatformIO's native test runner links every `.cpp` under a matched test directory into one executable, so only one file may define `int main()` per directory — not one per test file, as earlier drafts of this plan assumed. `test_main.cpp` (created as part of Task 4's fix-up) owns the single `UNITY_BEGIN()`/`RUN_TEST(...)`/`UNITY_END()` body; every other `test_*.cpp` file contributes test functions only (no `main()`), and each task that adds native tests appends `extern` declarations + `RUN_TEST` calls to `test_main.cpp` in its own step.
 
 ---
 
@@ -827,6 +828,7 @@ git commit -m "Add MotionHardware module (IServoOutput, Pca9685ServoOutput)"
 - Create: `lib/EyeController/README.md`
 - Create: `test/test_native/support/FakeServoOutput.h`
 - Create: `test/test_native/test_eye_controller.cpp`
+- Modify: `test/test_native/test_main.cpp` (append this task's tests — see Step 5b)
 - Modify: `src/main.cpp`
 
 **Interfaces:**
@@ -1139,16 +1141,39 @@ void test_set_idle_resets_to_default_pose() {
     TEST_ASSERT_EQUAL_FLOAT(1.0f, pose.upperLeftLid);
 }
 
-int main(int argc, char** argv) {
-    UNITY_BEGIN();
+```
+
+No `main()` in this file — see the note on `test/test_native/test_main.cpp`
+at the top of this task's file list. Every native test executable in
+`test/test_native/` links as one PlatformIO test suite, so exactly one file
+in the directory owns `main()`; individual `test_*.cpp` files contribute
+only test functions.
+
+- [ ] **Step 5b: Append this task's tests to `test/test_native/test_main.cpp`**
+
+Add these `extern` declarations and `RUN_TEST` calls to the existing
+`test/test_native/test_main.cpp` (created in Task 4's fix-up — see ledger).
+Do not create a new `main()`; extend the existing one:
+
+```cpp
+extern void test_apply_pose_writes_neutral_pulses_and_calls_write_once();
+extern void test_look_updates_gaze_but_preserves_eyelids();
+extern void test_blink_closes_all_four_lids();
+extern void test_wink_left_closes_only_left_lids();
+extern void test_set_idle_resets_to_default_pose();
+```
+
+```cpp
     RUN_TEST(test_apply_pose_writes_neutral_pulses_and_calls_write_once);
     RUN_TEST(test_look_updates_gaze_but_preserves_eyelids);
     RUN_TEST(test_blink_closes_all_four_lids);
     RUN_TEST(test_wink_left_closes_only_left_lids);
     RUN_TEST(test_set_idle_resets_to_default_pose);
-    return UNITY_END();
-}
 ```
+
+(add the `extern` block near the file's other `extern` declarations, and
+each `RUN_TEST` line inside the existing `UNITY_BEGIN()`/`UNITY_END()` block,
+before `return UNITY_END();`)
 
 - [ ] **Step 6: Modify `src/main.cpp`**
 
@@ -1207,6 +1232,7 @@ git commit -m "Add EyeController module"
 - Create: `lib/Animation/PassthroughAnimationEngine.cpp`
 - Create: `lib/Animation/README.md`
 - Create: `test/test_native/test_animation_engine.cpp`
+- Modify: `test/test_native/test_main.cpp` (append this task's tests — see Step 5b)
 - Modify: `src/main.cpp`
 
 **Interfaces:**
@@ -1396,13 +1422,24 @@ void test_animate_blink_closes_eyelids_immediately() {
     TEST_ASSERT_EQUAL_FLOAT(0.0f, controller.currentPose().upperRightLid);
 }
 
-int main(int argc, char** argv) {
-    UNITY_BEGIN();
+```
+
+No `main()` in this file — same reason as Task 6 (one `main()` per
+`test/test_native/` PlatformIO test suite).
+
+- [ ] **Step 5b: Append this task's tests to `test/test_native/test_main.cpp`**
+
+```cpp
+extern void test_animate_gaze_applies_pose_immediately();
+extern void test_animate_blink_closes_eyelids_immediately();
+```
+
+```cpp
     RUN_TEST(test_animate_gaze_applies_pose_immediately);
     RUN_TEST(test_animate_blink_closes_eyelids_immediately);
-    return UNITY_END();
-}
 ```
+
+(same placement convention as Task 6's Step 5b)
 
 - [ ] **Step 6: Modify `src/main.cpp`**
 
@@ -1449,7 +1486,7 @@ Expected: `SUCCESS`
 - [ ] **Step 9: Commit**
 
 ```bash
-git add lib/Animation test/test_native/test_animation_engine.cpp src/main.cpp
+git add lib/Animation test/test_native/test_animation_engine.cpp test/test_native/test_main.cpp src/main.cpp
 git commit -m "Add Animation module"
 ```
 
@@ -1464,6 +1501,7 @@ git commit -m "Add Animation module"
 - Create: `lib/Behavior/CommandQueue.cpp`
 - Create: `lib/Behavior/README.md`
 - Create: `test/test_native/test_command_queue.cpp`
+- Modify: `test/test_native/test_main.cpp` (append this task's tests — see Step 6b)
 
 **Interfaces:**
 - Consumes: `eyesee::GazeTarget`, `eyesee::Expression` (Task 6).
@@ -1668,14 +1706,25 @@ void test_clear_empties_queue() {
     TEST_ASSERT_EQUAL_UINT32(0, static_cast<uint32_t>(queue.size()));
 }
 
-int main(int argc, char** argv) {
-    UNITY_BEGIN();
+// No main() in this file — same reason as Task 6 (one main() per
+// test/test_native/ PlatformIO test suite; see Step 6b below).
+```
+
+- [ ] **Step 6b: Append this task's tests to `test/test_native/test_main.cpp`**
+
+```cpp
+extern void test_push_pop_preserves_fifo_order();
+extern void test_push_fails_when_full();
+extern void test_clear_empties_queue();
+```
+
+```cpp
     RUN_TEST(test_push_pop_preserves_fifo_order);
     RUN_TEST(test_push_fails_when_full);
     RUN_TEST(test_clear_empties_queue);
-    return UNITY_END();
-}
 ```
+
+(same placement convention as Task 6's Step 5b)
 
 - [ ] **Step 7: Run the native tests**
 
@@ -1685,7 +1734,7 @@ Expected: `15 Tests 0 Failures 0 Ignored` — `PASSED`
 - [ ] **Step 8: Commit**
 
 ```bash
-git add lib/Behavior test/test_native/test_command_queue.cpp
+git add lib/Behavior test/test_native/test_command_queue.cpp test/test_native/test_main.cpp
 git commit -m "Add Behavior data layer (EyeState, EyeCommand, CommandQueue)"
 ```
 
@@ -1702,6 +1751,7 @@ git commit -m "Add Behavior data layer (EyeState, EyeCommand, CommandQueue)"
 - Create: `lib/Behavior/BehaviorEngine.cpp`
 - Create: `test/test_native/support/FakeAnimationEngine.h`
 - Create: `test/test_native/test_behavior_engine.cpp`
+- Modify: `test/test_native/test_main.cpp` (append this task's tests — see Step 9b)
 - Modify: `lib/Behavior/README.md`
 - Modify: `src/main.cpp`
 
@@ -2035,15 +2085,27 @@ void test_set_state_updates_reported_state() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Manual), static_cast<int>(engine.state()));
 }
 
-int main(int argc, char** argv) {
-    UNITY_BEGIN();
+// No main() in this file — same reason as Task 6 (one main() per
+// test/test_native/ PlatformIO test suite; see Step 9b below).
+```
+
+- [ ] **Step 9b: Append this task's tests to `test/test_native/test_main.cpp`**
+
+```cpp
+extern void test_update_drains_queue_and_dispatches_look_command();
+extern void test_update_dispatches_blink_command();
+extern void test_update_dispatches_all_remaining_command_types();
+extern void test_set_state_updates_reported_state();
+```
+
+```cpp
     RUN_TEST(test_update_drains_queue_and_dispatches_look_command);
     RUN_TEST(test_update_dispatches_blink_command);
     RUN_TEST(test_update_dispatches_all_remaining_command_types);
     RUN_TEST(test_set_state_updates_reported_state);
-    return UNITY_END();
-}
 ```
+
+(same placement convention as Task 6's Step 5b)
 
 - [ ] **Step 10: Modify `src/main.cpp`**
 

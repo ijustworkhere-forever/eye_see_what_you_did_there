@@ -5,6 +5,7 @@
 #include "support/FakeServoOutput.h"
 
 using eyesee::CalibrationManager;
+using eyesee::Expression;
 using eyesee::EyeController;
 using eyesee::EyePose;
 
@@ -63,6 +64,26 @@ void test_wink_left_closes_only_left_lids() {
     TEST_ASSERT_EQUAL_FLOAT(0.0f, pose.lowerLeftLid);
     TEST_ASSERT_EQUAL_FLOAT(1.0f, pose.upperRightLid);
     TEST_ASSERT_EQUAL_FLOAT(1.0f, pose.lowerRightLid);
+}
+
+void test_set_expression_does_not_change_pose() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+
+    controller.look(0.6f, -0.3f);
+    controller.blink();
+    const EyePose before = controller.currentPose();
+
+    controller.setExpression(Expression::Happy);
+
+    const EyePose after = controller.currentPose();
+    TEST_ASSERT_EQUAL_FLOAT(before.lookX, after.lookX);
+    TEST_ASSERT_EQUAL_FLOAT(before.lookY, after.lookY);
+    TEST_ASSERT_EQUAL_FLOAT(before.upperLeftLid, after.upperLeftLid);
+    TEST_ASSERT_EQUAL_FLOAT(before.lowerLeftLid, after.lowerLeftLid);
+    TEST_ASSERT_EQUAL_FLOAT(before.upperRightLid, after.upperRightLid);
+    TEST_ASSERT_EQUAL_FLOAT(before.lowerRightLid, after.lowerRightLid);
 }
 
 void test_set_idle_resets_to_default_pose() {

@@ -40,6 +40,13 @@ private:
     CalibrationManager& calibration_;
     EyePose currentPose_;
 
+    /**
+     * Applies the current pose with all four eyelids closed, preserving gaze.
+     * Shared by blink() and sleep(), which are identical today but are expected
+     * to diverge (blink reopens, sleep stays shut — docs/ROADMAP.md v0.3).
+     */
+    void closeAllLids();
+
     ServoOutput toServoOutput(const EyePose& pose) const;
 };
 

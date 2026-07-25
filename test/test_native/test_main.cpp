@@ -1,5 +1,10 @@
 #include <unity.h>
 
+// PlatformIO links every .cpp under test/test_native/ into a single test
+// binary, so exactly one translation unit may define main(). This is that file:
+// the other test_*.cpp files contain test functions only, and each one is
+// declared extern and registered below.
+
 // Configuration tests
 extern void test_default_eye_config_has_six_distinct_channels();
 extern void test_default_servo_config_is_centered_and_uninverted();
@@ -14,6 +19,7 @@ extern void test_apply_pose_writes_neutral_pulses_and_calls_write_once();
 extern void test_look_updates_gaze_but_preserves_eyelids();
 extern void test_blink_closes_all_four_lids();
 extern void test_wink_left_closes_only_left_lids();
+extern void test_set_expression_does_not_change_pose();
 extern void test_set_idle_resets_to_default_pose();
 
 // Animation tests
@@ -42,6 +48,7 @@ int main(int argc, char** argv) {
     RUN_TEST(test_look_updates_gaze_but_preserves_eyelids);
     RUN_TEST(test_blink_closes_all_four_lids);
     RUN_TEST(test_wink_left_closes_only_left_lids);
+    RUN_TEST(test_set_expression_does_not_change_pose);
     RUN_TEST(test_set_idle_resets_to_default_pose);
     RUN_TEST(test_animate_gaze_applies_pose_immediately);
     RUN_TEST(test_animate_blink_closes_eyelids_immediately);

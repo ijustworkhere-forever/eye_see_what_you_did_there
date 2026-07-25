@@ -2,9 +2,14 @@
 
 #include "IServoOutput.h"
 
+// This class is Arduino-only, and so is its entire implementation in
+// Pca9685ServoOutput.cpp. The declaration is guarded to match: under !ARDUINO
+// this header intentionally declares nothing, so a native build can't reference
+// a class that has no definitions anywhere. Native tests use a fake
+// IServoOutput instead (see test/test_native/support/FakeServoOutput.h).
 #ifdef ARDUINO
+
 #include <Adafruit_PWMServoDriver.h>
-#endif
 
 namespace eyesee {
 
@@ -23,11 +28,7 @@ public:
     void update(uint32_t deltaMs) override;
 
 private:
-#ifdef ARDUINO
     Adafruit_PWMServoDriver driver_;
-#else
-    void* driver_;  // Placeholder for non-Arduino environments
-#endif
 
     static constexpr uint8_t kChannelLr = 0;
     static constexpr uint8_t kChannelUd = 1;
@@ -39,3 +40,5 @@ private:
 };
 
 }  // namespace eyesee
+
+#endif  // ARDUINO

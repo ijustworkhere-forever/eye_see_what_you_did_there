@@ -88,5 +88,5 @@ void test_set_state_updates_reported_state() {
     TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Manual), static_cast<int>(engine.state()));
 }
 
-// No main() in this file — same reason as Task 6 (one main() per
-// test/test_native/ PlatformIO test suite; see Step 9b below).
+// No main() here — test/test_native/test_main.cpp is the sole file with main()
+// (see its own comment for why).

@@ -39,9 +39,13 @@ void Pca9685ServoOutput::setAngle(uint8_t channel, float angleDegrees) {
 
 void Pca9685ServoOutput::setPulse(uint8_t channel, uint16_t pulseUs) {
     constexpr uint32_t kTicksPerCycle = 4096;
+    constexpr uint32_t kMaxTicks = kTicksPerCycle - 1;  // 12-bit PWM counter: 0..4095
     const uint32_t microsPerCycle = 1000000UL / kPwmFrequencyHz;
     const uint32_t ticks = (static_cast<uint32_t>(pulseUs) * kTicksPerCycle) / microsPerCycle;
-    driver_.setPWM(channel, 0, static_cast<uint16_t>(ticks));
+    // Clamp before narrowing: a pulseUs longer than one PWM cycle yields
+    // ticks > 4095, which would truncate into a garbage duty cycle.
+    const uint32_t clampedTicks = ticks > kMaxTicks ? kMaxTicks : ticks;
+    driver_.setPWM(channel, 0, static_cast<uint16_t>(clampedTicks));
 }
 
 void Pca9685ServoOutput::update(uint32_t deltaMs) {

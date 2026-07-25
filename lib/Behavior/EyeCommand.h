@@ -9,6 +9,7 @@
 
 namespace eyesee {
 
+/** Which action an EyeCommand requests; selects the EyeCommand fields that are valid. */
 enum class CommandType {
     Look,
     Blink,
@@ -18,6 +19,9 @@ enum class CommandType {
     Wake,
     SetExpression
 };
+
+/** Relative urgency of a queued command. Priority-aware arbitration is future work
+ * (docs/ROADMAP.md v0.3); CommandQueue is strictly FIFO today. */
 enum class CommandPriority {
     Low,
     Normal,

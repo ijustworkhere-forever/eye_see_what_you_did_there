@@ -43,5 +43,5 @@ void test_clear_empties_queue() {
     TEST_ASSERT_EQUAL_UINT32(0, static_cast<uint32_t>(queue.size()));
 }
 
-// No main() in this file — same reason as Task 6 (one main() per
-// test/test_native/ PlatformIO test suite; see Step 6b below).
+// No main() here — test/test_native/test_main.cpp is the sole file with main()
+// (see its own comment for why).

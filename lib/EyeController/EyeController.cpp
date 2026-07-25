@@ -22,13 +22,17 @@ void EyeController::look(float x, float y) {
     applyPose(pose);
 }
 
-void EyeController::blink() {
+void EyeController::closeAllLids() {
     EyePose pose = currentPose_;
     pose.upperLeftLid = 0.0f;
     pose.lowerLeftLid = 0.0f;
     pose.upperRightLid = 0.0f;
     pose.lowerRightLid = 0.0f;
     applyPose(pose);
+}
+
+void EyeController::blink() {
+    closeAllLids();
     // TODO: reopening after a duration is IAnimationEngine's job (docs/ROADMAP.md v0.3) —
     // EyeController never owns time, so this call only closes the eyelids.
 }
@@ -48,12 +52,7 @@ void EyeController::winkRight() {
 }
 
 void EyeController::sleep() {
-    EyePose pose = currentPose_;
-    pose.upperLeftLid = 0.0f;
-    pose.lowerLeftLid = 0.0f;
-    pose.upperRightLid = 0.0f;
-    pose.lowerRightLid = 0.0f;
-    applyPose(pose);
+    closeAllLids();
 }
 
 void EyeController::wake() {
@@ -67,9 +66,9 @@ void EyeController::wake() {
 
 void EyeController::setExpression(Expression expression) {
     (void)expression;
-    // TODO: per-expression pose blending (docs/ROADMAP.md v0.3). Every
-    // expression resolves to the idle pose this pass.
-    setIdle();
+    // TODO: per-expression pose blending (docs/ROADMAP.md v0.3). No pose
+    // change this pass — a stub must never silently mutate state it wasn't
+    // asked to touch (see docs/architecture.md).
 }
 
 void EyeController::setIdle() {

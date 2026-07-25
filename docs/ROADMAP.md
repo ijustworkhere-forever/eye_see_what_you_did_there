@@ -11,6 +11,8 @@
 - `EyeController::toServoOutput()` calibration math (scaling, invert, mirror, offset)
 - `IAnimationEngine` real interpolation: linear, ease-in/out, cubic
 - `GazeTarget` speed/hold honored
+- Frame-rate pacing in `loop()`: hold the documented 100Hz target via a delta
+  accumulator instead of running as fast as the scheduler allows
 
 ## v0.3 — Behavior
 - `EyeState`-driven behavior switching in `BehaviorEngine`

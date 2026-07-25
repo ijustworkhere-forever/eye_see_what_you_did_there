@@ -56,20 +56,29 @@ with zero impact on `EyeController`/`Animation`/`Behavior`.
 
 ## Module dependency graph
 
+Two independent leaf modules sit at the bottom. `Configuration` and
+`MotionHardware` know nothing about each other — `IServoOutput`/`ServoOutput`
+only include `<cstdint>`:
+
 ```
-Configuration (leaf: ServoConfig, EyeConfig, NetworkConfig, BehaviorConfig, CalibrationManager)
-     ^
-     |
-MotionHardware (leaf: ServoOutput, IServoOutput, Pca9685ServoOutput)
-     ^
-     |
-EyeController --------> depends on Configuration + MotionHardware
-     ^
-     |
-Animation -------------> depends on EyeController
-     ^
-     |
-Behavior --------------> depends on Animation + EyeController (GazeTarget/Expression)
+Configuration                          MotionHardware
+(leaf: ServoConfig, EyeConfig,         (leaf: ServoOutput, IServoOutput,
+ NetworkConfig, BehaviorConfig,         Pca9685ServoOutput)
+ CalibrationManager)
+         ^                                     ^
+         |                                     |
+         +------------------+------------------+
+                            |
+                      EyeController ---> depends on Configuration + MotionHardware
+                            ^             (also owns EyeTypes.h: Expression,
+                            |              GazeTarget, EyePose)
+                       Animation ------> depends on EyeController
+                            ^
+                            |
+                        Behavior ------> depends on Animation + EyeTypes.h
+                                          (GazeTarget/Expression only — never
+                                           EyeController itself, so hardware and
+                                           calibration types stay out of scope)
 
 Logger, Storage, Networking, OTA: leaf modules, no dependency on the above.
 ```
@@ -89,6 +98,8 @@ All REST routes (not implemented yet) are versioned under `/api/v1/`:
 `Configuration`, `CalibrationManager`, `EyeController`, `Animation`, and
 `Behavior` are free of `Arduino.h` and are unit-tested on the host via the
 `native` PlatformIO environment (`pio test -e native`). `Logger`,
-`MotionHardware`, `Storage`, `Networking`, and `OTA` depend on
-Arduino/hardware headers and are verified only by `pio run -e esp32dev`
-compiling successfully.
+`MotionHardware` (specifically `Pca9685ServoOutput`), and `Storage`
+(`PreferencesStore`) depend on Arduino/hardware headers and are verified only
+by `pio run -e esp32dev` compiling successfully. `Networking` and `OTA` are
+Arduino-free today (they only include `<cstdint>`) — they will gain hardware
+dependencies once their bodies are implemented.

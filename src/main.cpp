@@ -69,6 +69,8 @@ void setup() {
 }
 
 void loop() {
+    // TODO: enforce ~100Hz frame pacing (docs/ROADMAP.md v0.2) — currently runs
+    // as fast as the scheduler allows
     const uint32_t deltaMs = tickDeltaMs();
 
     behaviorEngine.update(deltaMs);

@@ -11,3 +11,6 @@ firmware.
 
 **Future work:** `CalibrationManager` persistence via `IStorage` (see
 `docs/ROADMAP.md` v0.5).
+
+**CalibrationManager:** In-memory owner of `EyeConfig`. `EyeChannel` selects
+which of the six servos a getter/setter operates on.

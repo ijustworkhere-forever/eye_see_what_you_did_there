@@ -1,3 +1,4 @@
+#ifdef ARDUINO
 #include <Arduino.h>
 
 #include "CalibrationManager.h"
@@ -23,3 +24,4 @@ void setup() {
 
 void loop() {
 }
+#endif  // ARDUINO

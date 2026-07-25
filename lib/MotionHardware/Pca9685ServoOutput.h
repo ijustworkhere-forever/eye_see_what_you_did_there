@@ -4,9 +4,6 @@
 
 #ifdef ARDUINO
 #include <Adafruit_PWMServoDriver.h>
-#else
-// Forward declaration for non-Arduino environments
-class Adafruit_PWMServoDriver;
 #endif
 
 namespace eyesee {

@@ -2,12 +2,8 @@
 
 #include "Configuration.h"
 
-// Undefine macros that may conflict with enum values
-#undef LR
-#undef UD
-#undef TL
-#undef BL
-#undef TR
+// BR collides with a macro defined in xtensa/config/specreg.h (pulled in transitively
+// via the ESP32 Arduino core). This undef prevents macro expansion in the enum definition.
 #undef BR
 
 namespace eyesee {

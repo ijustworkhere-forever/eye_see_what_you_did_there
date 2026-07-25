@@ -9,7 +9,14 @@
 namespace eyesee {
 
 /** Selects one of the six calibrated servos. */
-enum class EyeChannel { LR, UD, TL, BL, TR, BR };
+enum class EyeChannel {
+    LR,
+    UD,
+    TL,
+    BL,
+    TR,
+    BR
+};
 
 /**
  * Owns the in-memory EyeConfig: per-servo limits, neutral position,

@@ -18,14 +18,25 @@ public:
         lastGazeTarget = target;
         ++animateGazeCallCount;
     }
-    void animateBlink(uint32_t) override { ++animateBlinkCallCount; }
-    void animateWinkLeft(uint32_t) override { ++animateWinkLeftCallCount; }
-    void animateWinkRight(uint32_t) override { ++animateWinkRightCallCount; }
-    void animateSleep(uint32_t) override { ++animateSleepCallCount; }
-    void animateWake(uint32_t) override { ++animateWakeCallCount; }
+    void animateBlink(uint32_t) override {
+        ++animateBlinkCallCount;
+    }
+    void animateWinkLeft(uint32_t) override {
+        ++animateWinkLeftCallCount;
+    }
+    void animateWinkRight(uint32_t) override {
+        ++animateWinkRightCallCount;
+    }
+    void animateSleep(uint32_t) override {
+        ++animateSleepCallCount;
+    }
+    void animateWake(uint32_t) override {
+        ++animateWakeCallCount;
+    }
     void animateExpression(eyesee::Expression expression, uint32_t) override {
         lastExpression = expression;
         ++animateExpressionCallCount;
     }
-    void update(uint32_t) override {}
+    void update(uint32_t) override {
+    }
 };

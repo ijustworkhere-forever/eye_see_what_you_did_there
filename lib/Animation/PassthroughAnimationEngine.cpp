@@ -3,7 +3,8 @@
 namespace eyesee {
 
 PassthroughAnimationEngine::PassthroughAnimationEngine(EyeController& eyeController)
-    : eyeController_(eyeController) {}
+    : eyeController_(eyeController) {
+}
 
 void PassthroughAnimationEngine::animateGaze(const GazeTarget& target) {
     // TODO: honor target.speed/blinkOnArrival/hold via real interpolation (docs/ROADMAP.md v0.2).

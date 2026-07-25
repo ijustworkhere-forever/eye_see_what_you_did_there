@@ -3,7 +3,12 @@
 namespace eyesee {
 
 /** Log severity, from least to most urgent. */
-enum class LogLevel { Debug, Info, Warn, Error };
+enum class LogLevel {
+    Debug,
+    Info,
+    Warn,
+    Error
+};
 
 /**
  * Static logging utility backed by Serial.

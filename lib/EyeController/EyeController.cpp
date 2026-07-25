@@ -3,7 +3,8 @@
 namespace eyesee {
 
 EyeController::EyeController(IServoOutput& output, CalibrationManager& calibration)
-    : output_(output), calibration_(calibration), currentPose_() {}
+    : output_(output), calibration_(calibration), currentPose_() {
+}
 
 void EyeController::applyPose(const EyePose& pose) {
     currentPose_ = pose;

@@ -8,9 +8,17 @@
 namespace eyesee {
 
 /** Named facial expressions. Pose blending per expression is future work (docs/ROADMAP.md v0.3). */
-enum class Expression { Neutral, Happy, Curious, Sleepy, Angry, Surprised };
+enum class Expression {
+    Neutral,
+    Happy,
+    Curious,
+    Sleepy,
+    Angry,
+    Surprised
+};
 
-/** Command-layer gaze intent: where to look, and how (speed/blink/hold) — consumed by IAnimationEngine, not EyeController. */
+/** Command-layer gaze intent: where to look, and how (speed/blink/hold) — consumed by
+ * IAnimationEngine, not EyeController. */
 struct GazeTarget {
     float x = 0.0f;
     float y = 0.0f;
@@ -46,7 +54,8 @@ public:
     void applyPose(const EyePose& pose);
     EyePose currentPose() const;
 
-    /** Convenience wrappers over applyPose(), each preserving prior pose fields they don't touch. */
+    /** Convenience wrappers over applyPose(), each preserving prior pose fields they don't touch.
+     */
     void look(float x, float y);
     void blink();
     void winkLeft();

@@ -5,3 +5,7 @@ IndentWidth: 4
 ColumnLimit: 100
 PointerAlignment: Left
 SortIncludes: false
+AccessModifierOffset: -4
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None

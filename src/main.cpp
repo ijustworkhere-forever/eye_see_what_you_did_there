@@ -41,7 +41,8 @@ uint32_t lastFrameMillis = 0;
 
 uint32_t tickDeltaMs() {
     const uint32_t nowMillis = millis();
-    const uint32_t deltaMs = nowMillis - lastFrameMillis;  // wraps correctly via unsigned arithmetic
+    const uint32_t deltaMs =
+        nowMillis - lastFrameMillis;  // wraps correctly via unsigned arithmetic
     lastFrameMillis = nowMillis;
     return deltaMs;
 }

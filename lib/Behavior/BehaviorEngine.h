@@ -14,7 +14,8 @@ namespace eyesee {
  */
 class BehaviorEngine : public IBehaviorEngine {
 public:
-    BehaviorEngine(IAnimationEngine& animation, CommandQueue& commandQueue, IBehavior& defaultBehavior);
+    BehaviorEngine(IAnimationEngine& animation, CommandQueue& commandQueue,
+                   IBehavior& defaultBehavior);
 
     void setState(EyeState state) override;
     EyeState state() const override;

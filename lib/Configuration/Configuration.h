@@ -4,7 +4,8 @@
 
 namespace eyesee {
 
-/** Per-servo calibration, expressed entirely in pulse widths (not angles) so it's independent of servo brand. */
+/** Per-servo calibration, expressed entirely in pulse widths (not angles) so it's independent of
+ * servo brand. */
 struct ServoConfig {
     uint8_t channel = 0;
     uint16_t minPulseUs = 1000;

@@ -4,7 +4,8 @@
 
 namespace eyesee {
 
-Pca9685ServoOutput::Pca9685ServoOutput(uint8_t i2cAddress) : driver_(i2cAddress) {}
+Pca9685ServoOutput::Pca9685ServoOutput(uint8_t i2cAddress) : driver_(i2cAddress) {
+}
 
 void Pca9685ServoOutput::init() {
     driver_.begin();
@@ -30,8 +31,8 @@ void Pca9685ServoOutput::setAngle(uint8_t channel, float angleDegrees) {
     constexpr float kMaxAngleDegrees = 180.0f;
 
     const float clamped = angleDegrees < 0.0f
-        ? 0.0f
-        : (angleDegrees > kMaxAngleDegrees ? kMaxAngleDegrees : angleDegrees);
+                              ? 0.0f
+                              : (angleDegrees > kMaxAngleDegrees ? kMaxAngleDegrees : angleDegrees);
     const float pulseUs = kMinPulseUs + (clamped / kMaxAngleDegrees) * (kMaxPulseUs - kMinPulseUs);
     setPulse(channel, static_cast<uint16_t>(pulseUs));
 }

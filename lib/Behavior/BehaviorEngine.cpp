@@ -3,11 +3,12 @@
 namespace eyesee {
 
 BehaviorEngine::BehaviorEngine(IAnimationEngine& animation, CommandQueue& commandQueue,
-                                IBehavior& defaultBehavior)
+                               IBehavior& defaultBehavior)
     : animation_(animation),
       commandQueue_(commandQueue),
       activeBehavior_(defaultBehavior),
-      state_(EyeState::Startup) {}
+      state_(EyeState::Startup) {
+}
 
 void BehaviorEngine::setState(EyeState state) {
     state_ = state;
@@ -29,24 +30,12 @@ void BehaviorEngine::update(uint32_t deltaMs) {
 
 void BehaviorEngine::dispatch(const EyeCommand& command) {
     switch (command.type) {
-        case CommandType::Look:
-            animation_.animateGaze(command.gazeTarget);
-            break;
-        case CommandType::Blink:
-            animation_.animateBlink(command.durationMs);
-            break;
-        case CommandType::WinkLeft:
-            animation_.animateWinkLeft(command.durationMs);
-            break;
-        case CommandType::WinkRight:
-            animation_.animateWinkRight(command.durationMs);
-            break;
-        case CommandType::Sleep:
-            animation_.animateSleep(command.durationMs);
-            break;
-        case CommandType::Wake:
-            animation_.animateWake(command.durationMs);
-            break;
+        case CommandType::Look: animation_.animateGaze(command.gazeTarget); break;
+        case CommandType::Blink: animation_.animateBlink(command.durationMs); break;
+        case CommandType::WinkLeft: animation_.animateWinkLeft(command.durationMs); break;
+        case CommandType::WinkRight: animation_.animateWinkRight(command.durationMs); break;
+        case CommandType::Sleep: animation_.animateSleep(command.durationMs); break;
+        case CommandType::Wake: animation_.animateWake(command.durationMs); break;
         case CommandType::SetExpression:
             animation_.animateExpression(command.expression, command.durationMs);
             break;

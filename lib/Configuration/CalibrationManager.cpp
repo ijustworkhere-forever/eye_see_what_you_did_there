@@ -2,9 +2,11 @@
 
 namespace eyesee {
 
-CalibrationManager::CalibrationManager() : config_(makeDefaultEyeConfig()) {}
+CalibrationManager::CalibrationManager() : config_(makeDefaultEyeConfig()) {
+}
 
-CalibrationManager::CalibrationManager(const EyeConfig& initialConfig) : config_(initialConfig) {}
+CalibrationManager::CalibrationManager(const EyeConfig& initialConfig) : config_(initialConfig) {
+}
 
 const EyeConfig& CalibrationManager::eyeConfig() const {
     return config_;

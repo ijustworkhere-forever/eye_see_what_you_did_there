@@ -73,7 +73,8 @@ void test_update_dispatches_all_remaining_command_types() {
     TEST_ASSERT_EQUAL_INT(1, animation.animateSleepCallCount);
     TEST_ASSERT_EQUAL_INT(1, animation.animateWakeCallCount);
     TEST_ASSERT_EQUAL_INT(1, animation.animateExpressionCallCount);
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(Expression::Happy), static_cast<int>(animation.lastExpression));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(Expression::Happy),
+                          static_cast<int>(animation.lastExpression));
 }
 
 void test_set_state_updates_reported_state() {

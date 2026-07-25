@@ -58,13 +58,13 @@ Web UI / REST API / WebSocket / Bluetooth / Serial
                 ↓  (push EyeCommand)
               CommandQueue
                 ↓  (drained each frame)
-           BehaviorEngine  — decides WHAT: "look over there"
+           BehaviorEngine  — decides WHAT: "look over there"       (EyeCommand)
                 ↓
-          IAnimationEngine — decides HOW: "350ms, cubic easing"
+          IAnimationEngine — decides HOW: "350ms, cubic easing"    (GazeTarget in, EyePose out)
                 ↓
-            EyeController  — decides WHERE: "that gaze = these servo angles"
+            EyeController  — decides WHERE: pose → calibrated servo pulses  (EyePose in, ServoOutput out)
                 ↓
-            IServoOutput   — moves hardware
+            IServoOutput   — moves hardware                        (ServoOutput in)
                 ↓
               PCA9685 (or other future actuator hardware)
 ```
@@ -76,18 +76,35 @@ or `IAnimationEngine` directly. This is a change from the original draft
 (which allowed manual commands to bypass `BehaviorEngine`) — the reviewer's
 point about inputs fighting each other is worth the extra indirection.
 
-**Design synthesis note:** the review suggested both (a) changing
-`EyeController::look()` to take a `GazeTarget` (with speed/easing/hold), and
-(b) moving `IAnimationEngine` between `BehaviorEngine` and `EyeController` so
-`EyeController` only converts "gaze → servo angles." Taking both literally
-would mean `EyeController` receives dynamics it has no use for. Resolution:
-`GazeTarget` (position + speed + blinkOnArrival + hold) is the vocabulary of
-the **command layer** — what `EyeCommand`/`BehaviorEngine`/`IAnimationEngine`
-pass around. `EyeController::look(float x, float y)` stays a low-level,
-instantaneous primitive that `IAnimationEngine` calls once per frame with an
-already-interpolated point. This keeps `EyeController` genuinely dumb (pure
-gaze→angle conversion), which was the point of separating it from Animation
-in the first place. Flag this if it's not what you intended.
+**Design synthesis note (confirmed):** `GazeTarget` (position + speed +
+blinkOnArrival + hold) is the vocabulary of the **command layer** — what
+`EyeCommand`/`BehaviorEngine`/`IAnimationEngine` pass around. `IAnimationEngine`
+converts that into a plain `EyePose` each frame, and `EyeController` converts
+`EyePose` into a calibrated `ServoOutput`. Each arrow in the pipeline is a
+different value type, and each stage does exactly one kind of conversion —
+no stage carries data it doesn't need.
+
+### Three invariants
+
+These are load-bearing and worth stating explicitly, since they're what
+keeps the layers above from re-coupling as the codebase grows:
+
+1. **`EyeController` never owns time.** No delays, no timers, no easing, no
+   animation — it holds only its *current* `EyePose` as a value, and
+   converts it to a `ServoOutput` synchronously. All animation lives in
+   `IAnimationEngine`.
+2. **`MotionHardware` never owns state.** `IServoOutput` receives a
+   `ServoOutput`, writes PWM, done. It doesn't remember what it was asked to
+   do last frame beyond whatever the underlying driver chip itself holds.
+3. **`Behavior` never knows hardware.** `BehaviorEngine`/`IBehavior` only
+   ever deal in `EyeCommand`/`GazeTarget`/`Expression` — never servo
+   channels, pulse widths, calibration, or inversion. Those concepts don't
+   exist above `EyeController`.
+
+A useful side effect of invariant 2 in particular: swapping `IServoOutput`
+for a host-side implementation (e.g. an SDL window drawing the eyes) is a
+one-class change with zero impact on `EyeController`/`Animation`/`Behavior`.
+Not built this pass, but the boundary is what makes it possible later.
 
 ### Namespace
 
@@ -103,8 +120,8 @@ Each module is a flat PlatformIO private library under `lib/<Module>/`
 include/            # project-wide public headers (currently empty/placeholder)
 src/                 # main.cpp only — thin wiring + frame clock, no logic
 lib/
-  EyeController/     # concrete: sole owner of eye motion state; GazeTarget, Expression
-  MotionHardware/     # IServoOutput + Pca9685ServoOutput (renamed from ServoDriver)
+  EyeController/     # concrete: sole owner of eye motion state; GazeTarget, Expression, EyePose
+  MotionHardware/     # IServoOutput + Pca9685ServoOutput (renamed from ServoDriver); ServoOutput
   Animation/           # IAnimationEngine + PassthroughAnimationEngine stub
   Behavior/            # IBehaviorEngine + BehaviorEngine, IBehavior + IdleBehaviorStub,
                        # EyeState, EyeCommand/CommandQueue
@@ -130,7 +147,7 @@ test/
 
 | Module | Interface? | Why |
 |---|---|---|
-| MotionHardware | `IServoOutput` → `Pca9685ServoOutput` | future actuator hardware: ESP32 LEDC PWM, other PWM chips, Dynamixel, CAN servos — renamed from `ServoDriver`/`IServoDriver` so the abstraction isn't PCA9685-specific |
+| MotionHardware | `IServoOutput` → `Pca9685ServoOutput` | future actuator hardware: ESP32 LEDC PWM, other PWM chips, Dynamixel, CAN servos, or even a host-side simulator — renamed from `ServoDriver`/`IServoDriver` so the abstraction isn't PCA9685-specific |
 | Animation | `IAnimationEngine` → `PassthroughAnimationEngine` (stub) | interpolation strategies will multiply (linear/easing/spline) |
 | Behavior (engine) | `IBehaviorEngine` → `BehaviorEngine` | alternate top-level orchestration is plausible (e.g. a test harness engine) |
 | Behavior (strategy) | `IBehavior` → `IdleBehaviorStub` (only one stub this pass) | plugin-style behaviors (Idle/Tracking/Curious/Random/Sleep) share one contract; only `Idle` gets a stub body — the rest are listed in `docs/ROADMAP.md` rather than scaffolded as empty files, to avoid five placeholder classes with nothing in them yet |
@@ -145,7 +162,7 @@ test/
 ### EyeController
 
 Concrete class, constructor-injected with `IServoOutput&` and
-`CalibrationManager&`. Owns two small value types used across the pipeline:
+`CalibrationManager&`. Owns the small value types used across the pipeline:
 
 ```cpp
 enum class Expression { Neutral, Happy, Curious, Sleepy, Angry, Surprised };
@@ -157,21 +174,67 @@ struct GazeTarget {
     bool blinkOnArrival;
     bool hold;
 };
+
+// The complete instantaneous "desired shape" of both eyes — no timing,
+// no easing, just values. This is what IAnimationEngine produces once per
+// frame and EyeController converts to hardware output.
+struct EyePose {
+    float lookX;         // normalized -1..1
+    float lookY;         // normalized -1..1
+    float upperLeftLid;  // normalized 0 (closed) .. 1 (open)
+    float lowerLeftLid;
+    float upperRightLid;
+    float lowerRightLid;
+};
 ```
 
-Public methods, all present with real signatures, bodies stubbed (TODO,
-no interpolation — that's `IAnimationEngine`'s job):
+The one true primitive is pose conversion; the named methods are thin
+convenience wrappers over it (e.g. `blink()` builds the canonical
+"eyelids closed" `EyePose` from the current gaze and applies it — instantly,
+no animation, per invariant 1 above):
 
-`look(float x, float y)`, `blink()`, `winkLeft()`, `winkRight()`, `sleep()`,
-`wake()`, `setExpression(Expression)`, `setIdle()`, `update(uint32_t deltaMs)`.
+```cpp
+class EyeController {
+public:
+    EyeController(IServoOutput& output, CalibrationManager& calibration);
+
+    void applyPose(const EyePose& pose);   // the one true primitive
+    void look(float x, float y);           // convenience: updates gaze, preserves eyelids
+    void blink();
+    void winkLeft();
+    void winkRight();
+    void sleep();
+    void wake();
+    void setExpression(Expression expression);
+    void setIdle();
+    void update(uint32_t deltaMs);         // reserved; currently a no-op, since EyeController owns no timed state
+
+private:
+    EyePose currentPose_;                  // last-applied pose, so partial updates (e.g. look()) don't clobber eyelids
+    IServoOutput& output_;
+    CalibrationManager& calibration_;
+
+    ServoOutput toServoOutput(const EyePose& pose) const; // applies calibration: pulse range, offset, invert, mirror
+};
+```
+
+All bodies are stubbed (TODO) this pass — `toServoOutput()` and `applyPose()`
+get real math later; right now they exist so the pipeline compiles and the
+type boundaries are locked in.
 
 ### MotionHardware (renamed from ServoDriver)
 
 ```cpp
+// Calibrated pulse widths for all six channels — the hardware-facing payload.
+struct ServoOutput {
+    uint16_t lr, ud, tl, bl, tr, br;  // microseconds
+};
+
 class IServoOutput {
 public:
     virtual ~IServoOutput() = default;
-    virtual void moveServo(uint8_t channel, float angleDegrees) = 0;
+    virtual void write(const ServoOutput& output) = 0;              // primary bulk write, called every frame by EyeController
+    virtual void moveServo(uint8_t channel, float angleDegrees) = 0; // manual/diagnostic/calibration use
     virtual void setAngle(uint8_t channel, float angleDegrees) = 0;
     virtual void setPulse(uint8_t channel, uint16_t pulseUs) = 0;
     virtual void update(uint32_t deltaMs) = 0;
@@ -179,7 +242,28 @@ public:
 ```
 
 `Pca9685ServoOutput` implements it using the Adafruit PWM Servo Driver
-library; constructor takes I2C address (default `0x40`).
+library; constructor takes I2C address (default `0x40`). `write()` is what
+the per-frame pipeline uses; the per-channel methods stay for calibration
+tooling and diagnostics, per the original driver spec.
+
+### Animation module
+
+```cpp
+class IAnimationEngine {
+public:
+    virtual ~IAnimationEngine() = default;
+    virtual void animateGaze(const GazeTarget& target) = 0;
+    virtual void animateBlink(uint32_t durationMs) = 0;
+    virtual void animateExpression(Expression expression, uint32_t durationMs) = 0;
+    virtual void update(uint32_t deltaMs) = 0;   // advances any in-progress animation, calls EyeController::applyPose()
+};
+```
+
+`PassthroughAnimationEngine` is constructor-injected with `EyeController&`
+and implements the interface with no real interpolation this pass (TODO —
+easing/spline math is explicitly out of scope): `animateGaze()` computes the
+target `EyePose` immediately and hands it straight to `applyPose()`, skipping
+the "take 350ms" part for now. The seam is real even though the math isn't.
 
 ### CalibrationManager & Configuration
 
@@ -374,6 +458,10 @@ CI step that would need to be immediately disabled.
 ## Out of Scope (explicit TODOs, not implemented this pass)
 
 - Any real animation/interpolation (easing, spline, saccades, micro-saccades)
+  — `IAnimationEngine` exists, `animateGaze()`/`animateBlink()`/`animateExpression()`
+  apply their target `EyePose` immediately instead of over time
+- `EyeController::toServoOutput()` calibration math (channel mapping, pulse
+  scaling, invert/mirror/offset) — signature exists, body is a stub
 - Any real behavior logic (state transitions, idle scanning, tracking,
   sleep/wake triggers, emotion) — `IBehavior`/`EyeState` contracts exist,
   bodies don't
@@ -382,6 +470,7 @@ CI step that would need to be immediately disabled.
 - OTA implementation
 - Calibration persistence to flash
 - Expression blending
+- A host-side/SDL `IServoOutput` simulator (enabled by the design, not built)
 - `clang-tidy` in CI
 
 ## Git

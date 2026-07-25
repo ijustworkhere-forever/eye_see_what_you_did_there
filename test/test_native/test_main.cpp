@@ -20,6 +20,11 @@ extern void test_set_idle_resets_to_default_pose();
 extern void test_animate_gaze_applies_pose_immediately();
 extern void test_animate_blink_closes_eyelids_immediately();
 
+// Behavior tests
+extern void test_push_pop_preserves_fifo_order();
+extern void test_push_fails_when_full();
+extern void test_clear_empties_queue();
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_default_eye_config_has_six_distinct_channels);
@@ -34,5 +39,8 @@ int main(int argc, char** argv) {
     RUN_TEST(test_set_idle_resets_to_default_pose);
     RUN_TEST(test_animate_gaze_applies_pose_immediately);
     RUN_TEST(test_animate_blink_closes_eyelids_immediately);
+    RUN_TEST(test_push_pop_preserves_fifo_order);
+    RUN_TEST(test_push_fails_when_full);
+    RUN_TEST(test_clear_empties_queue);
     return UNITY_END();
 }

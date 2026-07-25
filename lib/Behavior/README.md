@@ -12,3 +12,7 @@ next task.
 
 **Future work:** Command priority handling (currently stored but not acted
 on), `EyeState`-driven behavior switching (docs/ROADMAP.md v0.3).
+
+**IBehaviorEngine / BehaviorEngine:** Drains `CommandQueue`, dispatches each
+`EyeCommand` to `IAnimationEngine`, then delegates per-frame `update` to the
+active `IBehavior` (only `IdleBehaviorStub` exists this pass).

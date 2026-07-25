@@ -1,0 +1,40 @@
+# Doxyfile configuration for EyeSee Firmware
+# Generated for documentation of C++ firmware code
+# To regenerate with full defaults: doxygen -g docs/Doxyfile
+
+PROJECT_NAME           = "EyeSee Firmware"
+OUTPUT_DIRECTORY       = docs/api
+INPUT                  = lib src
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+GENERATE_LATEX         = NO
+
+# Additional settings for better documentation generation
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HAVE_DOT               = NO
+GENERATE_MAN           = NO
+GENERATE_RTF           = NO
+GENERATE_XML           = NO
+GENERATE_DOCBOOK       = NO
+VERBATIM_HEADERS       = NO
+CLANG_ASSISTED_PARSING = NO
+
+# Source code options
+FILE_PATTERNS          = *.h *.hpp *.cpp *.c *.ino
+STRIP_FROM_PATH        = src lib
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = YES
+
+# Documentation options
+OPTIMIZE_FOR_C         = NO
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_NO_PARAMDOC       = YES
+
+# Namespace and class options
+SHOW_NAMESPACES        = YES
+SHOW_FILES             = YES
+SHOW_GROUPS            = YES
+CLASS_DIAGRAMS         = NO

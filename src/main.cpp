@@ -9,6 +9,9 @@
 #include "Pca9685ServoOutput.h"
 #include "PassthroughAnimationEngine.h"
 #include "PreferencesStore.h"
+#include "RestApi.h"
+#include "WebServer.h"
+#include "WebSocketServer.h"
 
 using namespace eyesee;
 
@@ -22,6 +25,9 @@ CommandQueue commandQueue;
 IdleBehaviorStub idleBehavior;
 BehaviorEngine behaviorEngine(animationEngine, commandQueue, idleBehavior);
 PreferencesStore preferencesStore;
+WebServer webServer;
+RestApi restApi;
+WebSocketServer webSocketServer;
 }
 
 void setup() {
@@ -29,6 +35,9 @@ void setup() {
     Logger::info(kLogTag, "EyeSee firmware booting");
     servoOutput.init();
     preferencesStore.begin("eyesee");
+    webServer.begin();
+    restApi.begin();
+    webSocketServer.begin();
     eyeController.setIdle();
     behaviorEngine.setState(EyeState::Startup);
 }

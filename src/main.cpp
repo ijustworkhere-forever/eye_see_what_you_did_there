@@ -8,6 +8,7 @@
 #include "Logger.h"
 #include "Pca9685ServoOutput.h"
 #include "PassthroughAnimationEngine.h"
+#include "PreferencesStore.h"
 
 using namespace eyesee;
 
@@ -20,12 +21,14 @@ PassthroughAnimationEngine animationEngine(eyeController);
 CommandQueue commandQueue;
 IdleBehaviorStub idleBehavior;
 BehaviorEngine behaviorEngine(animationEngine, commandQueue, idleBehavior);
+PreferencesStore preferencesStore;
 }
 
 void setup() {
     Logger::init();
     Logger::info(kLogTag, "EyeSee firmware booting");
     servoOutput.init();
+    preferencesStore.begin("eyesee");
     eyeController.setIdle();
     behaviorEngine.setState(EyeState::Startup);
 }

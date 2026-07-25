@@ -14,12 +14,12 @@ const EyeConfig& CalibrationManager::eyeConfig() const {
 
 const ServoConfig& CalibrationManager::servoConfig(EyeChannel channel) const {
     switch (channel) {
-        case EyeChannel::LR: return config_.lr;
-        case EyeChannel::UD: return config_.ud;
-        case EyeChannel::TL: return config_.tl;
-        case EyeChannel::BL: return config_.bl;
-        case EyeChannel::TR: return config_.tr;
-        case EyeChannel::BR: return config_.br;
+        case EyeChannel::Lr: return config_.lr;
+        case EyeChannel::Ud: return config_.ud;
+        case EyeChannel::Tl: return config_.tl;
+        case EyeChannel::Bl: return config_.bl;
+        case EyeChannel::Tr: return config_.tr;
+        case EyeChannel::Br: return config_.br;
     }
     return config_.lr;
 }
@@ -31,12 +31,12 @@ void CalibrationManager::setServoConfig(EyeChannel channel, const ServoConfig& c
 
 ServoConfig& CalibrationManager::mutableServoConfig(EyeChannel channel) {
     switch (channel) {
-        case EyeChannel::LR: return config_.lr;
-        case EyeChannel::UD: return config_.ud;
-        case EyeChannel::TL: return config_.tl;
-        case EyeChannel::BL: return config_.bl;
-        case EyeChannel::TR: return config_.tr;
-        case EyeChannel::BR: return config_.br;
+        case EyeChannel::Lr: return config_.lr;
+        case EyeChannel::Ud: return config_.ud;
+        case EyeChannel::Tl: return config_.tl;
+        case EyeChannel::Bl: return config_.bl;
+        case EyeChannel::Tr: return config_.tr;
+        case EyeChannel::Br: return config_.br;
     }
     return config_.lr;
 }

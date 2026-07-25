@@ -2,7 +2,10 @@
 
 #include <cstdint>
 
-#include "EyeController.h"
+// Only the pipeline value types are needed here — deliberately NOT
+// EyeController.h, which would drag calibration and servo types into Behavior
+// and break "Behavior never knows hardware" (docs/architecture.md invariant 3).
+#include "EyeTypes.h"
 
 namespace eyesee {
 

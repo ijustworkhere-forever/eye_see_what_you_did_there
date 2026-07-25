@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EyeController.h"
 #include "IAnimationEngine.h"
 
 namespace eyesee {

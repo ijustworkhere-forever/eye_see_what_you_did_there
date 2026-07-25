@@ -2,7 +2,9 @@
 
 #include <cstdint>
 
-#include "EyeController.h"
+// Only GazeTarget/Expression are needed for these signatures — the concrete
+// EyeController class is an implementation detail of the concrete engines.
+#include "EyeTypes.h"
 
 namespace eyesee {
 

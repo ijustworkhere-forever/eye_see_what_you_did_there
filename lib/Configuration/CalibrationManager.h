@@ -2,20 +2,21 @@
 
 #include "Configuration.h"
 
-// BR collides with a macro defined in xtensa/config/specreg.h (pulled in transitively
-// via the ESP32 Arduino core). This undef prevents macro expansion in the enum definition.
-#undef BR
-
 namespace eyesee {
 
-/** Selects one of the six calibrated servos. */
+/**
+ * Selects one of the six calibrated servos. Deliberately capitalized `Lr`/`Ud`/...
+ * rather than ALL-CAPS: `BR` is a macro in the Xtensa SDK's xtensa/config/specreg.h
+ * (pulled in transitively by the ESP32 Arduino core), and an ALL-CAPS enumerator
+ * would be macro-expanded depending on include order.
+ */
 enum class EyeChannel {
-    LR,
-    UD,
-    TL,
-    BL,
-    TR,
-    BR
+    Lr,
+    Ud,
+    Tl,
+    Bl,
+    Tr,
+    Br
 };
 
 /**

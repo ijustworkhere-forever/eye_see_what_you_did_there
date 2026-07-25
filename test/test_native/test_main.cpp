@@ -16,6 +16,10 @@ extern void test_blink_closes_all_four_lids();
 extern void test_wink_left_closes_only_left_lids();
 extern void test_set_idle_resets_to_default_pose();
 
+// Animation tests
+extern void test_animate_gaze_applies_pose_immediately();
+extern void test_animate_blink_closes_eyelids_immediately();
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_default_eye_config_has_six_distinct_channels);
@@ -28,5 +32,7 @@ int main(int argc, char** argv) {
     RUN_TEST(test_blink_closes_all_four_lids);
     RUN_TEST(test_wink_left_closes_only_left_lids);
     RUN_TEST(test_set_idle_resets_to_default_pose);
+    RUN_TEST(test_animate_gaze_applies_pose_immediately);
+    RUN_TEST(test_animate_blink_closes_eyelids_immediately);
     return UNITY_END();
 }

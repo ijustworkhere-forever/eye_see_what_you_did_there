@@ -1,10 +1,10 @@
-#ifdef ARDUINO
 #include <Arduino.h>
 
 #include "CalibrationManager.h"
 #include "EyeController.h"
 #include "Logger.h"
 #include "Pca9685ServoOutput.h"
+#include "PassthroughAnimationEngine.h"
 
 using namespace eyesee;
 
@@ -13,6 +13,7 @@ constexpr const char* kLogTag = "main";
 Pca9685ServoOutput servoOutput;
 CalibrationManager calibration;
 EyeController eyeController(servoOutput, calibration);
+PassthroughAnimationEngine animationEngine(eyeController);
 }
 
 void setup() {
@@ -24,4 +25,3 @@ void setup() {
 
 void loop() {
 }
-#endif  // ARDUINO

@@ -1,6 +1,6 @@
 # EyeSee Firmware Bootstrap — Design
 
-Date: 2026-07-25
+Date: 2026-07-25 (revised after design review)
 
 ## Purpose
 
@@ -25,27 +25,69 @@ and the module boundaries are right for future contributors to build on.
 
 ## Architecture
 
+### Frame update model
+
+The firmware is frame-based, not event-driven. Target update frequency: **100 Hz**.
+
+Every module that has ongoing state implements `update(uint32_t deltaMs)`.
+`main.cpp`'s `loop()` contains no business logic — it only measures elapsed
+time and calls `update(dt)` down the chain:
+
+```
+loop()
+  ↓
+Clock (measures dt)
+  ↓
+BehaviorEngine.update(dt)
+  ↓
+IAnimationEngine.update(dt)
+  ↓
+EyeController.update(dt)
+  ↓
+IServoOutput.update(dt)
+```
+
 ### Control-flow invariant
 
-No code manipulates servos directly. All motion goes through `EyeController`:
+No code manipulates servos directly. All motion goes through `EyeController`,
+and all *inputs* to the system are arbitrated by `BehaviorEngine` through a
+single command queue — no input source is allowed to fight another:
 
 ```
-Web UI / REST API / Bluetooth / Serial
+Web UI / REST API / WebSocket / Bluetooth / Serial
+                ↓  (push EyeCommand)
+              CommandQueue
+                ↓  (drained each frame)
+           BehaviorEngine  — decides WHAT: "look over there"
                 ↓
-         BehaviorEngine (autonomous behavior) OR direct manual command
+          IAnimationEngine — decides HOW: "350ms, cubic easing"
                 ↓
-           EyeController
+            EyeController  — decides WHERE: "that gaze = these servo angles"
                 ↓
-          IServoDriver (Pca9685ServoDriver)
+            IServoOutput   — moves hardware
                 ↓
-              PCA9685
+              PCA9685 (or other future actuator hardware)
 ```
 
-`BehaviorEngine` sits between input sources and `EyeController` for
-autonomous behavior (idle scan, tracking, sleep/wake). Manual commands
-(e.g. a REST `POST /look`) may call `EyeController` directly, bypassing
-`BehaviorEngine` — but nothing is ever allowed to reach `IServoDriver`
-except through `EyeController`.
+`BehaviorEngine` is the single arbiter between the outside world and the eye
+— every REST/WebSocket/BT/Serial handler, present or future, pushes an
+`EyeCommand` into the same `CommandQueue` rather than calling `EyeController`
+or `IAnimationEngine` directly. This is a change from the original draft
+(which allowed manual commands to bypass `BehaviorEngine`) — the reviewer's
+point about inputs fighting each other is worth the extra indirection.
+
+**Design synthesis note:** the review suggested both (a) changing
+`EyeController::look()` to take a `GazeTarget` (with speed/easing/hold), and
+(b) moving `IAnimationEngine` between `BehaviorEngine` and `EyeController` so
+`EyeController` only converts "gaze → servo angles." Taking both literally
+would mean `EyeController` receives dynamics it has no use for. Resolution:
+`GazeTarget` (position + speed + blinkOnArrival + hold) is the vocabulary of
+the **command layer** — what `EyeCommand`/`BehaviorEngine`/`IAnimationEngine`
+pass around. `EyeController::look(float x, float y)` stays a low-level,
+instantaneous primitive that `IAnimationEngine` calls once per frame with an
+already-interpolated point. This keeps `EyeController` genuinely dumb (pure
+gaze→angle conversion), which was the point of separating it from Animation
+in the first place. Flag this if it's not what you intended.
 
 ### Namespace
 
@@ -54,163 +96,275 @@ All firmware code lives under `namespace eyesee`.
 ### Module layout
 
 Each module is a flat PlatformIO private library under `lib/<Module>/`
-(header + source at the library root — no nested `include/`/`src/` split,
-which PlatformIO does not require for private libraries). Every module
-folder has its own `README.md` (purpose, responsibilities, planned
-features, future work).
+(header + source at the library root). Every module folder has its own
+`README.md` (purpose, responsibilities, planned features, future work).
 
 ```
 include/            # project-wide public headers (currently empty/placeholder)
-src/                 # main.cpp only — thin wiring, no logic
+src/                 # main.cpp only — thin wiring + frame clock, no logic
 lib/
-  EyeController/     # concrete: sole owner of eye motion state
-  ServoDriver/        # IServoDriver + Pca9685ServoDriver
+  EyeController/     # concrete: sole owner of eye motion state; GazeTarget, Expression
+  MotionHardware/     # IServoOutput + Pca9685ServoOutput (renamed from ServoDriver)
   Animation/           # IAnimationEngine + PassthroughAnimationEngine stub
-  Behavior/            # IBehaviorEngine + BehaviorEngineSkeleton stub
+  Behavior/            # IBehaviorEngine + BehaviorEngine, IBehavior + IdleBehaviorStub,
+                       # EyeState, EyeCommand/CommandQueue
   Networking/          # WebServer, RestApi, WebSocketServer placeholders
   Storage/             # IStorage + PreferencesStore (ESP32 Preferences wrapper)
   OTA/                 # OtaManager placeholder
   Logger/              # static Logger utility
-  Configuration/       # EyeConfig, ServoConfig, NetworkConfig, BehaviorConfig structs
+  Configuration/       # ServoConfig, EyeConfig, NetworkConfig, BehaviorConfig structs
 data/                # reserved for future SPIFFS/LittleFS web assets
 docs/
   architecture.md    # this diagram + module responsibilities, long-form
+  ROADMAP.md         # milestone roadmap, v0.1 → v1.0
   Doxyfile           # doxygen config, scans lib/ + src/, outputs docs/api/ (gitignored)
 examples/            # reserved for future example sketches/configs
-test/                # PlatformIO Unity tests
+test/
+  test_native/       # hardware-independent Unity tests (run on host via `pio test -e native`)
+.github/
+  workflows/ci.yml    # build + native test + clang-format check
+.clang-format
 ```
 
 ### Interfaces vs. concrete classes
 
-Interfaces (pure abstract classes) are introduced **only** where a second
-implementation is genuinely anticipated (YAGNI):
-
 | Module | Interface? | Why |
 |---|---|---|
-| ServoDriver | `IServoDriver` → `Pca9685ServoDriver` | future mock driver for host-side tests, alternate driver chips |
+| MotionHardware | `IServoOutput` → `Pca9685ServoOutput` | future actuator hardware: ESP32 LEDC PWM, other PWM chips, Dynamixel, CAN servos — renamed from `ServoDriver`/`IServoDriver` so the abstraction isn't PCA9685-specific |
 | Animation | `IAnimationEngine` → `PassthroughAnimationEngine` (stub) | interpolation strategies will multiply (linear/easing/spline) |
-| Behavior | `IBehaviorEngine` → `BehaviorEngineSkeleton` (stub) | behavior strategies (idle/tracking/emotion) will multiply |
+| Behavior (engine) | `IBehaviorEngine` → `BehaviorEngine` | alternate top-level orchestration is plausible (e.g. a test harness engine) |
+| Behavior (strategy) | `IBehavior` → `IdleBehaviorStub` (only one stub this pass) | plugin-style behaviors (Idle/Tracking/Curious/Random/Sleep) share one contract; only `Idle` gets a stub body — the rest are listed in `docs/ROADMAP.md` rather than scaffolded as empty files, to avoid five placeholder classes with nothing in them yet |
 | Storage | `IStorage` → `PreferencesStore` | swappable persistence backend, testability |
 | EyeController | none (concrete) | single required implementation — this class *is* the abstraction boundary for motion |
 | CalibrationManager | none (concrete) | single required implementation |
-| Networking (WebServer/RestApi/WebSocketServer) | none (concrete, empty stub bodies) | only one implementation anticipated; each wraps a specific future library |
+| CommandQueue | none (concrete data structure) | fixed-capacity ring buffer, not a strategy — nothing to swap |
+| Networking (WebServer/RestApi/WebSocketServer) | none (concrete, empty stub bodies) | only one implementation anticipated |
 | OTA (OtaManager) | none (concrete, empty stub bodies) | single implementation |
-| Logger | none (static utility) | cross-cutting concern; the one accepted exception to "avoid globals," documented inline |
-
-Stub implementations (`PassthroughAnimationEngine`, `BehaviorEngineSkeleton`)
-exist so `EyeController`/`main.cpp` wire together into a real, compiling
-object graph rather than leaving dangling TODOs — but they contain no real
-logic, only comments marking future work.
+| Logger | none (static utility) | cross-cutting concern; documented exception to "avoid globals" |
 
 ### EyeController
 
-Concrete class, constructor-injected with `IServoDriver&` and
-`CalibrationManager&` (dependency injection, no globals/singletons).
-Public methods per spec, all present with real signatures, bodies stubbed:
+Concrete class, constructor-injected with `IServoOutput&` and
+`CalibrationManager&`. Owns two small value types used across the pipeline:
 
-`look(x, y)`, `blink()`, `winkLeft()`, `winkRight()`, `sleep()`, `wake()`,
-`setExpression(Expression)`, `setIdle()`, `update()`.
+```cpp
+enum class Expression { Neutral, Happy, Curious, Sleepy, Angry, Surprised };
 
-### ServoDriver
+struct GazeTarget {
+    float x;
+    float y;
+    float speed;            // used by IAnimationEngine, ignored by EyeController
+    bool blinkOnArrival;
+    bool hold;
+};
+```
 
-`IServoDriver` interface: `moveServo(channel, angle)`, `setAngle(channel, angle)`,
-`setPulse(channel, pulseUs)`, `update()`.
-`Pca9685ServoDriver` implements it using the Adafruit PWM Servo Driver
-library; constructor takes I2C address (default 0x40).
+Public methods, all present with real signatures, bodies stubbed (TODO,
+no interpolation — that's `IAnimationEngine`'s job):
 
-### CalibrationManager
+`look(float x, float y)`, `blink()`, `winkLeft()`, `winkRight()`, `sleep()`,
+`wake()`, `setExpression(Expression)`, `setIdle()`, `update(uint32_t deltaMs)`.
 
-Concrete class owning an in-memory `EyeConfig` (six `ServoConfig`s: limits,
-neutral position, inversion, mirroring, offset). Getters/setters per
-servo. Persistence is a stubbed call into `IStorage` (TODO — not
-implemented this pass; will use ESP32 `Preferences` eventually).
+### MotionHardware (renamed from ServoDriver)
 
-### Configuration
+```cpp
+class IServoOutput {
+public:
+    virtual ~IServoOutput() = default;
+    virtual void moveServo(uint8_t channel, float angleDegrees) = 0;
+    virtual void setAngle(uint8_t channel, float angleDegrees) = 0;
+    virtual void setPulse(uint8_t channel, uint16_t pulseUs) = 0;
+    virtual void update(uint32_t deltaMs) = 0;
+};
+```
 
-Plain structs with `constexpr` defaults, no behavior:
+`Pca9685ServoOutput` implements it using the Adafruit PWM Servo Driver
+library; constructor takes I2C address (default `0x40`).
 
-- `ServoConfig` — channel, min/max pulse, neutral pulse, inverted (bool), offset
-- `EyeConfig` — aggregates 6× `ServoConfig` (LR, UD, TL, BL, TR, BR) + look-range limits
-- `NetworkConfig` — SSID/password placeholders, web server port
-- `BehaviorConfig` — idle-timing placeholders
+### CalibrationManager & Configuration
 
-### Logger
+Plain structs with `constexpr` defaults, no behavior — calibration is
+expressed entirely in **pulse widths**, not angles, so it's independent of
+servo brand; angle is a computed value at the `MotionHardware` boundary:
 
-Static-method utility class: `Logger::debug/info/warn/error(tag, message)`,
-backed by `Serial`. `enum class LogLevel`. Not instance-injected — logging
-is cross-cutting and threading a logger reference through every
-constructor buys nothing; this is called out as an intentional exception
-via a short inline comment.
+```cpp
+struct ServoConfig {
+    uint8_t channel;
+    uint16_t minPulseUs;
+    uint16_t maxPulseUs;
+    uint16_t neutralPulseUs;
+    int16_t mechanicalOffset;
+    bool inverted;
+    bool mirrored;
+};
+
+struct EyeConfig {
+    ServoConfig lr, ud, tl, bl, tr, br;
+    float lookRangeDegrees;
+};
+
+struct NetworkConfig { /* SSID/password placeholders, web server port */ };
+struct BehaviorConfig { /* idle-timing placeholders */ };
+```
+
+`CalibrationManager` owns an in-memory `EyeConfig`, exposes getters/setters
+per servo. Persistence is a stubbed call into `IStorage` (TODO — not
+implemented this pass).
+
+### Behavior module
+
+**State machine** — `BehaviorEngine` owns the system-level state (replacing
+ad hoc booleans like `sleeping`/`idle`/`tracking`):
+
+```cpp
+enum class EyeState {
+    Startup, Calibration, Manual, Idle, Tracking, Sleeping, Disabled, Error
+};
+```
+
+**Command queue** — every input source (present or future) pushes an
+`EyeCommand`; nothing calls `IAnimationEngine`/`EyeController` directly:
+
+```cpp
+enum class CommandType { Look, Blink, WinkLeft, WinkRight, Sleep, Wake, SetExpression };
+enum class CommandPriority { Low, Normal, High };
+
+struct EyeCommand {
+    CommandType type;
+    CommandPriority priority;
+    uint32_t durationMs;
+    GazeTarget gazeTarget;     // valid when type == Look
+    Expression expression;    // valid when type == SetExpression
+};
+
+class CommandQueue {
+public:
+    bool push(const EyeCommand& command);
+    bool pop(EyeCommand& outCommand);
+    void clear();
+private:
+    std::array<EyeCommand, kCapacity> buffer_; // fixed-capacity ring buffer, no heap allocation
+    // TODO: real ring-buffer indexing; this pass just defines the contract
+};
+```
+
+**Plugin-friendly behaviors** — `IBehaviorEngine`'s concrete `BehaviorEngine`
+delegates per-frame `update(dt)` to whichever `IBehavior` is active for the
+current `EyeState`:
+
+```cpp
+class IBehavior {
+public:
+    virtual ~IBehavior() = default;
+    virtual void update(uint32_t deltaMs, IAnimationEngine& animation) = 0;
+    virtual EyeState state() const = 0;
+};
+```
+
+Only `IdleBehaviorStub` is scaffolded this pass (empty body, proves the
+interface compiles and wires up). `TrackingBehavior`, `CuriousBehavior`,
+`RandomBehavior`, `SleepBehavior` are named in `docs/ROADMAP.md` as v0.3+
+work rather than stubbed as empty files now — avoids scaffolding classes
+with literally nothing in them.
 
 ### Networking / OTA / Storage
 
-All placeholder-only this pass:
+Placeholder-only this pass:
 
-- `WebServer`, `RestApi`, `WebSocketServer` — classes with `begin()`/`update()`
-  stubs, empty bodies, TODOs documenting the future REST endpoints
-  (`GET /status`, `POST /look`, `POST /blink`, `POST /expression`,
-  `POST /config`, `GET /config`) and target WebSocket update rate (30–60 Hz).
-  No networking library dependency added yet — kept out of `platformio.ini`
-  until real implementation begins.
+- `WebServer`, `RestApi`, `WebSocketServer` — `begin()`/`update()` stubs,
+  empty bodies, TODOs documenting future endpoints under a **versioned**
+  prefix: `GET /api/v1/status`, `POST /api/v1/look`, `POST /api/v1/blink`,
+  `POST /api/v1/expression`, `POST /api/v1/config`, `GET /api/v1/config`.
+  Target WebSocket update rate 30–60 Hz. No networking library dependency
+  added yet.
 - `OtaManager` — placeholder class, empty `begin()`/`update()`.
 - `PreferencesStore` (`IStorage` impl) — wraps ESP32 `Preferences.h`
   (built into the Arduino core, no extra `lib_dep`), stub get/set methods.
 
+### Logger
+
+Static-method utility class: `Logger::debug/info/warn/error(tag, message)`,
+backed by `Serial`. `enum class LogLevel`. Documented exception to "avoid
+globals" — cross-cutting, and threading a logger reference through every
+constructor buys nothing.
+
 ### main.cpp
 
-Thin wiring only — instantiates concrete objects, injects dependencies,
-delegates to `update()` in `loop()`. No business logic in `main.cpp`.
-
 ```cpp
-Pca9685ServoDriver servoDriver;
+Pca9685ServoOutput servoOutput;
 CalibrationManager calibration;
-EyeController eyeController(servoDriver, calibration);
-PassthroughAnimationEngine animationEngine;
-BehaviorEngineSkeleton behaviorEngine(eyeController, animationEngine);
+EyeController eyeController(servoOutput, calibration);
+PassthroughAnimationEngine animationEngine(eyeController);
+CommandQueue commandQueue;
+IdleBehaviorStub idleBehavior;
+BehaviorEngine behaviorEngine(animationEngine, commandQueue, idleBehavior);
 
 void setup() {
   Logger::init();
-  servoDriver.init();
-  eyeController.setIdle();
+  servoOutput.init();
+  behaviorEngine.setState(eyesee::EyeState::Startup);
 }
 
 void loop() {
-  behaviorEngine.update();
-  eyeController.update();
+  const uint32_t dt = frameClock.tick();
+  behaviorEngine.update(dt);
+  animationEngine.update(dt);
+  eyeController.update(dt);
+  servoOutput.update(dt);
 }
 ```
 
 ## Build Configuration
 
-`platformio.ini`:
+`platformio.ini` — two environments: the real target, and a `native` one for
+hardware-independent unit tests (this is why `Configuration`, `CalibrationManager`,
+`EyeCommand`/`CommandQueue`, and `EyeController`'s value types must stay
+free of `Arduino.h`/hardware includes):
 
-- `[env:esp32dev]`
-- `platform = espressif32`
-- `board = esp32dev`
-- `framework = arduino`
-- `lib_deps = adafruit/Adafruit PWM Servo Driver Library`
-- `build_flags = -std=gnu++17`
-- `build_unflags = -std=gnu++11` (ESP32 Arduino core defaults to gnu++11)
-- `monitor_speed = 115200`
+```ini
+[env:esp32dev]
+platform = espressif32
+board = esp32dev
+framework = arduino
+lib_deps = adafruit/Adafruit PWM Servo Driver Library
+build_flags = -std=gnu++17
+build_unflags = -std=gnu++11
+monitor_speed = 115200
 
-No other third-party libraries are declared this pass — Networking/Storage/OTA
-stubs don't touch a library yet, so nothing is added prematurely.
+[env:native]
+platform = native
+build_flags = -std=c++17
+test_filter = test_native/*
+```
 
 ## Testing
 
-One PlatformIO Unity test under `test/` (e.g. `test_calibration_defaults`)
-asserting a trivial, real fact (default neutral servo position from
-`CalibrationManager`) — proves `pio test` works end-to-end from the first
-commit. No broader test coverage is expected yet since there's no real
-logic to test.
+One PlatformIO Unity test under `test/test_native/` (e.g.
+`test_calibration_defaults`) asserting a trivial, real fact (default neutral
+pulse from `CalibrationManager`) — runs via `pio test -e native` with no
+hardware required, which is also what CI runs.
+
+## Continuous Integration
+
+`.github/workflows/ci.yml`, on every push/PR:
+
+1. Checkout, set up Python, `pip install platformio`.
+2. `pio run -e esp32dev` — build the real firmware target.
+3. `pio test -e native` — run hardware-independent unit tests.
+4. `clang-format --dry-run --Werror` over `lib/` and `src/` against the
+   root `.clang-format`.
+
+`clang-tidy` is **not** wired into CI this pass — getting it working against
+the ESP32/Arduino toolchain is a real chunk of work on its own and isn't a
+scaffold-level task. Left as a `docs/ROADMAP.md` item instead of faking a
+CI step that would need to be immediately disabled.
 
 ## Documentation
 
 - Root `README.md` rewritten: project overview, hardware, architecture
-  diagram, build/flash instructions, module list, contributing pointer
-  (replaces current 2-line stub).
-- `docs/architecture.md`: expanded version of the architecture section
-  above.
+  diagram, build/flash instructions, module list, contributing pointer.
+- `docs/architecture.md`: expanded version of the architecture section above.
+- `docs/ROADMAP.md`: milestone list, v0.1 (this scaffold) through v1.0.
 - `docs/Doxyfile`: scans `lib/` + `src/`, outputs to `docs/api/` (gitignored).
 - Every `lib/<Module>/README.md`: purpose, responsibilities, planned
   features, future work.
@@ -220,13 +374,16 @@ logic to test.
 ## Out of Scope (explicit TODOs, not implemented this pass)
 
 - Any real animation/interpolation (easing, spline, saccades, micro-saccades)
-- Any real behavior logic (idle scanning, tracking, sleep/wake triggers, emotion)
+- Any real behavior logic (state transitions, idle scanning, tracking,
+  sleep/wake triggers, emotion) — `IBehavior`/`EyeState` contracts exist,
+  bodies don't
+- `CommandQueue` ring-buffer indexing (contract only)
 - Any real networking (WebServer/RestApi/WebSocketServer bodies, Web UI)
 - OTA implementation
 - Calibration persistence to flash
 - Expression blending
+- `clang-tidy` in CI
 
 ## Git
 
-Work happens directly on `main` (repo currently has only `LICENSE` and a
-2-line `README.md`, no prior history to protect).
+Work happens directly on `main`.

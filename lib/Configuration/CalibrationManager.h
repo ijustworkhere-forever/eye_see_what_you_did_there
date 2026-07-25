@@ -2,6 +2,14 @@
 
 #include "Configuration.h"
 
+// Undefine macros that may conflict with enum values
+#undef LR
+#undef UD
+#undef TL
+#undef BL
+#undef TR
+#undef BR
+
 namespace eyesee {
 
 /** Selects one of the six calibrated servos. */

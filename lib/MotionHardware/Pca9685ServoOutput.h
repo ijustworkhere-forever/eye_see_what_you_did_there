@@ -1,8 +1,13 @@
 #pragma once
 
-#include <Adafruit_PWMServoDriver.h>
-
 #include "IServoOutput.h"
+
+#ifdef ARDUINO
+#include <Adafruit_PWMServoDriver.h>
+#else
+// Forward declaration for non-Arduino environments
+class Adafruit_PWMServoDriver;
+#endif
 
 namespace eyesee {
 
@@ -21,7 +26,11 @@ public:
     void update(uint32_t deltaMs) override;
 
 private:
+#ifdef ARDUINO
     Adafruit_PWMServoDriver driver_;
+#else
+    void* driver_;  // Placeholder for non-Arduino environments
+#endif
 
     static constexpr uint8_t kChannelLr = 0;
     static constexpr uint8_t kChannelUd = 1;

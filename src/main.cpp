@@ -63,8 +63,10 @@ void setup() {
 
 void loop() {
     const uint32_t nowMillis = millis();
-    const uint32_t elapsed = nowMillis - lastFrameMillis;  // wraps correctly via unsigned arithmetic
+    const uint32_t elapsed =
+        nowMillis - lastFrameMillis;  // wraps correctly via unsigned arithmetic
     if (elapsed < kFramePeriodMs) {
+        delay(1);  // yield to the idle/WiFi tasks instead of busy-spinning; 1ms << kFramePeriodMs
         return;
     }
     lastFrameMillis = nowMillis;

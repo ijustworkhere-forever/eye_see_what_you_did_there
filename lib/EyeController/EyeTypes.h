@@ -17,7 +17,7 @@ enum class Expression {
 struct GazeTarget {
     float x = 0.0f;
     float y = 0.0f;
-    float speed = 1.0f;
+    float speed = 300.0f;  // degrees/second
     bool blinkOnArrival = false;
     bool hold = false;
 };

@@ -45,6 +45,9 @@ extern void test_wink_left_preserves_right_eyelids();
 extern void test_blink_on_arrival_triggers_blink_after_gaze_completes();
 extern void test_eyelid_transition_uses_ease_in_out_not_cubic_or_linear();
 extern void test_interrupting_mid_flight_transition_continues_from_current_value();
+extern void test_animate_gaze_with_zero_speed_snaps_instantly();
+extern void test_animate_gaze_with_negative_speed_snaps_instantly();
+extern void test_animate_blink_with_zero_duration_completes_in_one_frame();
 
 // CommandQueue tests (Behavior module)
 extern void test_push_pop_preserves_fifo_order();
@@ -90,6 +93,9 @@ int main(int argc, char** argv) {
     RUN_TEST(test_blink_on_arrival_triggers_blink_after_gaze_completes);
     RUN_TEST(test_eyelid_transition_uses_ease_in_out_not_cubic_or_linear);
     RUN_TEST(test_interrupting_mid_flight_transition_continues_from_current_value);
+    RUN_TEST(test_animate_gaze_with_zero_speed_snaps_instantly);
+    RUN_TEST(test_animate_gaze_with_negative_speed_snaps_instantly);
+    RUN_TEST(test_animate_blink_with_zero_duration_completes_in_one_frame);
     RUN_TEST(test_push_pop_preserves_fifo_order);
     RUN_TEST(test_push_fails_when_full);
     RUN_TEST(test_clear_empties_queue);

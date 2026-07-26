@@ -1,5 +1,7 @@
 #include "EyeController.h"
 
+#include <cmath>
+
 namespace eyesee {
 
 EyeController::EyeController(IServoOutput& output, CalibrationManager& calibration)
@@ -90,13 +92,15 @@ float clampf(float value, float lo, float hi) {
 
 uint16_t EyeController::gazeChannelPulse(float input, const ServoConfig& config) {
     float effective = input * (config.inverted ? -1.0f : 1.0f) * (config.mirrored ? -1.0f : 1.0f);
-    float pulse = effective >= 0.0f
-        ? static_cast<float>(config.neutralPulseUs) +
-              effective * static_cast<float>(config.maxPulseUs - config.neutralPulseUs)
-        : static_cast<float>(config.neutralPulseUs) +
-              effective * static_cast<float>(config.neutralPulseUs - config.minPulseUs);
-    pulse = clampf(pulse + static_cast<float>(config.mechanicalOffset), config.minPulseUs, config.maxPulseUs);
-    return static_cast<uint16_t>(pulse);
+    float pulse =
+        effective >= 0.0f
+            ? static_cast<float>(config.neutralPulseUs) +
+                  effective * static_cast<float>(config.maxPulseUs - config.neutralPulseUs)
+            : static_cast<float>(config.neutralPulseUs) +
+                  effective * static_cast<float>(config.neutralPulseUs - config.minPulseUs);
+    pulse = clampf(pulse + static_cast<float>(config.mechanicalOffset), config.minPulseUs,
+                   config.maxPulseUs);
+    return static_cast<uint16_t>(std::lround(pulse));
 }
 
 uint16_t EyeController::eyelidChannelPulse(float input, const ServoConfig& config) {
@@ -104,10 +108,10 @@ uint16_t EyeController::eyelidChannelPulse(float input, const ServoConfig& confi
     if (config.inverted) effective = 1.0f - effective;
     if (config.mirrored) effective = 1.0f - effective;
     float pulse = clampf(static_cast<float>(config.minPulseUs) +
-                              effective * static_cast<float>(config.maxPulseUs - config.minPulseUs) +
-                              static_cast<float>(config.mechanicalOffset),
-                          config.minPulseUs, config.maxPulseUs);
-    return static_cast<uint16_t>(pulse);
+                             effective * static_cast<float>(config.maxPulseUs - config.minPulseUs) +
+                             static_cast<float>(config.mechanicalOffset),
+                         config.minPulseUs, config.maxPulseUs);
+    return static_cast<uint16_t>(std::lround(pulse));
 }
 
 ServoOutput EyeController::toServoOutput(const EyePose& pose) const {

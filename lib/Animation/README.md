@@ -17,7 +17,7 @@ executes whatever gaze/eyelid targets it's given.
 **Future work:** Expression pose blending (v0.3), caller-selectable easing
 per call (currently fixed per intent — gaze uses Cubic, eyelid moves use
 EaseInOut; expression is a no-op with no interpolation). `animateBlink()`/
-`animateWinkLeft()`/`animateWinkRight()`/`animateSleep()` only close — they 
-never auto-reopen. This is more consequential now that `blinkOnArrival` can 
-auto-trigger a blink; something upstream (behavior logic, v0.3) needs to call 
+`animateWinkLeft()`/`animateWinkRight()`/`animateSleep()` only close — they
+never auto-reopen. This is more consequential now that `blinkOnArrival` can
+auto-trigger a blink; something upstream (behavior logic, v0.3) needs to call
 `wake()` afterward, or eyes stay shut indefinitely.

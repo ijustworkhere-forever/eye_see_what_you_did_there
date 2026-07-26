@@ -86,13 +86,14 @@ void test_interrupting_mid_flight_transition_continues_from_current_value() {
     animation.animateBlink(100);
     animation.update(50);  // lid now at 0.5, blink half-closed
 
-    animation.animateWinkLeft(100);  // interrupts mid-flight; new start must be current (0.5),
-                                     // not the old target (1.0, which would make the lid jump
-                                     // back up before continuing down)
+    // Interrupts mid-flight with a transition whose target (1.0) differs from the blink's
+    // target (0.0), so the assertion below can distinguish start=current from start=old-target.
+    // Correct: start=0.5, target=1.0, EaseInOut(0.5)=0.5 -> 0.5 + 0.5*(1.0-0.5) = 0.75.
+    // Broken (start=old target 0.0): 0.0 + 0.5*(1.0-0.0) = 0.5, which fails this assertion.
+    animation.animateWake(100);
     animation.update(50);
 
-    TEST_ASSERT_TRUE(controller.currentPose().upperLeftLid >= 0.0f);
-    TEST_ASSERT_TRUE(controller.currentPose().upperLeftLid < 0.5f);
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 0.75f, controller.currentPose().upperLeftLid);
 }
 
 void test_animate_blink_closes_lids_only_after_full_duration() {
@@ -161,6 +162,59 @@ void test_blink_on_arrival_triggers_blink_after_gaze_completes() {
     TEST_ASSERT_EQUAL_FLOAT(1.0f, controller.currentPose().upperLeftLid);  // blink not yet advanced
 
     animation.update(150);  // advance the triggered blink to completion
+    TEST_ASSERT_EQUAL_FLOAT(0.0f, controller.currentPose().upperLeftLid);
+
+    // blinkOnArrival must fire exactly once: reopen the eyes, then run another frame with
+    // nothing commanded. A latched flag that re-fired would close the lids again here.
+    animation.animateWake(100);
+    animation.update(100);
+    TEST_ASSERT_EQUAL_FLOAT(1.0f, controller.currentPose().upperLeftLid);
+
+    animation.update(50);  // nothing new commanded — no spurious second blink
+    TEST_ASSERT_EQUAL_FLOAT(1.0f, controller.currentPose().upperLeftLid);
+}
+
+void test_animate_gaze_with_zero_speed_snaps_instantly() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    GazeTarget target;
+    target.x = 1.0f;
+    target.speed = 0.0f;  // documented contract: speed <= 0 means instant snap, no animation
+    animation.animateGaze(target);
+
+    animation.update(1);  // a single tiny tick is enough
+
+    TEST_ASSERT_EQUAL_FLOAT(1.0f, controller.currentPose().lookX);
+}
+
+void test_animate_gaze_with_negative_speed_snaps_instantly() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    GazeTarget target;
+    target.x = 1.0f;
+    target.speed = -5.0f;  // same contract as zero: no negative-duration or NaN math
+    animation.animateGaze(target);
+
+    animation.update(1);
+
+    TEST_ASSERT_EQUAL_FLOAT(1.0f, controller.currentPose().lookX);
+}
+
+void test_animate_blink_with_zero_duration_completes_in_one_frame() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    animation.animateBlink(0);  // zero duration must not divide by zero
+    animation.update(1);
+
     TEST_ASSERT_EQUAL_FLOAT(0.0f, controller.currentPose().upperLeftLid);
 }
 

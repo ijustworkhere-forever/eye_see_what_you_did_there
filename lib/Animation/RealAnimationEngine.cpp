@@ -11,7 +11,8 @@ float lerp(float start, float target, float t) {
 }
 }  // namespace
 
-RealAnimationEngine::RealAnimationEngine(EyeController& eyeController, CalibrationManager& calibration)
+RealAnimationEngine::RealAnimationEngine(EyeController& eyeController,
+                                         CalibrationManager& calibration)
     : eyeController_(eyeController), calibration_(calibration) {
     const EyePose initial = eyeController_.currentPose();
     gaze_.currentX = gaze_.startX = gaze_.targetX = initial.lookX;
@@ -39,6 +40,7 @@ void RealAnimationEngine::animateGaze(const GazeTarget& target) {
         const float safeSpeed = std::max(target.speed, 0.001f);
         durationMs = static_cast<uint32_t>(
             std::lround((deltaNormalized * lookRangeDegrees / safeSpeed) * 1000.0f));
+        durationMs = std::min(durationMs, kMaxGazeDurationMs);
     }
     startGazeTransition(target.x, target.y, durationMs, target.blinkOnArrival);
 }
@@ -82,8 +84,9 @@ void RealAnimationEngine::update(uint32_t deltaMs) {
     if (gaze_.active) {
         gaze_.elapsedMs += deltaMs;
         const float rawT = gaze_.durationMs == 0
-            ? 1.0f
-            : std::min(1.0f, static_cast<float>(gaze_.elapsedMs) / static_cast<float>(gaze_.durationMs));
+                               ? 1.0f
+                               : std::min(1.0f, static_cast<float>(gaze_.elapsedMs) /
+                                                    static_cast<float>(gaze_.durationMs));
         const float t = ease(EasingType::Cubic, rawT);
         gaze_.currentX = lerp(gaze_.startX, gaze_.targetX, t);
         gaze_.currentY = lerp(gaze_.startY, gaze_.targetY, t);
@@ -99,14 +102,18 @@ void RealAnimationEngine::update(uint32_t deltaMs) {
     if (eyelid_.active) {
         eyelid_.elapsedMs += deltaMs;
         const float rawT = eyelid_.durationMs == 0
-            ? 1.0f
-            : std::min(1.0f,
-                       static_cast<float>(eyelid_.elapsedMs) / static_cast<float>(eyelid_.durationMs));
+                               ? 1.0f
+                               : std::min(1.0f, static_cast<float>(eyelid_.elapsedMs) /
+                                                    static_cast<float>(eyelid_.durationMs));
         const float t = ease(EasingType::EaseInOut, rawT);
-        eyelid_.currentUpperLeftLid = lerp(eyelid_.startUpperLeftLid, eyelid_.targetUpperLeftLid, t);
-        eyelid_.currentLowerLeftLid = lerp(eyelid_.startLowerLeftLid, eyelid_.targetLowerLeftLid, t);
-        eyelid_.currentUpperRightLid = lerp(eyelid_.startUpperRightLid, eyelid_.targetUpperRightLid, t);
-        eyelid_.currentLowerRightLid = lerp(eyelid_.startLowerRightLid, eyelid_.targetLowerRightLid, t);
+        eyelid_.currentUpperLeftLid =
+            lerp(eyelid_.startUpperLeftLid, eyelid_.targetUpperLeftLid, t);
+        eyelid_.currentLowerLeftLid =
+            lerp(eyelid_.startLowerLeftLid, eyelid_.targetLowerLeftLid, t);
+        eyelid_.currentUpperRightLid =
+            lerp(eyelid_.startUpperRightLid, eyelid_.targetUpperRightLid, t);
+        eyelid_.currentLowerRightLid =
+            lerp(eyelid_.startLowerRightLid, eyelid_.targetLowerRightLid, t);
         if (eyelid_.elapsedMs >= eyelid_.durationMs) {
             eyelid_.currentUpperLeftLid = eyelid_.targetUpperLeftLid;
             eyelid_.currentLowerLeftLid = eyelid_.targetLowerLeftLid;
@@ -131,7 +138,7 @@ void RealAnimationEngine::update(uint32_t deltaMs) {
 }
 
 void RealAnimationEngine::startGazeTransition(float targetX, float targetY, uint32_t durationMs,
-                                               bool blinkOnArrival) {
+                                              bool blinkOnArrival) {
     gaze_.startX = gaze_.currentX;
     gaze_.startY = gaze_.currentY;
     gaze_.targetX = targetX;
@@ -143,8 +150,8 @@ void RealAnimationEngine::startGazeTransition(float targetX, float targetY, uint
 }
 
 void RealAnimationEngine::startEyelidTransition(float targetUpperLeftLid, float targetLowerLeftLid,
-                                                 float targetUpperRightLid, float targetLowerRightLid,
-                                                 uint32_t durationMs) {
+                                                float targetUpperRightLid,
+                                                float targetLowerRightLid, uint32_t durationMs) {
     eyelid_.startUpperLeftLid = eyelid_.currentUpperLeftLid;
     eyelid_.startLowerLeftLid = eyelid_.currentLowerLeftLid;
     eyelid_.startUpperRightLid = eyelid_.currentUpperRightLid;

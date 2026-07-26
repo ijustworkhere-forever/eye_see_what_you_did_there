@@ -11,5 +11,6 @@ positions. No other module ever touches `IServoOutput` directly.
 **Planned features:** None — this class is deliberately "dumb" (see
 docs/architecture.md invariant 1). All animation and behavior sit above it.
 
-**Future work:** Real `toServoOutput()` calibration math (pulse scaling,
-invert, mirror, mechanical offset) — docs/ROADMAP.md v0.2.
+**Future work:** A calibration validation/bounds-check API, so `ServoConfig`
+values arriving from outside the firmware (v0.4 REST endpoints, v0.5 persisted
+config) are rejected before they reach the servos — docs/ROADMAP.md.

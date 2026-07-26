@@ -24,6 +24,16 @@ class RealAnimationEngine : public IAnimationEngine {
 public:
     RealAnimationEngine(EyeController& eyeController, CalibrationManager& calibration);
 
+    /**
+     * Starts a gaze transition whose duration is derived from `target.speed`
+     * (degrees/second) and `EyeConfig::lookRangeDegrees`.
+     *
+     * Contract: `target.speed <= 0` — including NaN, which fails the `> 0.0f`
+     * comparison — results in an instant snap to the target on the next
+     * `update()`, with no interpolation. A positive but pathologically tiny
+     * speed is bounded by `kMaxGazeDurationMs` rather than producing a
+     * multi-hour transition.
+     */
     void animateGaze(const GazeTarget& target) override;
     void animateBlink(uint32_t durationMs) override;
     void animateWinkLeft(uint32_t durationMs) override;
@@ -35,6 +45,9 @@ public:
 
 private:
     static constexpr uint32_t kDefaultBlinkDurationMs = 150;
+    // Upper bound on a computed gaze duration: generous for any real saccade, and keeps a
+    // pathologically tiny (but positive) speed from producing an absurd multi-hour transition.
+    static constexpr uint32_t kMaxGazeDurationMs = 5000;
 
     struct GazeTransition {
         float currentX = 0.0f, currentY = 0.0f;
@@ -63,7 +76,8 @@ private:
     GazeTransition gaze_;
     EyelidTransition eyelid_;
 
-    void startGazeTransition(float targetX, float targetY, uint32_t durationMs, bool blinkOnArrival);
+    void startGazeTransition(float targetX, float targetY, uint32_t durationMs,
+                             bool blinkOnArrival);
     void startEyelidTransition(float targetUpperLeftLid, float targetLowerLeftLid,
                                float targetUpperRightLid, float targetLowerRightLid,
                                uint32_t durationMs);

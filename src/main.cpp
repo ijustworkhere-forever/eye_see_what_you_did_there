@@ -7,8 +7,11 @@
 #include "CommandQueue.h"
 #include "CuriousBehavior.h"
 #include "EyeController.h"
+#include "GamepadBridge.h"
 #include "IdleBehavior.h"
 #include "Logger.h"
+#include "MqttBridge.h"
+#include "MqttCredentials.h"
 #include "OtaManager.h"
 #include "Pca9685ServoOutput.h"
 #include "PreferencesStore.h"
@@ -54,6 +57,8 @@ WebServer webServer;
 RestApi restApi(commandQueue, behaviorEngine, eyeController, wifiManager, calibration, preferencesStore);
 WebSocketServer webSocketServer(behaviorEngine, eyeController);
 OtaManager otaManager;
+MqttBridge mqttBridge(commandQueue, behaviorEngine, eyeController, wifiManager);
+GamepadBridge gamepadBridge(commandQueue);
 
 uint32_t lastFrameMillis = 0;
 constexpr uint32_t kFramePeriodMs = 10;  // 100Hz target
@@ -73,6 +78,8 @@ void setup() {
     webSocketServer.begin(server);
     server.begin();
     otaManager.begin();
+    mqttBridge.begin(kMqttBrokerHost, kMqttBrokerPort, kMqttTopicPrefix);
+    gamepadBridge.begin();
 
     behaviorEngine.registerBehavior(EyeState::Idle, idleBehavior);
     behaviorEngine.registerBehavior(EyeState::Sleeping, sleepBehavior);
@@ -106,4 +113,6 @@ void loop() {
     restApi.update(elapsed);
     webSocketServer.update(elapsed);
     otaManager.update(elapsed);
+    mqttBridge.update(elapsed);
+    gamepadBridge.update(elapsed);
 }

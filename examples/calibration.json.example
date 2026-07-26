@@ -1,0 +1,9 @@
+{
+  "channel": "lr",
+  "minPulseUs": 1000,
+  "maxPulseUs": 2000,
+  "neutralPulseUs": 1500,
+  "mechanicalOffset": 0,
+  "inverted": false,
+  "mirrored": false
+}

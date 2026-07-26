@@ -1,0 +1,16 @@
+# Minimal local MQTT broker for testing EyeSee's MQTT integration.
+# NOT for production use: anonymous access is enabled, with no auth
+# and no TLS. Point include/MqttCredentials.h's kMqttBrokerHost at
+# this machine's LAN IP (not "localhost" -- the device is a separate
+# host on your network) and kMqttBrokerPort at 1883.
+#
+# Usage: docker compose -f mosquitto-compose.yml up
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    command: >
+      sh -c "echo 'listener 1883' > /mosquitto/config/mosquitto.conf &&
+             echo 'allow_anonymous true' >> /mosquitto/config/mosquitto.conf &&
+             mosquitto -c /mosquitto/config/mosquitto.conf"

@@ -41,7 +41,14 @@ For reference: [Will Cogley's EYEMECH ε3.2 adapted for ESP32 + PCA9685](https:/
 - MQTT: `lib/Integrations/MqttBridge` subscribes to `<prefix>/command` (reusing every existing `lib/Protocol` parser via one new type-dispatch function) and publishes `<prefix>/status` at 1Hz
 - Bluetooth gamepad control: `lib/Integrations/GamepadBridge` on `tbekas/BLE-Gamepad-Client` (BLE HID host, Xbox Wireless Controller), mapped via a pure, native-tested `GamepadInputMapper`
 
-## v1.0 — Stable release
-- API freeze
-- Full documentation
-- Example configs
+## v1.0 — Stable release (complete)
+- API freeze: `/api/v1/`, the WebSocket protocol, and MQTT are all now
+  additive-only-changes-under-the-same-version (see `docs/api-reference.md`'s
+  "Versioning & stability" section); every status response gained a
+  `firmwareVersion` field
+- Full documentation: `docs/api-reference.md` (full REST/WS/MQTT protocol
+  reference), `docs/hardware.md` (wiring/BOM/power), `docs/known-limitations.md`
+  (consolidated future-work notes), root `README.md` rewritten as a
+  getting-started guide (hardware, flashing, calibration, control examples)
+- Example configs: `examples/` populated with calibration, REST, and MQTT
+  examples plus a disposable local MQTT broker compose file

@@ -28,10 +28,11 @@ void test_fake_storage_round_trips_every_type() {
     TEST_ASSERT_EQUAL_FLOAT(30.5f, f);
 }
 
-void test_fake_storage_missing_key_returns_false() {
+void test_fake_storage_missing_key_returns_false_and_leaves_output_untouched() {
     FakeStorage storage;
-    uint16_t u = 0;
+    uint16_t u = 4242;  // sentinel -- a get() that wrongly zeroes this would still pass the old test
     TEST_ASSERT_FALSE(storage.getUInt16("missing", u));
+    TEST_ASSERT_EQUAL_UINT16(4242, u);
 }
 
 // No main() here — test/test_native/test_main.cpp is the sole file with main().

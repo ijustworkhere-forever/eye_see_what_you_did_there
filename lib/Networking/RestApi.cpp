@@ -106,7 +106,9 @@ void RestApi::begin(AsyncWebServer& server) {
             request->send(400, "application/json", buildErrorJson(result.error).c_str());
             return;
         }
-        calibrationManager_.setServoConfig(result.channel, result.servoConfig);
+        ServoConfig config = result.servoConfig;
+        config.channel = calibrationManager_.servoConfig(result.channel).channel;
+        calibrationManager_.setServoConfig(result.channel, config);
         calibrationManager_.saveToStorage(storage_);
         const std::string body = buildConfigJson(calibrationManager_.eyeConfig());
         request->send(200, "application/json", body.c_str());

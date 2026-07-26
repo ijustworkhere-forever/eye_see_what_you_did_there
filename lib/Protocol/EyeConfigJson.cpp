@@ -45,9 +45,23 @@ ConfigParseResult parseConfigUpdate(JsonVariantConst body) {
         return result;
     }
 
-    result.servoConfig.minPulseUs = body["minPulseUs"].as<uint16_t>();
-    result.servoConfig.maxPulseUs = body["maxPulseUs"].as<uint16_t>();
-    result.servoConfig.neutralPulseUs = body["neutralPulseUs"].as<uint16_t>();
+    const uint16_t minPulseUs = body["minPulseUs"].as<uint16_t>();
+    const uint16_t maxPulseUs = body["maxPulseUs"].as<uint16_t>();
+    const uint16_t neutralPulseUs = body["neutralPulseUs"].as<uint16_t>();
+
+    constexpr uint16_t kAbsoluteMinPulseUs = 500;   // generous floor below any real hobby servo's minimum
+    constexpr uint16_t kAbsoluteMaxPulseUs = 2500;  // generous ceiling above any real hobby servo's maximum
+    if (minPulseUs < kAbsoluteMinPulseUs || maxPulseUs > kAbsoluteMaxPulseUs || minPulseUs >= maxPulseUs ||
+        neutralPulseUs < minPulseUs || neutralPulseUs > maxPulseUs) {
+        result.error =
+            "invalid pulse range: require 500 <= minPulseUs < maxPulseUs <= 2500 "
+            "and minPulseUs <= neutralPulseUs <= maxPulseUs";
+        return result;
+    }
+
+    result.servoConfig.minPulseUs = minPulseUs;
+    result.servoConfig.maxPulseUs = maxPulseUs;
+    result.servoConfig.neutralPulseUs = neutralPulseUs;
     result.servoConfig.mechanicalOffset = body["mechanicalOffset"].as<int16_t>();
     result.servoConfig.inverted = body["inverted"].as<bool>();
     result.servoConfig.mirrored = body["mirrored"].as<bool>();
@@ -68,17 +82,17 @@ void writeServoConfig(JsonObject& obj, const ServoConfig& config) {
 
 std::string buildConfigJson(const EyeConfig& config) {
     JsonDocument doc;
-    JsonObject lr = doc["lr"].to<JsonObject>();
+    JsonObject lr = doc[channelToString(EyeChannel::Lr)].to<JsonObject>();
     writeServoConfig(lr, config.lr);
-    JsonObject ud = doc["ud"].to<JsonObject>();
+    JsonObject ud = doc[channelToString(EyeChannel::Ud)].to<JsonObject>();
     writeServoConfig(ud, config.ud);
-    JsonObject tl = doc["tl"].to<JsonObject>();
+    JsonObject tl = doc[channelToString(EyeChannel::Tl)].to<JsonObject>();
     writeServoConfig(tl, config.tl);
-    JsonObject bl = doc["bl"].to<JsonObject>();
+    JsonObject bl = doc[channelToString(EyeChannel::Bl)].to<JsonObject>();
     writeServoConfig(bl, config.bl);
-    JsonObject tr = doc["tr"].to<JsonObject>();
+    JsonObject tr = doc[channelToString(EyeChannel::Tr)].to<JsonObject>();
     writeServoConfig(tr, config.tr);
-    JsonObject br = doc["br"].to<JsonObject>();
+    JsonObject br = doc[channelToString(EyeChannel::Br)].to<JsonObject>();
     writeServoConfig(br, config.br);
     doc["lookRangeDegrees"] = config.lookRangeDegrees;
 

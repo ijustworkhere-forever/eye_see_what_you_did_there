@@ -79,6 +79,21 @@ void test_parse_config_update_rejects_missing_required_field() {
     TEST_ASSERT_TRUE(result.error.size() > 0);
 }
 
+void test_parse_config_update_rejects_out_of_range_pulse_values() {
+    JsonDocument doc;
+    doc["channel"] = "lr";
+    doc["minPulseUs"] = 65535;
+    doc["maxPulseUs"] = 65535;
+    doc["neutralPulseUs"] = 65535;
+    doc["mechanicalOffset"] = 0;
+    doc["inverted"] = false;
+    doc["mirrored"] = false;
+
+    const ConfigParseResult result = parseConfigUpdate(doc.as<JsonVariantConst>());
+
+    TEST_ASSERT_FALSE(result.ok);
+}
+
 void test_build_config_json_reports_all_six_channels_and_look_range() {
     EyeConfig config;
     config.lr.minPulseUs = 900;

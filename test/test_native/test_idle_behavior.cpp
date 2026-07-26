@@ -35,6 +35,8 @@ void test_idle_behavior_glance_stays_within_micro_saccade_range() {
     TEST_ASSERT_EQUAL_FLOAT(0.15f, animation.lastGazeTarget.x);
     TEST_ASSERT_EQUAL_FLOAT(-0.15f, animation.lastGazeTarget.y);
     TEST_ASSERT_EQUAL_FLOAT(300.0f, animation.lastGazeTarget.speed);
+    TEST_ASSERT_EQUAL_FLOAT(-0.15f, random.lastFloatMin);
+    TEST_ASSERT_EQUAL_FLOAT(0.15f, random.lastFloatMax);
 }
 
 void test_idle_behavior_reports_idle_state() {

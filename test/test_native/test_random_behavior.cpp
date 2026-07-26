@@ -35,6 +35,8 @@ void test_random_behavior_glance_uses_wider_range_and_higher_speed() {
     TEST_ASSERT_EQUAL_FLOAT(0.9f, animation.lastGazeTarget.x);
     TEST_ASSERT_EQUAL_FLOAT(-0.9f, animation.lastGazeTarget.y);
     TEST_ASSERT_EQUAL_FLOAT(600.0f, animation.lastGazeTarget.speed);
+    TEST_ASSERT_EQUAL_FLOAT(-0.9f, random.lastFloatMin);
+    TEST_ASSERT_EQUAL_FLOAT(0.9f, random.lastFloatMax);
 }
 
 void test_random_behavior_reports_idle_state() {

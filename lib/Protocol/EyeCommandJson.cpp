@@ -51,6 +51,7 @@ ParseResult parseWinkCommand(JsonVariantConst body, EyeCommand& out) {
     } else {
         return ParseResult{false, "side must be \"left\" or \"right\""};
     }
+    out.durationMs = body["durationMs"] | static_cast<uint32_t>(150);
     return ParseResult{true, ""};
 }
 
@@ -67,6 +68,7 @@ ParseResult parseExpressionCommand(JsonVariantConst body, EyeCommand& out) {
     out = EyeCommand{};
     out.type = CommandType::SetExpression;
     out.expression = expression;
+    out.durationMs = body["durationMs"] | static_cast<uint32_t>(200);
     return ParseResult{true, ""};
 }
 

@@ -121,8 +121,10 @@ extern void test_parse_wink_command_left();
 extern void test_parse_wink_command_right();
 extern void test_parse_wink_command_rejects_invalid_side();
 extern void test_parse_wink_command_rejects_missing_side();
+extern void test_parse_wink_command_reads_custom_duration();
 extern void test_parse_expression_command_reads_known_name();
 extern void test_parse_expression_command_rejects_unknown_name();
+extern void test_parse_expression_command_reads_custom_duration();
 
 int main(int argc, char** argv) {
     UNITY_BEGIN();
@@ -213,7 +215,9 @@ int main(int argc, char** argv) {
     RUN_TEST(test_parse_wink_command_right);
     RUN_TEST(test_parse_wink_command_rejects_invalid_side);
     RUN_TEST(test_parse_wink_command_rejects_missing_side);
+    RUN_TEST(test_parse_wink_command_reads_custom_duration);
     RUN_TEST(test_parse_expression_command_reads_known_name);
     RUN_TEST(test_parse_expression_command_rejects_unknown_name);
+    RUN_TEST(test_parse_expression_command_reads_custom_duration);
     return UNITY_END();
 }

@@ -102,6 +102,19 @@ void test_parse_wink_command_left() {
 
     TEST_ASSERT_TRUE(result.ok);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::WinkLeft), static_cast<int>(command.type));
+    TEST_ASSERT_EQUAL_UINT32(150, command.durationMs);
+}
+
+void test_parse_wink_command_reads_custom_duration() {
+    JsonDocument doc;
+    doc["side"] = "left";
+    doc["durationMs"] = 400;
+
+    EyeCommand command;
+    const ParseResult result = parseWinkCommand(doc.as<JsonVariantConst>(), command);
+
+    TEST_ASSERT_TRUE(result.ok);
+    TEST_ASSERT_EQUAL_UINT32(400, command.durationMs);
 }
 
 void test_parse_wink_command_right() {
@@ -144,6 +157,19 @@ void test_parse_expression_command_reads_known_name() {
     TEST_ASSERT_TRUE(result.ok);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::SetExpression), static_cast<int>(command.type));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(Expression::Happy), static_cast<int>(command.expression));
+    TEST_ASSERT_EQUAL_UINT32(200, command.durationMs);
+}
+
+void test_parse_expression_command_reads_custom_duration() {
+    JsonDocument doc;
+    doc["expression"] = "Happy";
+    doc["durationMs"] = 600;
+
+    EyeCommand command;
+    const ParseResult result = parseExpressionCommand(doc.as<JsonVariantConst>(), command);
+
+    TEST_ASSERT_TRUE(result.ok);
+    TEST_ASSERT_EQUAL_UINT32(600, command.durationMs);
 }
 
 void test_parse_expression_command_rejects_unknown_name() {

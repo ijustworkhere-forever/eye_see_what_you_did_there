@@ -3,7 +3,11 @@
 namespace eyesee {
 
 /** Interpolation curve shape for an in-progress animation transition. */
-enum class EasingType { Linear, EaseInOut, Cubic };
+enum class EasingType {
+    Linear,
+    EaseInOut,
+    Cubic
+};
 
 /**
  * Maps a linear progress fraction through the given easing curve. `t` is

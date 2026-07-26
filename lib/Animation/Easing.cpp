@@ -15,8 +15,7 @@ float clamp01(float t) {
 float ease(EasingType type, float t) {
     t = clamp01(t);
     switch (type) {
-        case EasingType::Linear:
-            return t;
+        case EasingType::Linear: return t;
         case EasingType::EaseInOut:
             return t < 0.5f ? 2.0f * t * t : 1.0f - std::pow(-2.0f * t + 2.0f, 2.0f) / 2.0f;
         case EasingType::Cubic:

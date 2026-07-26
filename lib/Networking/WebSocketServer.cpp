@@ -1,13 +1,30 @@
 #include "WebSocketServer.h"
 
+#include "EyeStateJson.h"
+
 namespace eyesee {
 
-void WebSocketServer::begin() {
-    // TODO: start a WebSocket endpoint, push EyeController state at 30-60Hz (docs/ROADMAP.md v0.4).
+WebSocketServer::WebSocketServer(const IBehaviorEngine& behaviorEngine, const EyeController& eyeController)
+    : behaviorEngine_(behaviorEngine), eyeController_(eyeController) {
+}
+
+void WebSocketServer::begin(AsyncWebServer& server) {
+    server.addHandler(&ws_);
 }
 
 void WebSocketServer::update(uint32_t deltaMs) {
-    (void)deltaMs;
+    uptimeMs_ += deltaMs;
+    ws_.cleanupClients();
+
+    msSinceLastBroadcast_ += deltaMs;
+    if (msSinceLastBroadcast_ < kBroadcastPeriodMs) {
+        return;
+    }
+    msSinceLastBroadcast_ = 0;
+
+    const std::string payload =
+        buildBroadcastJson(behaviorEngine_.state(), eyeController_.currentPose(), uptimeMs_);
+    ws_.textAll(payload.c_str());
 }
 
 }  // namespace eyesee

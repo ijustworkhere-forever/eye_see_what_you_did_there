@@ -72,4 +72,20 @@ ParseResult parseExpressionCommand(JsonVariantConst body, EyeCommand& out) {
     return ParseResult{true, ""};
 }
 
+ParseResult parseTrackCommand(JsonVariantConst body, EyeCommand& out) {
+    if (!body["x"].is<float>() || !body["y"].is<float>()) {
+        return ParseResult{false, "missing required field: x and y must be numbers"};
+    }
+
+    GazeTarget target;
+    target.x = clampf(body["x"].as<float>(), -1.0f, 1.0f);
+    target.y = clampf(body["y"].as<float>(), -1.0f, 1.0f);
+    target.hold = body["hold"] | true;
+
+    out = EyeCommand{};
+    out.type = CommandType::Track;
+    out.gazeTarget = target;
+    return ParseResult{true, ""};
+}
+
 }  // namespace eyesee

@@ -26,4 +26,7 @@ ParseResult parseWinkCommand(JsonVariantConst body, EyeCommand& out);
 /** {"expression": "Happy", "durationMs"?: uint32_t} (default 200) -> CommandType::SetExpression. */
 ParseResult parseExpressionCommand(JsonVariantConst body, EyeCommand& out);
 
+/** {"x": float, "y": float, "hold"?: bool} (hold default true) -> CommandType::Track. */
+ParseResult parseTrackCommand(JsonVariantConst body, EyeCommand& out);
+
 }  // namespace eyesee

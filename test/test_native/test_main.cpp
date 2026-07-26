@@ -133,6 +133,10 @@ extern void test_parse_wink_command_reads_custom_duration();
 extern void test_parse_expression_command_reads_known_name();
 extern void test_parse_expression_command_rejects_unknown_name();
 extern void test_parse_expression_command_reads_custom_duration();
+extern void test_parse_track_command_reads_required_fields_and_defaults_hold_true();
+extern void test_parse_track_command_reads_explicit_hold_false();
+extern void test_parse_track_command_clamps_out_of_range_xy();
+extern void test_parse_track_command_rejects_missing_y();
 
 // EyeConfigJson tests
 extern void test_channel_string_round_trips_every_value();
@@ -248,6 +252,10 @@ int main(int argc, char** argv) {
     RUN_TEST(test_parse_expression_command_reads_known_name);
     RUN_TEST(test_parse_expression_command_rejects_unknown_name);
     RUN_TEST(test_parse_expression_command_reads_custom_duration);
+    RUN_TEST(test_parse_track_command_reads_required_fields_and_defaults_hold_true);
+    RUN_TEST(test_parse_track_command_reads_explicit_hold_false);
+    RUN_TEST(test_parse_track_command_clamps_out_of_range_xy);
+    RUN_TEST(test_parse_track_command_rejects_missing_y);
     RUN_TEST(test_channel_string_round_trips_every_value);
     RUN_TEST(test_channel_from_string_rejects_unknown_name);
     RUN_TEST(test_parse_config_update_reads_all_fields);

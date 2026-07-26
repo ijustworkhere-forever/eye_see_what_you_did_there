@@ -138,6 +138,16 @@ extern void test_parse_track_command_reads_explicit_hold_false();
 extern void test_parse_track_command_clamps_out_of_range_xy();
 extern void test_parse_track_command_rejects_missing_y();
 
+// MqttCommandJson tests
+extern void test_parse_mqtt_command_dispatches_look();
+extern void test_parse_mqtt_command_dispatches_wink();
+extern void test_parse_mqtt_command_dispatches_track();
+extern void test_parse_mqtt_command_sleep_needs_no_body_and_gets_easing_duration();
+extern void test_parse_mqtt_command_wake_needs_no_body_and_gets_easing_duration();
+extern void test_parse_mqtt_command_rejects_missing_type();
+extern void test_parse_mqtt_command_rejects_unrecognized_type();
+extern void test_parse_mqtt_command_propagates_underlying_parse_error();
+
 // EyeConfigJson tests
 extern void test_channel_string_round_trips_every_value();
 extern void test_channel_from_string_rejects_unknown_name();
@@ -256,6 +266,14 @@ int main(int argc, char** argv) {
     RUN_TEST(test_parse_track_command_reads_explicit_hold_false);
     RUN_TEST(test_parse_track_command_clamps_out_of_range_xy);
     RUN_TEST(test_parse_track_command_rejects_missing_y);
+    RUN_TEST(test_parse_mqtt_command_dispatches_look);
+    RUN_TEST(test_parse_mqtt_command_dispatches_wink);
+    RUN_TEST(test_parse_mqtt_command_dispatches_track);
+    RUN_TEST(test_parse_mqtt_command_sleep_needs_no_body_and_gets_easing_duration);
+    RUN_TEST(test_parse_mqtt_command_wake_needs_no_body_and_gets_easing_duration);
+    RUN_TEST(test_parse_mqtt_command_rejects_missing_type);
+    RUN_TEST(test_parse_mqtt_command_rejects_unrecognized_type);
+    RUN_TEST(test_parse_mqtt_command_propagates_underlying_parse_error);
     RUN_TEST(test_channel_string_round_trips_every_value);
     RUN_TEST(test_channel_from_string_rejects_unknown_name);
     RUN_TEST(test_parse_config_update_reads_all_fields);

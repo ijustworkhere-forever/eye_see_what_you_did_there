@@ -31,3 +31,12 @@ jobs:
 
       - name: Check formatting
         run: clang-format --dry-run --Werror $(find lib src test -name '*.h' -o -name '*.cpp')
+
+      - name: Generate compile_commands.json
+        run: pio run -t compiledb -e esp32dev
+
+      - name: Install clang-tidy
+        run: sudo apt-get install -y clang-tidy
+
+      - name: Run clang-tidy
+        run: clang-tidy -p . $(find lib src -name '*.cpp')

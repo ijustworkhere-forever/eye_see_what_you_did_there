@@ -76,6 +76,22 @@ extern void test_sleep_behavior_closes_eyes_on_enter();
 extern void test_sleep_behavior_update_does_nothing();
 extern void test_sleep_behavior_reports_sleeping_state();
 
+// TrackingBehavior tests
+extern void test_tracking_behavior_does_nothing_until_target_is_set();
+extern void test_tracking_behavior_animates_toward_target_once_set();
+extern void test_tracking_behavior_does_not_reissue_gaze_for_unchanged_target();
+extern void test_tracking_behavior_reports_tracking_state();
+
+// CuriousBehavior tests
+extern void test_curious_behavior_sets_curious_expression_on_enter();
+extern void test_curious_behavior_waits_for_full_interval_before_glancing();
+extern void test_curious_behavior_reports_idle_state();
+
+// RandomBehavior tests
+extern void test_random_behavior_waits_for_full_interval_before_glancing();
+extern void test_random_behavior_glance_uses_wider_range_and_higher_speed();
+extern void test_random_behavior_reports_idle_state();
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_default_eye_config_has_six_distinct_channels);
@@ -131,5 +147,15 @@ int main(int argc, char** argv) {
     RUN_TEST(test_sleep_behavior_closes_eyes_on_enter);
     RUN_TEST(test_sleep_behavior_update_does_nothing);
     RUN_TEST(test_sleep_behavior_reports_sleeping_state);
+    RUN_TEST(test_tracking_behavior_does_nothing_until_target_is_set);
+    RUN_TEST(test_tracking_behavior_animates_toward_target_once_set);
+    RUN_TEST(test_tracking_behavior_does_not_reissue_gaze_for_unchanged_target);
+    RUN_TEST(test_tracking_behavior_reports_tracking_state);
+    RUN_TEST(test_curious_behavior_sets_curious_expression_on_enter);
+    RUN_TEST(test_curious_behavior_waits_for_full_interval_before_glancing);
+    RUN_TEST(test_curious_behavior_reports_idle_state);
+    RUN_TEST(test_random_behavior_waits_for_full_interval_before_glancing);
+    RUN_TEST(test_random_behavior_glance_uses_wider_range_and_higher_speed);
+    RUN_TEST(test_random_behavior_reports_idle_state);
     return UNITY_END();
 }

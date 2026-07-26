@@ -54,21 +54,30 @@ A side effect of invariant 2: swapping `IServoOutput` for a host-side
 implementation (e.g. an SDL window drawing the eyes) is a one-class change
 with zero impact on `EyeController`/`Animation`/`Behavior`.
 
-## Animation engine (v0.2)
+## Animation engine (v0.2, extended in v0.3)
 
 `RealAnimationEngine` (in `lib/Animation/`) replaces the v0.1
 `PassthroughAnimationEngine` placeholder. It runs two independent,
 per-frame-composed transitions — one for gaze (`lookX`/`lookY`), one for
 all four eyelids — each eased over its own duration via `Easing.h`'s three
-curves (`Linear`, `EaseInOut`, `Cubic`), assigned per animation intent
-(gaze uses Cubic; blink/wink/sleep/wake use EaseInOut); expression is
-currently a no-op passthrough with no interpolation applied at all (see
-Future work) — `EasingType::Linear` exists but has no caller yet.
-`GazeTarget.speed` (degrees/second) combines with `EyeConfig.lookRangeDegrees`
-to compute how long a gaze transition takes. See
-`docs/superpowers/specs/2026-07-25-v0.2-real-motion-design.md` for the
-full design and what's still deferred to v0.3 (blink auto-reopen,
-expression pose blending, `GazeTarget.hold`).
+curves (`Linear`, `EaseInOut`, `Cubic`), assigned per animation intent: gaze
+uses Cubic; all eyelid moves (blink, wink, sleep, wake, expression) use
+EaseInOut. Blink is the only one-way-vs-symmetric case — `animateBlink()`
+closes then auto-reopens over the same duration it closed with
+(`EyelidTransition::autoReopenOnComplete`); wink and sleep remain one-way,
+same as before. Expression blending uses the shared
+`expressionEyelidTarget()` lookup table (`lib/EyeController/ExpressionPose.h`)
+for both the instant path (`EyeController::setExpression`) and the animated
+path (`RealAnimationEngine::animateExpression`, which eases toward the same
+table's values via the eyelid-transition machinery), so the two paths can
+never disagree on what an `Expression` means. `GazeTarget.speed`
+(degrees/second) combines with `EyeConfig.lookRangeDegrees` to compute how
+long a gaze transition takes. See
+`docs/superpowers/specs/2026-07-25-v0.2-real-motion-design.md` and
+`docs/superpowers/specs/2026-07-25-v0.3-behavior-design.md` for the full
+design. `GazeTarget.hold` (real face-tracking input) remains deferred — it's
+set by `TrackingBehavior` but has no consumer until v0.6's face-tracking
+bridge.
 
 ## Behavior switching (v0.3)
 
@@ -78,8 +87,10 @@ registration table mapping `EyeState` to a concrete `IBehavior`, set up via
 constructor-injected default if nothing's registered for that state), and
 calls the outgoing/incoming behavior's `onExit()`/`onEnter()` lifecycle
 hooks — both default no-ops on `IBehavior`, overridden only where a
-behavior needs a one-time transition action (`SleepBehavior` closes the
-eyes on entry; the glance-based behaviors reset their countdown timer).
+behavior needs a one-time transition action (the glance-based behaviors
+reset their countdown timer on entry). Closing the eyes for a `Sleep`
+command is handled by `BehaviorEngine::dispatch()` itself, before
+`setState(Sleeping)` runs — see the next paragraph.
 
 `Sleep`/`Wake` `EyeCommand`s now also drive the state transition
 (`BehaviorEngine::dispatch()` calls `setState(Sleeping)`/`setState(Idle)`

@@ -6,7 +6,10 @@ positions. No other module ever touches `IServoOutput` directly.
 **Responsibilities:** Hold the current `EyePose`; convert poses to
 `ServoOutput` via `CalibrationManager`; expose named convenience methods
 (`look`, `blink`, `winkLeft`, `winkRight`, `sleep`, `wake`, `setExpression`,
-`setIdle`).
+`setIdle`). `ExpressionPose.h` holds `expressionEyelidTarget()`, the single
+source of truth for what each `Expression` numerically means, shared with
+`RealAnimationEngine::animateExpression()` (in `lib/Animation`) so the
+instant and animated paths never disagree.
 
 **Planned features:** None — this class is deliberately "dumb" (see
 docs/architecture.md invariant 1). All animation and behavior sit above it.

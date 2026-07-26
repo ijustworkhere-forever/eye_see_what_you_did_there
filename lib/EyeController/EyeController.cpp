@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "ExpressionPose.h"
+
 namespace eyesee {
 
 EyeController::EyeController(IServoOutput& output, CalibrationManager& calibration)
@@ -67,10 +69,13 @@ void EyeController::wake() {
 }
 
 void EyeController::setExpression(Expression expression) {
-    (void)expression;
-    // TODO: per-expression pose blending (docs/ROADMAP.md v0.3). No pose
-    // change this pass — a stub must never silently mutate state it wasn't
-    // asked to touch (see docs/architecture.md).
+    const ExpressionEyelidTarget target = expressionEyelidTarget(expression);
+    EyePose pose = currentPose_;
+    pose.upperLeftLid = target.upperLid;
+    pose.lowerLeftLid = target.lowerLid;
+    pose.upperRightLid = target.upperLid;
+    pose.lowerRightLid = target.lowerLid;
+    applyPose(pose);
 }
 
 void EyeController::setIdle() {

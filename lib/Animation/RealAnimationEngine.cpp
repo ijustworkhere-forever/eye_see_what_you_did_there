@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "ExpressionPose.h"
+
 namespace eyesee {
 
 namespace {
@@ -69,10 +71,9 @@ void RealAnimationEngine::animateWake(uint32_t durationMs) {
 }
 
 void RealAnimationEngine::animateExpression(Expression expression, uint32_t durationMs) {
-    (void)durationMs;
-    // TODO: per-expression target pose blending (docs/ROADMAP.md v0.3). No pose
-    // change this pass — matches EyeController::setExpression()'s no-op.
-    eyeController_.setExpression(expression);
+    const ExpressionEyelidTarget target = expressionEyelidTarget(expression);
+    startEyelidTransition(target.upperLid, target.lowerLid, target.upperLid, target.lowerLid,
+                          durationMs);
 }
 
 void RealAnimationEngine::update(uint32_t deltaMs) {

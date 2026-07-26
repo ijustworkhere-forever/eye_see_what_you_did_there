@@ -7,6 +7,8 @@
 
 using eyesee::CalibrationManager;
 using eyesee::EyeController;
+using eyesee::EyePose;
+using eyesee::Expression;
 using eyesee::GazeTarget;
 using eyesee::RealAnimationEngine;
 
@@ -263,6 +265,43 @@ void test_animate_sleep_does_not_auto_reopen() {
     animation.update(500);
 
     TEST_ASSERT_EQUAL_FLOAT(0.0f, controller.currentPose().upperLeftLid);
+}
+
+void test_animate_expression_blends_toward_target_eyelid_values() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    animation.animateExpression(Expression::Sleepy, 100);
+    animation.update(50);
+
+    const EyePose midPose = controller.currentPose();
+    TEST_ASSERT_TRUE(midPose.upperLeftLid > 0.3f);
+    TEST_ASSERT_TRUE(midPose.upperLeftLid < 1.0f);
+
+    animation.update(60);
+
+    TEST_ASSERT_EQUAL_FLOAT(0.3f, controller.currentPose().upperLeftLid);
+    TEST_ASSERT_EQUAL_FLOAT(0.5f, controller.currentPose().lowerLeftLid);
+}
+
+void test_animate_expression_does_not_affect_gaze() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    GazeTarget gazeTarget;
+    gazeTarget.x = 0.5f;
+    gazeTarget.speed = 1000.0f;
+    animation.animateGaze(gazeTarget);
+    animation.update(100);
+
+    animation.animateExpression(Expression::Happy, 100);
+    animation.update(100);
+
+    TEST_ASSERT_EQUAL_FLOAT(0.5f, controller.currentPose().lookX);
 }
 
 // No main() here — test/test_native/test_main.cpp is the sole file with

@@ -25,8 +25,13 @@ extern void test_mechanical_offset_shifts_pulse_within_clamp();
 extern void test_look_updates_gaze_but_preserves_eyelids();
 extern void test_blink_closes_all_four_lids();
 extern void test_wink_left_closes_only_left_lids();
-extern void test_set_expression_does_not_change_pose();
+extern void test_set_expression_applies_expression_target_but_preserves_gaze();
 extern void test_set_idle_resets_to_default_pose();
+
+// ExpressionPose tests
+extern void test_neutral_expression_is_relaxed_open();
+extern void test_sleepy_expression_is_mostly_closed();
+extern void test_surprised_expression_is_fully_open();
 
 // Easing tests
 extern void test_linear_easing_is_identity();
@@ -51,6 +56,8 @@ extern void test_animate_blink_with_zero_duration_completes_in_one_frame();
 extern void test_animate_blink_reopens_after_close_phase_completes();
 extern void test_animate_wink_left_does_not_auto_reopen();
 extern void test_animate_sleep_does_not_auto_reopen();
+extern void test_animate_expression_blends_toward_target_eyelid_values();
+extern void test_animate_expression_does_not_affect_gaze();
 
 // CommandQueue tests (Behavior module)
 extern void test_push_pop_preserves_fifo_order();
@@ -112,8 +119,11 @@ int main(int argc, char** argv) {
     RUN_TEST(test_look_updates_gaze_but_preserves_eyelids);
     RUN_TEST(test_blink_closes_all_four_lids);
     RUN_TEST(test_wink_left_closes_only_left_lids);
-    RUN_TEST(test_set_expression_does_not_change_pose);
+    RUN_TEST(test_set_expression_applies_expression_target_but_preserves_gaze);
     RUN_TEST(test_set_idle_resets_to_default_pose);
+    RUN_TEST(test_neutral_expression_is_relaxed_open);
+    RUN_TEST(test_sleepy_expression_is_mostly_closed);
+    RUN_TEST(test_surprised_expression_is_fully_open);
     RUN_TEST(test_linear_easing_is_identity);
     RUN_TEST(test_ease_in_out_starts_and_ends_at_bounds);
     RUN_TEST(test_cubic_starts_and_ends_at_bounds);
@@ -134,6 +144,8 @@ int main(int argc, char** argv) {
     RUN_TEST(test_animate_blink_reopens_after_close_phase_completes);
     RUN_TEST(test_animate_wink_left_does_not_auto_reopen);
     RUN_TEST(test_animate_sleep_does_not_auto_reopen);
+    RUN_TEST(test_animate_expression_blends_toward_target_eyelid_values);
+    RUN_TEST(test_animate_expression_does_not_affect_gaze);
     RUN_TEST(test_push_pop_preserves_fifo_order);
     RUN_TEST(test_push_fails_when_full);
     RUN_TEST(test_clear_empties_queue);

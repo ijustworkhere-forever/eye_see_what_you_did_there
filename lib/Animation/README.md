@@ -16,8 +16,9 @@ executes whatever gaze/eyelid targets it's given.
 
 **Future work:** `animateWinkLeft()`/`animateWinkRight()`/`animateSleep()`
 still only close — they never auto-reopen (only `animateBlink()` does,
-symmetrically, over the same duration as the close phase). Expression
-pose blending is still a no-op passthrough (docs/ROADMAP.md v0.3 —
-implemented later in this same milestone, Task 6). Caller-selectable
-easing per call (currently fixed per intent — gaze uses Cubic, eyelid
-moves use EaseInOut).
+symmetrically, over the same duration as the close phase).
+`animateExpression()` blends toward `ExpressionPose.h`'s per-expression
+eyelid targets via the same eyelid-transition machinery as any other
+eyelid move (docs/ROADMAP.md v0.3). Caller-selectable easing per call
+(currently fixed per intent — gaze uses Cubic, eyelid moves use
+EaseInOut).

@@ -12,3 +12,11 @@ pio run -t uploadfs -e esp32dev
 Run this once after any change to a file in this directory (firmware
 flashes via the normal `pio run -t upload -e esp32dev` don't touch the
 filesystem partition).
+
+Anyone with a device already flashed under the old partition table must
+re-flash both firmware and filesystem after a partition table change
+(`pio run -t upload -e esp32dev` then `pio run -t uploadfs -e esp32dev`),
+since a partition table change moves where every partition's data lives
+on flash, making old filesystem/OTA contents at the previous offsets
+invalid at the new ones; this is a one-time transition, and ordinary OTA
+updates after this point work normally again.

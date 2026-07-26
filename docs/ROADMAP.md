@@ -10,7 +10,7 @@
 ## v0.2 — Real motion (complete)
 - `EyeController::toServoOutput()` calibration math (scaling, invert, mirror, offset)
 - `IAnimationEngine` real interpolation: linear, ease-in/out, cubic
-- `GazeTarget` speed honored (degrees/second, using `lookRangeDegrees`); `hold` remains unused, deferred to v0.3
+- `GazeTarget` speed honored (degrees/second, using `lookRangeDegrees`); `hold` remains unused, deferred to v0.6 (face-tracking bridge)
 - Frame-rate pacing in `loop()`: holds the documented 100Hz target via a fixed-period gate
 
 ## v0.3 — Behavior (complete)

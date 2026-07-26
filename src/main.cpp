@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ESPAsyncWebServer.h>
 
 #include "ArduinoRandomSource.h"
 #include "BehaviorEngine.h"
@@ -18,6 +19,8 @@
 #include "TrackingBehavior.h"
 #include "WebServer.h"
 #include "WebSocketServer.h"
+#include "WifiCredentials.h"
+#include "WifiManager.h"
 
 using namespace eyesee;
 
@@ -44,9 +47,12 @@ RandomBehavior randomBehavior(randomSource);    // built + tested, not registere
 BehaviorEngine behaviorEngine(animationEngine, commandQueue, idleBehavior);
 
 PreferencesStore preferencesStore;
+NetworkConfig networkConfig{kWifiSsid, kWifiPassword, 80};
+AsyncWebServer server(networkConfig.webServerPort);
+WifiManager wifiManager;
 WebServer webServer;
-RestApi restApi;
-WebSocketServer webSocketServer;
+RestApi restApi(commandQueue, behaviorEngine, eyeController, wifiManager);
+WebSocketServer webSocketServer(behaviorEngine, eyeController);
 OtaManager otaManager;
 
 uint32_t lastFrameMillis = 0;
@@ -60,9 +66,11 @@ void setup() {
 
     servoOutput.init();
     preferencesStore.begin("eyesee");
-    webServer.begin();
-    restApi.begin();
-    webSocketServer.begin();
+    wifiManager.begin(networkConfig.ssid, networkConfig.password);
+    webServer.begin(server);
+    restApi.begin(server);
+    webSocketServer.begin(server);
+    server.begin();
     otaManager.begin();
 
     behaviorEngine.registerBehavior(EyeState::Idle, idleBehavior);
@@ -92,6 +100,7 @@ void loop() {
     eyeController.update(elapsed);
     servoOutput.update(elapsed);
 
+    wifiManager.update(elapsed);
     webServer.update(elapsed);
     restApi.update(elapsed);
     webSocketServer.update(elapsed);

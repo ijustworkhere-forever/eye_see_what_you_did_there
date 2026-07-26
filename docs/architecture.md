@@ -50,11 +50,13 @@ each frame; `EyeController` converts `EyePose` into a calibrated
    deal in `EyeCommand`/`GazeTarget`/`Expression` — never servo channels,
    pulse widths, calibration, or inversion.
 4. **`Networking` only writes via `CommandQueue`.** Every input source
-   (Web UI, REST, WebSocket, Bluetooth, Serial) pushes an `EyeCommand`;
-   reads are limited to existing read-only getters
-   (`IBehaviorEngine::state()`, `EyeController::currentPose()`) — never
-   `IAnimationEngine` or hardware directly. One documented exception: see
-   "Persistence & OTA (v0.5)" below for `RestApi`'s config route.
+   (Web UI, REST, WebSocket, Bluetooth, Serial, MQTT) pushes an
+   `EyeCommand`; reads are limited to existing read-only getters
+   (`IBehaviorEngine::state()`, `EyeController::currentPose()`,
+   `WifiManager::isConnected()` -- used by `RestApi` since v0.5 and by
+   `MqttBridge` since v0.6) — never `IAnimationEngine` or hardware
+   directly. One documented exception: see "Persistence & OTA (v0.5)"
+   below for `RestApi`'s config route.
 
 A side effect of invariant 2: swapping `IServoOutput` for a host-side
 implementation (e.g. an SDL window drawing the eyes) is a one-class change
@@ -81,9 +83,8 @@ never disagree on what an `Expression` means. `GazeTarget.speed`
 long a gaze transition takes. See
 `docs/superpowers/specs/2026-07-25-v0.2-real-motion-design.md` and
 `docs/superpowers/specs/2026-07-25-v0.3-behavior-design.md` for the full
-design. `GazeTarget.hold` (real face-tracking input) remains deferred — it's
-set by `TrackingBehavior` but has no consumer until v0.6's face-tracking
-bridge.
+design. `GazeTarget.hold` is read (not set) by `TrackingBehavior` as of
+v0.6 — see "Integrations (v0.6)" below.
 
 ## Behavior switching (v0.3)
 
@@ -140,7 +141,11 @@ Logger, OTA: leaf modules, no dependency on the above. Storage
 (`CalibrationManager::loadFromStorage`/`saveToStorage`, v0.5) — the
 dependency runs Configuration -> Storage, not the reverse. Networking
 depends on Protocol (v0.4) and, as of v0.5, on Configuration and Storage
-too (`RestApi`'s config route).
+too (`RestApi`'s config route). As of v0.6, Integrations depends on
+Behavior (`MqttBridge.h` includes `CommandQueue.h`, `EyeController.h`, and
+`IBehaviorEngine.h`), Networking (`WifiManager.h`), and Protocol
+(`MqttBridge` reuses `lib/Protocol`'s JSON parsers via `MqttCommandJson`) —
+it is not a leaf.
 ```
 
 ## Connectivity (v0.4)
@@ -204,8 +209,10 @@ no new target arrives within 3 seconds, unless the last-received target's
 the original v0.2 spec always meant `GazeTarget.hold` to drive.
 
 MQTT and Bluetooth gamepad are genuinely new external-protocol
-integrations, living in a new leaf library, `lib/Integrations`. Both
-follow the same rule `Networking` established in v0.4: every input source
+integrations, living in a new library, `lib/Integrations` -- not a leaf:
+it depends on Behavior (`CommandQueue`, `EyeController`, `IBehaviorEngine`),
+Networking (`WifiManager`), and Protocol (see "Module dependency graph"
+above). Both follow the same rule `Networking` established in v0.4: every input source
 only ever pushes an `EyeCommand` into the shared `CommandQueue`, never
 touching `IAnimationEngine` or hardware directly. `MqttBridge` reuses
 every existing `lib/Protocol` JSON parser (no new per-command parsing

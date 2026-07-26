@@ -240,5 +240,64 @@ void test_track_command_calls_on_enter_before_receiving_target() {
     TEST_ASSERT_EQUAL_INT(1, trackingBehavior.receiveGazeTargetCallCount);
 }
 
+void test_look_after_track_exits_tracking_back_to_idle() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    FakeBehavior trackingBehavior(EyeState::Tracking);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    engine.registerBehavior(EyeState::Idle, idleBehavior);
+    engine.registerBehavior(EyeState::Tracking, trackingBehavior);
+
+    EyeCommand trackCmd;
+    trackCmd.type = CommandType::Track;
+    queue.push(trackCmd);
+    engine.update(16);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Tracking), static_cast<int>(engine.state()));
+
+    EyeCommand lookCmd;
+    lookCmd.type = CommandType::Look;
+    lookCmd.gazeTarget.x = 0.7f;
+    lookCmd.gazeTarget.y = -0.1f;
+    queue.push(lookCmd);
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Idle), static_cast<int>(engine.state()));
+    TEST_ASSERT_EQUAL_INT(1, animation.animateGazeCallCount);
+    TEST_ASSERT_EQUAL_FLOAT(0.7f, animation.lastGazeTarget.x);
+    TEST_ASSERT_EQUAL_FLOAT(-0.1f, animation.lastGazeTarget.y);
+}
+
+void test_sleep_after_track_transitions_directly_to_sleeping_without_passing_through_idle() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    FakeBehavior trackingBehavior(EyeState::Tracking);
+    FakeBehavior sleepingBehavior(EyeState::Sleeping);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    engine.registerBehavior(EyeState::Idle, idleBehavior);
+    engine.registerBehavior(EyeState::Tracking, trackingBehavior);
+    engine.registerBehavior(EyeState::Sleeping, sleepingBehavior);
+
+    EyeCommand trackCmd;
+    trackCmd.type = CommandType::Track;
+    queue.push(trackCmd);
+    engine.update(16);
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Tracking), static_cast<int>(engine.state()));
+
+    EyeCommand sleepCmd;
+    sleepCmd.type = CommandType::Sleep;
+    queue.push(sleepCmd);
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Sleeping), static_cast<int>(engine.state()));
+    // Exactly one transition (Tracking -> Sleeping) happened, not two (Tracking -> Idle ->
+    // Sleeping) -- idleBehavior must never have been entered/exited across this dispatch.
+    TEST_ASSERT_EQUAL_INT(0, idleBehavior.onEnterCallCount);
+    TEST_ASSERT_EQUAL_INT(0, idleBehavior.onExitCallCount);
+    TEST_ASSERT_EQUAL_INT(1, trackingBehavior.onExitCallCount);
+    TEST_ASSERT_EQUAL_INT(1, sleepingBehavior.onEnterCallCount);
+}
+
 // No main() here — test/test_native/test_main.cpp is the sole file with main()
 // (see its own comment for why).

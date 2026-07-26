@@ -14,7 +14,13 @@ GamepadBridge::GamepadBridge(CommandQueue& commandQueue) : commandQueue_(command
 }
 
 void GamepadBridge::begin() {
-    BLEGamepadClient::init();
+    // Override controller_.begin()'s internal BLEGamepadClient::init() call, which defaults to
+    // deleteBonds=true -- without this, every boot would wipe all BLE bonds, breaking "paired
+    // controller reconnects automatically." Safe to call explicitly here: BLEGamepadClient::init()
+    // only initializes NimBLE (and only then applies deleteBonds) the first time it's called --
+    // controller_.begin()'s subsequent internal init() call is a no-op once NimBLE is already
+    // initialized, so its deleteBonds=true default never takes effect.
+    BLEGamepadClient::init(false);
     controller_.begin();
     controller_.onConnected([](XboxController&) { Logger::info(kLogTag, "gamepad connected"); });
     controller_.onDisconnected([](XboxController&) { Logger::info(kLogTag, "gamepad disconnected"); });

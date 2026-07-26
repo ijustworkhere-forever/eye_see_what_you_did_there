@@ -56,6 +56,7 @@ void test_button_a_press_edge_emits_blink_once() {
 
     TEST_ASSERT_EQUAL_size_t(1, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Blink), static_cast<int>(out[0].type));
+    TEST_ASSERT_EQUAL_UINT32(150, out[0].durationMs);
 }
 
 void test_button_a_held_does_not_repeat() {
@@ -79,6 +80,7 @@ void test_left_bumper_press_emits_wink_left() {
 
     TEST_ASSERT_EQUAL_size_t(1, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::WinkLeft), static_cast<int>(out[0].type));
+    TEST_ASSERT_EQUAL_UINT32(150, out[0].durationMs);
 }
 
 void test_right_bumper_press_emits_wink_right() {
@@ -91,6 +93,7 @@ void test_right_bumper_press_emits_wink_right() {
 
     TEST_ASSERT_EQUAL_size_t(1, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::WinkRight), static_cast<int>(out[0].type));
+    TEST_ASSERT_EQUAL_UINT32(150, out[0].durationMs);
 }
 
 void test_button_y_press_emits_happy_expression() {
@@ -104,6 +107,7 @@ void test_button_y_press_emits_happy_expression() {
     TEST_ASSERT_EQUAL_size_t(1, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::SetExpression), static_cast<int>(out[0].type));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(Expression::Happy), static_cast<int>(out[0].expression));
+    TEST_ASSERT_EQUAL_UINT32(200, out[0].durationMs);
 }
 
 void test_button_b_press_emits_sleep() {
@@ -116,6 +120,7 @@ void test_button_b_press_emits_sleep() {
 
     TEST_ASSERT_EQUAL_size_t(1, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Sleep), static_cast<int>(out[0].type));
+    TEST_ASSERT_EQUAL_UINT32(500, out[0].durationMs);
 }
 
 void test_button_x_press_emits_wake() {
@@ -128,6 +133,7 @@ void test_button_x_press_emits_wake() {
 
     TEST_ASSERT_EQUAL_size_t(1, count);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Wake), static_cast<int>(out[0].type));
+    TEST_ASSERT_EQUAL_UINT32(500, out[0].durationMs);
 }
 
 void test_stick_and_two_buttons_pressed_simultaneously_emits_three_commands() {

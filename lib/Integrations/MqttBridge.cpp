@@ -19,6 +19,10 @@ MqttBridge::MqttBridge(CommandQueue& commandQueue, const IBehaviorEngine& behavi
       eyeController_(eyeController),
       wifiManager_(wifiManager),
       mqttClient_(wifiClient_) {
+    // Cuts the worst-case blocking TCP connect attempt (inside PubSubClient::connect(),
+    // fully synchronous) from WiFiClient's 3000ms default down to 1000ms, so an
+    // unreachable broker can't freeze the 100Hz animation pipeline for as long.
+    wifiClient_.setTimeout(1);
 }
 
 void MqttBridge::begin(const char* brokerHost, uint16_t brokerPort, const char* topicPrefix) {
@@ -36,9 +40,14 @@ void MqttBridge::update(uint32_t deltaMs) {
         msSinceLastReconnectAttempt_ += deltaMs;
         if (msSinceLastReconnectAttempt_ >= kReconnectIntervalMs) {
             msSinceLastReconnectAttempt_ = 0;
+            if (!wifiManager_.isConnected()) {
+                return;
+            }
             if (mqttClient_.connect("eyesee")) {
                 Logger::info(kLogTag, "MQTT connected");
-                mqttClient_.subscribe(commandTopic_.c_str());
+                if (!mqttClient_.subscribe(commandTopic_.c_str())) {
+                    Logger::error(kLogTag, "MQTT subscribe failed");
+                }
             } else {
                 Logger::info(kLogTag, "MQTT connect failed, will retry");
             }
@@ -53,7 +62,9 @@ void MqttBridge::update(uint32_t deltaMs) {
         msSinceLastStatusPublish_ = 0;
         const std::string body = buildStatusJson(behaviorEngine_.state(), eyeController_.currentPose(),
                                                    wifiManager_.isConnected());
-        mqttClient_.publish(statusTopic_.c_str(), body.c_str());
+        if (!mqttClient_.publish(statusTopic_.c_str(), body.c_str())) {
+            Logger::error(kLogTag, "MQTT status publish failed");
+        }
     }
 }
 

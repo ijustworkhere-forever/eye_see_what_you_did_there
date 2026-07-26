@@ -51,6 +51,17 @@ void BehaviorEngine::update(uint32_t deltaMs) {
 }
 
 void BehaviorEngine::dispatch(const EyeCommand& command) {
+    // Any command other than Track/Sleep/Wake exits Tracking back to Idle before it runs --
+    // otherwise a Look/Blink from another input source would animate the eye while state_
+    // stays stuck at Tracking, letting TrackingBehavior's staleness timeout later recenter
+    // the eye and silently override it (see docs/superpowers/specs/2026-07-26-v0.6-integrations-design.md).
+    // Sleep/Wake already call setState() themselves below and must not be routed through this
+    // extra transition first, which would fire a spurious Idle onEnter()/onExit() pair
+    // sandwiched in between.
+    if (state_ == EyeState::Tracking && command.type != CommandType::Track &&
+        command.type != CommandType::Sleep && command.type != CommandType::Wake) {
+        setState(EyeState::Idle);
+    }
     switch (command.type) {
         case CommandType::Look:
             animation_.animateGaze(command.gazeTarget);
@@ -77,7 +88,9 @@ void BehaviorEngine::dispatch(const EyeCommand& command) {
             break;
         case CommandType::Track:
             setState(EyeState::Tracking);
-            activeBehavior_->receiveGazeTarget(command.gazeTarget);
+            if (activeBehavior_ != nullptr) {
+                activeBehavior_->receiveGazeTarget(command.gazeTarget);
+            }
             break;
     }
 }

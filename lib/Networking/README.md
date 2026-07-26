@@ -4,7 +4,7 @@
 
 **Responsibilities:** `WifiManager` (STA connect + retry), `WebServer`
 (LittleFS static assets), `RestApi` (`/api/v1/*` routes — `status`, `look`,
-`blink`, `wink`, `expression`, `sleep`, `wake`, `config`), `WebSocketServer` (~30Hz
+`blink`, `wink`, `expression`, `track`, `sleep`, `wake`, `config`), `WebSocketServer` (~30Hz
 state broadcast at `/ws`). Every route reads existing read-only state
 (`IBehaviorEngine::state()`, `EyeController::currentPose()`), pushes an
 `EyeCommand` into the shared `CommandQueue`, or (one exception, `config`

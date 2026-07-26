@@ -81,6 +81,16 @@ void RestApi::begin(AsyncWebServer& server) {
         respondQueued(request, commandQueue_, command);
     }).setMaxContentLength(512);
 
+    server.on("/api/v1/track", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
+        EyeCommand command;
+        const ParseResult result = parseTrackCommand(json, command);
+        if (!result.ok) {
+            request->send(400, "application/json", buildErrorJson(result.error).c_str());
+            return;
+        }
+        respondQueued(request, commandQueue_, command);
+    }).setMaxContentLength(512);
+
     server.on("/api/v1/sleep", HTTP_POST, [this](AsyncWebServerRequest* request) {
         EyeCommand command;
         command.type = CommandType::Sleep;

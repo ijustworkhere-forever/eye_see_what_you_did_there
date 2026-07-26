@@ -31,7 +31,8 @@ void TrackingBehavior::update(uint32_t deltaMs, IAnimationEngine& animation) {
     }
 
     if (lastTarget_.hold) {
-        return;  // hold indefinitely -- do not recenter, do not re-check every frame past the timeout
+        return;  // hold indefinitely -- do not recenter, do not re-check every frame past the
+                 // timeout
     }
 
     recentered_ = true;

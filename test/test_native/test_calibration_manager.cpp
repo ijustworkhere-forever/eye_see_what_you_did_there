@@ -107,5 +107,5 @@ void test_save_persists_all_six_channels_independently() {
     TEST_ASSERT_EQUAL_UINT16(1600, loaded.servoConfig(EyeChannel::Ud).neutralPulseUs);
     // Lr wasn't changed from its default -- confirms per-channel keys don't collide.
     TEST_ASSERT_EQUAL_UINT16(original.servoConfig(EyeChannel::Lr).neutralPulseUs,
-                              loaded.servoConfig(EyeChannel::Lr).neutralPulseUs);
+                             loaded.servoConfig(EyeChannel::Lr).neutralPulseUs);
 }

@@ -7,8 +7,12 @@ namespace {
 /** RAII critical-section guard around the ESP32 portMUX spinlock. */
 class CriticalSection {
 public:
-    explicit CriticalSection(portMUX_TYPE& mux) : mux_(mux) { portENTER_CRITICAL(&mux_); }
-    ~CriticalSection() { portEXIT_CRITICAL(&mux_); }
+    explicit CriticalSection(portMUX_TYPE& mux) : mux_(mux) {
+        portENTER_CRITICAL(&mux_);
+    }
+    ~CriticalSection() {
+        portEXIT_CRITICAL(&mux_);
+    }
 
 private:
     portMUX_TYPE& mux_;

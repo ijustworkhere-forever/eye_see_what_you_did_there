@@ -4,7 +4,8 @@
 
 namespace eyesee {
 
-WebSocketServer::WebSocketServer(const IBehaviorEngine& behaviorEngine, const EyeController& eyeController)
+WebSocketServer::WebSocketServer(const IBehaviorEngine& behaviorEngine,
+                                 const EyeController& eyeController)
     : behaviorEngine_(behaviorEngine), eyeController_(eyeController) {
 }
 

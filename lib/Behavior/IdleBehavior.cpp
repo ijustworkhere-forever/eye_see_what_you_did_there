@@ -11,7 +11,7 @@ constexpr float kMicroSaccadeSpeedDegPerSec = 300.0f;
 
 IdleBehavior::IdleBehavior(IRandomSource& randomSource)
     : GlanceBehavior(randomSource, EyeState::Idle, kMicroSaccadeRange, kMinIntervalMs,
-                      kMaxIntervalMs, kMicroSaccadeSpeedDegPerSec) {
+                     kMaxIntervalMs, kMicroSaccadeSpeedDegPerSec) {
 }
 
 }  // namespace eyesee

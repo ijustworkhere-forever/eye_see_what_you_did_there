@@ -5,8 +5,8 @@
 #include "support/FakeRandomSource.h"
 
 using eyesee::CuriousBehavior;
-using eyesee::EyeState;
 using eyesee::Expression;
+using eyesee::EyeState;
 
 void test_curious_behavior_sets_curious_expression_on_enter() {
     FakeRandomSource random;

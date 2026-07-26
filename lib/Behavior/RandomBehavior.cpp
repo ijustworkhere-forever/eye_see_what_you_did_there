@@ -11,7 +11,7 @@ constexpr float kGlanceSpeedDegPerSec = 600.0f;
 
 RandomBehavior::RandomBehavior(IRandomSource& randomSource)
     : GlanceBehavior(randomSource, EyeState::Idle, kGlanceRange, kMinIntervalMs, kMaxIntervalMs,
-                      kGlanceSpeedDegPerSec) {
+                     kGlanceSpeedDegPerSec) {
 }
 
 }  // namespace eyesee

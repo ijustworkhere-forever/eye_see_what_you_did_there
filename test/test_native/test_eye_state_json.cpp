@@ -9,12 +9,12 @@
 using eyesee::buildBroadcastJson;
 using eyesee::buildErrorJson;
 using eyesee::buildStatusJson;
-using eyesee::EyePose;
-using eyesee::EyeState;
 using eyesee::Expression;
-using eyesee::eyeStateToString;
 using eyesee::expressionFromString;
 using eyesee::expressionToString;
+using eyesee::EyePose;
+using eyesee::EyeState;
+using eyesee::eyeStateToString;
 using eyesee::kFirmwareVersion;
 
 void test_eye_state_to_string_covers_every_value() {
@@ -30,7 +30,7 @@ void test_eye_state_to_string_covers_every_value() {
 
 void test_expression_string_round_trips_every_value() {
     const Expression values[] = {Expression::Neutral, Expression::Happy, Expression::Curious,
-                                  Expression::Sleepy,  Expression::Angry, Expression::Surprised};
+                                 Expression::Sleepy,  Expression::Angry, Expression::Surprised};
     for (Expression value : values) {
         const char* name = expressionToString(value);
         Expression parsed = Expression::Neutral;

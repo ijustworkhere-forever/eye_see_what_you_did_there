@@ -28,8 +28,8 @@ void respondQueued(AsyncWebServerRequest* request, CommandQueue& queue, const Ey
 }  // namespace
 
 RestApi::RestApi(CommandQueue& commandQueue, const IBehaviorEngine& behaviorEngine,
-                  const EyeController& eyeController, const WifiManager& wifiManager,
-                  CalibrationManager& calibrationManager, IStorage& storage)
+                 const EyeController& eyeController, const WifiManager& wifiManager,
+                 CalibrationManager& calibrationManager, IStorage& storage)
     : commandQueue_(commandQueue),
       behaviorEngine_(behaviorEngine),
       eyeController_(eyeController),
@@ -40,56 +40,71 @@ RestApi::RestApi(CommandQueue& commandQueue, const IBehaviorEngine& behaviorEngi
 
 void RestApi::begin(AsyncWebServer& server) {
     server.on("/api/v1/status", HTTP_GET, [this](AsyncWebServerRequest* request) {
-        const std::string body = buildStatusJson(behaviorEngine_.state(), eyeController_.currentPose(),
-                                                   wifiManager_.isConnected());
+        const std::string body = buildStatusJson(
+            behaviorEngine_.state(), eyeController_.currentPose(), wifiManager_.isConnected());
         request->send(200, "application/json", body.c_str());
     });
 
-    server.on("/api/v1/look", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
-        EyeCommand command;
-        const ParseResult result = parseLookCommand(json, command);
-        if (!result.ok) {
-            request->send(400, "application/json", buildErrorJson(result.error).c_str());
-            return;
-        }
-        respondQueued(request, commandQueue_, command);
-    }).setMaxContentLength(512);
+    server
+        .on("/api/v1/look", HTTP_POST,
+            [this](AsyncWebServerRequest* request, JsonVariant& json) {
+                EyeCommand command;
+                const ParseResult result = parseLookCommand(json, command);
+                if (!result.ok) {
+                    request->send(400, "application/json", buildErrorJson(result.error).c_str());
+                    return;
+                }
+                respondQueued(request, commandQueue_, command);
+            })
+        .setMaxContentLength(512);
 
-    server.on("/api/v1/blink", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
-        EyeCommand command;
-        parseBlinkCommand(json, command);  // always succeeds
-        respondQueued(request, commandQueue_, command);
-    }).setMaxContentLength(512);
+    server
+        .on("/api/v1/blink", HTTP_POST,
+            [this](AsyncWebServerRequest* request, JsonVariant& json) {
+                EyeCommand command;
+                parseBlinkCommand(json, command);  // always succeeds
+                respondQueued(request, commandQueue_, command);
+            })
+        .setMaxContentLength(512);
 
-    server.on("/api/v1/wink", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
-        EyeCommand command;
-        const ParseResult result = parseWinkCommand(json, command);
-        if (!result.ok) {
-            request->send(400, "application/json", buildErrorJson(result.error).c_str());
-            return;
-        }
-        respondQueued(request, commandQueue_, command);
-    }).setMaxContentLength(512);
+    server
+        .on("/api/v1/wink", HTTP_POST,
+            [this](AsyncWebServerRequest* request, JsonVariant& json) {
+                EyeCommand command;
+                const ParseResult result = parseWinkCommand(json, command);
+                if (!result.ok) {
+                    request->send(400, "application/json", buildErrorJson(result.error).c_str());
+                    return;
+                }
+                respondQueued(request, commandQueue_, command);
+            })
+        .setMaxContentLength(512);
 
-    server.on("/api/v1/expression", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
-        EyeCommand command;
-        const ParseResult result = parseExpressionCommand(json, command);
-        if (!result.ok) {
-            request->send(400, "application/json", buildErrorJson(result.error).c_str());
-            return;
-        }
-        respondQueued(request, commandQueue_, command);
-    }).setMaxContentLength(512);
+    server
+        .on("/api/v1/expression", HTTP_POST,
+            [this](AsyncWebServerRequest* request, JsonVariant& json) {
+                EyeCommand command;
+                const ParseResult result = parseExpressionCommand(json, command);
+                if (!result.ok) {
+                    request->send(400, "application/json", buildErrorJson(result.error).c_str());
+                    return;
+                }
+                respondQueued(request, commandQueue_, command);
+            })
+        .setMaxContentLength(512);
 
-    server.on("/api/v1/track", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
-        EyeCommand command;
-        const ParseResult result = parseTrackCommand(json, command);
-        if (!result.ok) {
-            request->send(400, "application/json", buildErrorJson(result.error).c_str());
-            return;
-        }
-        respondQueued(request, commandQueue_, command);
-    }).setMaxContentLength(512);
+    server
+        .on("/api/v1/track", HTTP_POST,
+            [this](AsyncWebServerRequest* request, JsonVariant& json) {
+                EyeCommand command;
+                const ParseResult result = parseTrackCommand(json, command);
+                if (!result.ok) {
+                    request->send(400, "application/json", buildErrorJson(result.error).c_str());
+                    return;
+                }
+                respondQueued(request, commandQueue_, command);
+            })
+        .setMaxContentLength(512);
 
     server.on("/api/v1/sleep", HTTP_POST, [this](AsyncWebServerRequest* request) {
         EyeCommand command;
@@ -110,19 +125,22 @@ void RestApi::begin(AsyncWebServer& server) {
         request->send(200, "application/json", body.c_str());
     });
 
-    server.on("/api/v1/config", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
-        const ConfigParseResult result = parseConfigUpdate(json);
-        if (!result.ok) {
-            request->send(400, "application/json", buildErrorJson(result.error).c_str());
-            return;
-        }
-        ServoConfig config = result.servoConfig;
-        config.channel = calibrationManager_.servoConfig(result.channel).channel;
-        calibrationManager_.setServoConfig(result.channel, config);
-        calibrationManager_.saveToStorage(storage_);
-        const std::string body = buildConfigJson(calibrationManager_.eyeConfig());
-        request->send(200, "application/json", body.c_str());
-    }).setMaxContentLength(512);
+    server
+        .on("/api/v1/config", HTTP_POST,
+            [this](AsyncWebServerRequest* request, JsonVariant& json) {
+                const ConfigParseResult result = parseConfigUpdate(json);
+                if (!result.ok) {
+                    request->send(400, "application/json", buildErrorJson(result.error).c_str());
+                    return;
+                }
+                ServoConfig config = result.servoConfig;
+                config.channel = calibrationManager_.servoConfig(result.channel).channel;
+                calibrationManager_.setServoConfig(result.channel, config);
+                calibrationManager_.saveToStorage(storage_);
+                const std::string body = buildConfigJson(calibrationManager_.eyeConfig());
+                request->send(200, "application/json", body.c_str());
+            })
+        .setMaxContentLength(512);
 }
 
 void RestApi::update(uint32_t deltaMs) {

@@ -25,7 +25,8 @@ private:
     const EyeController& eyeController_;
     AsyncWebSocket ws_{"/ws"};
     uint32_t msSinceLastBroadcast_ = 0;
-    static constexpr uint32_t kBroadcastPeriodMs = 33;  // ~30Hz, low end of the documented 30-60Hz range
+    static constexpr uint32_t kBroadcastPeriodMs =
+        33;  // ~30Hz, low end of the documented 30-60Hz range
 };
 
 }  // namespace eyesee

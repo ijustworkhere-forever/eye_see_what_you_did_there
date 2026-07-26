@@ -5,7 +5,8 @@
 namespace eyesee {
 
 namespace {
-constexpr uint32_t kSleepWakeDurationMs = 500;  // matches RestApi.cpp's kSleepWakeDurationMs exactly
+constexpr uint32_t kSleepWakeDurationMs =
+    500;  // matches RestApi.cpp's kSleepWakeDurationMs exactly
 }  // namespace
 
 MqttParseResult parseMqttCommand(JsonVariantConst body) {

@@ -13,8 +13,9 @@ constexpr const char* kLogTag = "WebServer";
 
 void WebServer::begin(AsyncWebServer& server) {
     if (!LittleFS.begin()) {
-        Logger::error(kLogTag,
-                       "LittleFS mount failed -- flash the filesystem image with 'pio run -t uploadfs'");
+        Logger::error(
+            kLogTag,
+            "LittleFS mount failed -- flash the filesystem image with 'pio run -t uploadfs'");
     }
     server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
 }

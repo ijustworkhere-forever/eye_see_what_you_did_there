@@ -44,8 +44,10 @@ ArduinoRandomSource randomSource;
 IdleBehavior idleBehavior(randomSource);
 SleepBehavior sleepBehavior;
 TrackingBehavior trackingBehavior;
-CuriousBehavior curiousBehavior(randomSource);  // built + tested, not registered — see docs/superpowers/specs/2026-07-25-v0.3-behavior-design.md
-RandomBehavior randomBehavior(randomSource);    // built + tested, not registered — same reason
+CuriousBehavior curiousBehavior(
+    randomSource);  // built + tested, not registered — see
+                    // docs/superpowers/specs/2026-07-25-v0.3-behavior-design.md
+RandomBehavior randomBehavior(randomSource);  // built + tested, not registered — same reason
 
 BehaviorEngine behaviorEngine(animationEngine, commandQueue, idleBehavior);
 
@@ -54,7 +56,8 @@ NetworkConfig networkConfig{kWifiSsid, kWifiPassword, 80};
 AsyncWebServer server(networkConfig.webServerPort);
 WifiManager wifiManager;
 WebServer webServer;
-RestApi restApi(commandQueue, behaviorEngine, eyeController, wifiManager, calibration, preferencesStore);
+RestApi restApi(commandQueue, behaviorEngine, eyeController, wifiManager, calibration,
+                preferencesStore);
 WebSocketServer webSocketServer(behaviorEngine, eyeController);
 OtaManager otaManager;
 MqttBridge mqttBridge(commandQueue, behaviorEngine, eyeController, wifiManager);

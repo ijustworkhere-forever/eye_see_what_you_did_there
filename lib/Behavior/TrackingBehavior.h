@@ -21,7 +21,7 @@ public:
 
 private:
     static constexpr float kTrackingSpeedDegPerSec = 500.0f;  // faster than idle micro-saccades
-    static constexpr uint32_t kStaleTimeoutMs = 3000;         // no update in 3s -> face considered lost
+    static constexpr uint32_t kStaleTimeoutMs = 3000;  // no update in 3s -> face considered lost
 
     GazeTarget lastTarget_{};
     bool targetChanged_ = false;

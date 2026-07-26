@@ -33,12 +33,30 @@ const char* expressionToString(Expression expression) {
 }
 
 bool expressionFromString(const std::string& name, Expression& out) {
-    if (name == "Neutral") { out = Expression::Neutral; return true; }
-    if (name == "Happy") { out = Expression::Happy; return true; }
-    if (name == "Curious") { out = Expression::Curious; return true; }
-    if (name == "Sleepy") { out = Expression::Sleepy; return true; }
-    if (name == "Angry") { out = Expression::Angry; return true; }
-    if (name == "Surprised") { out = Expression::Surprised; return true; }
+    if (name == "Neutral") {
+        out = Expression::Neutral;
+        return true;
+    }
+    if (name == "Happy") {
+        out = Expression::Happy;
+        return true;
+    }
+    if (name == "Curious") {
+        out = Expression::Curious;
+        return true;
+    }
+    if (name == "Sleepy") {
+        out = Expression::Sleepy;
+        return true;
+    }
+    if (name == "Angry") {
+        out = Expression::Angry;
+        return true;
+    }
+    if (name == "Surprised") {
+        out = Expression::Surprised;
+        return true;
+    }
     return false;
 }
 

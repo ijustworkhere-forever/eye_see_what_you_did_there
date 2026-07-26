@@ -23,7 +23,8 @@ void GamepadBridge::begin() {
     BLEGamepadClient::init(false);
     controller_.begin();
     controller_.onConnected([](XboxController&) { Logger::info(kLogTag, "gamepad connected"); });
-    controller_.onDisconnected([](XboxController&) { Logger::info(kLogTag, "gamepad disconnected"); });
+    controller_.onDisconnected(
+        [](XboxController&) { Logger::info(kLogTag, "gamepad disconnected"); });
     controller_.onValueChanged([this](XboxControlsState& state) { handleValueChanged(state); });
 }
 

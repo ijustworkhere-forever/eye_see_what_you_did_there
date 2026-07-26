@@ -3,8 +3,8 @@
 #include "GamepadInputMapper.h"
 
 using eyesee::CommandType;
-using eyesee::EyeCommand;
 using eyesee::Expression;
+using eyesee::EyeCommand;
 using eyesee::GamepadState;
 using eyesee::kMaxCommandsPerFrame;
 using eyesee::mapGamepadState;
@@ -105,7 +105,8 @@ void test_button_y_press_emits_happy_expression() {
     const size_t count = mapGamepadState(pressed, previous, out);
 
     TEST_ASSERT_EQUAL_size_t(1, count);
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::SetExpression), static_cast<int>(out[0].type));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::SetExpression),
+                          static_cast<int>(out[0].type));
     TEST_ASSERT_EQUAL_INT(static_cast<int>(Expression::Happy), static_cast<int>(out[0].expression));
     TEST_ASSERT_EQUAL_UINT32(200, out[0].durationMs);
 }

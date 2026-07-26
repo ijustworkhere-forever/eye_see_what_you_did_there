@@ -30,7 +30,8 @@ void test_fake_storage_round_trips_every_type() {
 
 void test_fake_storage_missing_key_returns_false_and_leaves_output_untouched() {
     FakeStorage storage;
-    uint16_t u = 4242;  // sentinel -- a get() that wrongly zeroes this would still pass the old test
+    uint16_t u =
+        4242;  // sentinel -- a get() that wrongly zeroes this would still pass the old test
     TEST_ASSERT_FALSE(storage.getUInt16("missing", u));
     TEST_ASSERT_EQUAL_UINT16(4242, u);
 }

@@ -6,9 +6,9 @@
 #include "support/FakeServoOutput.h"
 
 using eyesee::CalibrationManager;
+using eyesee::Expression;
 using eyesee::EyeController;
 using eyesee::EyePose;
-using eyesee::Expression;
 using eyesee::GazeTarget;
 using eyesee::RealAnimationEngine;
 

@@ -13,7 +13,7 @@ constexpr const char* kLogTag = "MqttBridge";
 }  // namespace
 
 MqttBridge::MqttBridge(CommandQueue& commandQueue, const IBehaviorEngine& behaviorEngine,
-                        const EyeController& eyeController, const WifiManager& wifiManager)
+                       const EyeController& eyeController, const WifiManager& wifiManager)
     : commandQueue_(commandQueue),
       behaviorEngine_(behaviorEngine),
       eyeController_(eyeController),
@@ -65,8 +65,8 @@ void MqttBridge::update(uint32_t deltaMs) {
     msSinceLastStatusPublish_ += deltaMs;
     if (msSinceLastStatusPublish_ >= kStatusPublishPeriodMs) {
         msSinceLastStatusPublish_ = 0;
-        const std::string body = buildStatusJson(behaviorEngine_.state(), eyeController_.currentPose(),
-                                                   wifiManager_.isConnected());
+        const std::string body = buildStatusJson(
+            behaviorEngine_.state(), eyeController_.currentPose(), wifiManager_.isConnected());
         if (!mqttClient_.publish(statusTopic_.c_str(), body.c_str())) {
             Logger::error(kLogTag, "MQTT status publish failed");
         }

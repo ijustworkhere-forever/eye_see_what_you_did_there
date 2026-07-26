@@ -5,6 +5,7 @@
 
 #include "EyeConfigJson.h"
 
+using eyesee::buildConfigJson;
 using eyesee::channelFromString;
 using eyesee::channelToString;
 using eyesee::ConfigParseResult;
@@ -12,11 +13,10 @@ using eyesee::EyeChannel;
 using eyesee::EyeConfig;
 using eyesee::parseConfigUpdate;
 using eyesee::ServoConfig;
-using eyesee::buildConfigJson;
 
 void test_channel_string_round_trips_every_value() {
     const EyeChannel values[] = {EyeChannel::Lr, EyeChannel::Ud, EyeChannel::Tl,
-                                  EyeChannel::Bl, EyeChannel::Tr, EyeChannel::Br};
+                                 EyeChannel::Bl, EyeChannel::Tr, EyeChannel::Br};
     for (EyeChannel value : values) {
         const char* name = channelToString(value);
         EyeChannel parsed = EyeChannel::Lr;

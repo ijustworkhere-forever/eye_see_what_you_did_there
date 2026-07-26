@@ -30,7 +30,7 @@ jobs:
         run: pio test -e native
 
       - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
+        run: pip install clang-format==18.1.8
 
       - name: Check formatting
         run: clang-format --dry-run --Werror $(find lib src test -name '*.h' -o -name '*.cpp')
@@ -39,7 +39,7 @@ jobs:
         run: pio run -t compiledb -e esp32dev
 
       - name: Install clang-tidy
-        run: sudo apt-get install -y clang-tidy
+        run: pip install clang-tidy==18.1.8
 
       - name: Run clang-tidy
         run: clang-tidy -p . $(find lib src -name '*.cpp')

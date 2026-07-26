@@ -15,12 +15,30 @@ const char* channelToString(EyeChannel channel) {
 }
 
 bool channelFromString(const std::string& name, EyeChannel& out) {
-    if (name == "lr") { out = EyeChannel::Lr; return true; }
-    if (name == "ud") { out = EyeChannel::Ud; return true; }
-    if (name == "tl") { out = EyeChannel::Tl; return true; }
-    if (name == "bl") { out = EyeChannel::Bl; return true; }
-    if (name == "tr") { out = EyeChannel::Tr; return true; }
-    if (name == "br") { out = EyeChannel::Br; return true; }
+    if (name == "lr") {
+        out = EyeChannel::Lr;
+        return true;
+    }
+    if (name == "ud") {
+        out = EyeChannel::Ud;
+        return true;
+    }
+    if (name == "tl") {
+        out = EyeChannel::Tl;
+        return true;
+    }
+    if (name == "bl") {
+        out = EyeChannel::Bl;
+        return true;
+    }
+    if (name == "tr") {
+        out = EyeChannel::Tr;
+        return true;
+    }
+    if (name == "br") {
+        out = EyeChannel::Br;
+        return true;
+    }
     return false;
 }
 
@@ -49,10 +67,12 @@ ConfigParseResult parseConfigUpdate(JsonVariantConst body) {
     const uint16_t maxPulseUs = body["maxPulseUs"].as<uint16_t>();
     const uint16_t neutralPulseUs = body["neutralPulseUs"].as<uint16_t>();
 
-    constexpr uint16_t kAbsoluteMinPulseUs = 500;   // generous floor below any real hobby servo's minimum
-    constexpr uint16_t kAbsoluteMaxPulseUs = 2500;  // generous ceiling above any real hobby servo's maximum
-    if (minPulseUs < kAbsoluteMinPulseUs || maxPulseUs > kAbsoluteMaxPulseUs || minPulseUs >= maxPulseUs ||
-        neutralPulseUs < minPulseUs || neutralPulseUs > maxPulseUs) {
+    constexpr uint16_t kAbsoluteMinPulseUs =
+        500;  // generous floor below any real hobby servo's minimum
+    constexpr uint16_t kAbsoluteMaxPulseUs =
+        2500;  // generous ceiling above any real hobby servo's maximum
+    if (minPulseUs < kAbsoluteMinPulseUs || maxPulseUs > kAbsoluteMaxPulseUs ||
+        minPulseUs >= maxPulseUs || neutralPulseUs < minPulseUs || neutralPulseUs > maxPulseUs) {
         result.error =
             "invalid pulse range: require 500 <= minPulseUs < maxPulseUs <= 2500 "
             "and minPulseUs <= neutralPulseUs <= maxPulseUs";

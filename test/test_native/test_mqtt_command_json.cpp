@@ -17,7 +17,8 @@ void test_parse_mqtt_command_dispatches_look() {
     const MqttParseResult result = parseMqttCommand(doc.as<JsonVariantConst>());
 
     TEST_ASSERT_TRUE(result.ok);
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Look), static_cast<int>(result.command.type));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Look),
+                          static_cast<int>(result.command.type));
     TEST_ASSERT_EQUAL_FLOAT(0.2f, result.command.gazeTarget.x);
 }
 
@@ -29,7 +30,8 @@ void test_parse_mqtt_command_dispatches_wink() {
     const MqttParseResult result = parseMqttCommand(doc.as<JsonVariantConst>());
 
     TEST_ASSERT_TRUE(result.ok);
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::WinkLeft), static_cast<int>(result.command.type));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::WinkLeft),
+                          static_cast<int>(result.command.type));
 }
 
 void test_parse_mqtt_command_dispatches_track() {
@@ -41,7 +43,8 @@ void test_parse_mqtt_command_dispatches_track() {
     const MqttParseResult result = parseMqttCommand(doc.as<JsonVariantConst>());
 
     TEST_ASSERT_TRUE(result.ok);
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Track), static_cast<int>(result.command.type));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Track),
+                          static_cast<int>(result.command.type));
 }
 
 void test_parse_mqtt_command_sleep_needs_no_body_and_gets_easing_duration() {
@@ -51,7 +54,8 @@ void test_parse_mqtt_command_sleep_needs_no_body_and_gets_easing_duration() {
     const MqttParseResult result = parseMqttCommand(doc.as<JsonVariantConst>());
 
     TEST_ASSERT_TRUE(result.ok);
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Sleep), static_cast<int>(result.command.type));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Sleep),
+                          static_cast<int>(result.command.type));
     TEST_ASSERT_EQUAL_UINT32(500, result.command.durationMs);
 }
 
@@ -62,7 +66,8 @@ void test_parse_mqtt_command_wake_needs_no_body_and_gets_easing_duration() {
     const MqttParseResult result = parseMqttCommand(doc.as<JsonVariantConst>());
 
     TEST_ASSERT_TRUE(result.ok);
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Wake), static_cast<int>(result.command.type));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::Wake),
+                          static_cast<int>(result.command.type));
     TEST_ASSERT_EQUAL_UINT32(500, result.command.durationMs);
 }
 

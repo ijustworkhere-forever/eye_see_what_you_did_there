@@ -5,12 +5,12 @@
 #include "EyeCommandJson.h"
 
 using eyesee::CommandType;
-using eyesee::EyeCommand;
 using eyesee::Expression;
-using eyesee::ParseResult;
+using eyesee::EyeCommand;
 using eyesee::parseBlinkCommand;
 using eyesee::parseExpressionCommand;
 using eyesee::parseLookCommand;
+using eyesee::ParseResult;
 using eyesee::parseTrackCommand;
 using eyesee::parseWinkCommand;
 
@@ -156,8 +156,10 @@ void test_parse_expression_command_reads_known_name() {
     const ParseResult result = parseExpressionCommand(doc.as<JsonVariantConst>(), command);
 
     TEST_ASSERT_TRUE(result.ok);
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::SetExpression), static_cast<int>(command.type));
-    TEST_ASSERT_EQUAL_INT(static_cast<int>(Expression::Happy), static_cast<int>(command.expression));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(CommandType::SetExpression),
+                          static_cast<int>(command.type));
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(Expression::Happy),
+                          static_cast<int>(command.expression));
     TEST_ASSERT_EQUAL_UINT32(200, command.durationMs);
 }
 

@@ -5,8 +5,7 @@
 namespace eyesee {
 
 GlanceBehavior::GlanceBehavior(IRandomSource& randomSource, EyeState state, float glanceRange,
-                               uint32_t minIntervalMs, uint32_t maxIntervalMs,
-                               float speedDegPerSec)
+                               uint32_t minIntervalMs, uint32_t maxIntervalMs, float speedDegPerSec)
     : randomSource_(randomSource),
       state_(state),
       glanceRange_(glanceRange),

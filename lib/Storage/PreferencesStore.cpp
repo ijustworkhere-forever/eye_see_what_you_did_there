@@ -1,5 +1,7 @@
 #include "PreferencesStore.h"
 
+#ifdef ARDUINO
+
 namespace eyesee {
 
 bool PreferencesStore::begin(const char* namespaceName) {
@@ -59,3 +61,5 @@ void PreferencesStore::end() {
 }
 
 }  // namespace eyesee
+
+#endif  // ARDUINO

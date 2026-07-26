@@ -1,8 +1,15 @@
 #pragma once
 
-#include <Preferences.h>
-
 #include "IStorage.h"
+
+// This class is Arduino-only, and so is its entire implementation in
+// PreferencesStore.cpp. The declaration is guarded to match: under !ARDUINO
+// this header intentionally declares nothing, so a native build can't reference
+// a class that has no definitions anywhere. Native tests use a FakeStorage
+// instead (see test/test_native/support/FakeStorage.h).
+#ifdef ARDUINO
+
+#include <Preferences.h>
 
 namespace eyesee {
 
@@ -25,3 +32,5 @@ private:
 };
 
 }  // namespace eyesee
+
+#endif  // ARDUINO

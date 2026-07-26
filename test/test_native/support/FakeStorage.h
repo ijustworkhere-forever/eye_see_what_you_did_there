@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 
-#include "../../../lib/Storage/IStorage.h"
+#include "IStorage.h"
 
 /** In-memory IStorage double: four parallel maps, one per type, keyed by the
  * exact string key -- no cross-type key collisions possible since each type

@@ -142,10 +142,10 @@ Logger, OTA: leaf modules, no dependency on the above. Storage
 dependency runs Configuration -> Storage, not the reverse. Networking
 depends on Protocol (v0.4) and, as of v0.5, on Configuration and Storage
 too (`RestApi`'s config route). As of v0.6, Integrations depends on
-Behavior (`MqttBridge.h` includes `CommandQueue.h`, `EyeController.h`, and
-`IBehaviorEngine.h`), Networking (`WifiManager.h`), and Protocol
-(`MqttBridge` reuses `lib/Protocol`'s JSON parsers via `MqttCommandJson`) —
-it is not a leaf.
+Behavior (`MqttBridge.h` includes `CommandQueue.h` and `IBehaviorEngine.h`),
+EyeController (`EyeController.h`), Networking (`WifiManager.h`), and
+Protocol (`MqttBridge` reuses `lib/Protocol`'s JSON parsers via
+`MqttCommandJson`) — it is not a leaf.
 ```
 
 ## Connectivity (v0.4)
@@ -210,7 +210,7 @@ the original v0.2 spec always meant `GazeTarget.hold` to drive.
 
 MQTT and Bluetooth gamepad are genuinely new external-protocol
 integrations, living in a new library, `lib/Integrations` -- not a leaf:
-it depends on Behavior (`CommandQueue`, `EyeController`, `IBehaviorEngine`),
+it depends on Behavior (`CommandQueue`, `IBehaviorEngine`), EyeController,
 Networking (`WifiManager`), and Protocol (see "Module dependency graph"
 above). Both follow the same rule `Networking` established in v0.4: every input source
 only ever pushes an `EyeCommand` into the shared `CommandQueue`, never

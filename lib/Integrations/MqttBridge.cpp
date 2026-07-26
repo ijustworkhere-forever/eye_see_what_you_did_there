@@ -23,6 +23,11 @@ MqttBridge::MqttBridge(CommandQueue& commandQueue, const IBehaviorEngine& behavi
     // fully synchronous) from WiFiClient's 3000ms default down to 1000ms, so an
     // unreachable broker can't freeze the 100Hz animation pipeline for as long.
     wifiClient_.setTimeout(1);
+    // PubSubClient's own read-response wait (after TCP connects) busy-loops with no
+    // yield() for up to socketTimeout seconds -- cap that too, or a broker that accepts
+    // the TCP connection but never speaks MQTT would still freeze the frame loop for the
+    // 15s default.
+    mqttClient_.setSocketTimeout(1);
 }
 
 void MqttBridge::begin(const char* brokerHost, uint16_t brokerPort, const char* topicPrefix) {

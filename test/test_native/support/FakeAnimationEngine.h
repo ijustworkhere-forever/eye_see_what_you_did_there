@@ -10,6 +10,7 @@ public:
     int animateWinkLeftCallCount = 0;
     int animateWinkRightCallCount = 0;
     int animateSleepCallCount = 0;
+    uint32_t lastSleepDurationMs = 0;
     int animateWakeCallCount = 0;
     int animateExpressionCallCount = 0;
     eyesee::Expression lastExpression = eyesee::Expression::Neutral;
@@ -27,7 +28,8 @@ public:
     void animateWinkRight(uint32_t) override {
         ++animateWinkRightCallCount;
     }
-    void animateSleep(uint32_t) override {
+    void animateSleep(uint32_t durationMs) override {
+        lastSleepDurationMs = durationMs;
         ++animateSleepCallCount;
     }
     void animateWake(uint32_t) override {

@@ -2,6 +2,7 @@
 
 #include "BehaviorEngine.h"
 #include "IdleBehavior.h"
+#include "SleepBehavior.h"
 #include "support/FakeAnimationEngine.h"
 #include "support/FakeBehavior.h"
 #include "support/FakeRandomSource.h"
@@ -179,6 +180,24 @@ void test_wake_command_transitions_state_to_idle() {
 
     TEST_ASSERT_EQUAL_INT(1, animation.animateWakeCallCount);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Idle), static_cast<int>(engine.state()));
+}
+
+void test_sleep_command_uses_callers_duration_not_hardcoded_default() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    SleepBehavior sleepBehavior;
+    engine.registerBehavior(EyeState::Sleeping, sleepBehavior);
+
+    EyeCommand sleepCmd;
+    sleepCmd.type = CommandType::Sleep;
+    sleepCmd.durationMs = 1200;
+    queue.push(sleepCmd);
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(1, animation.animateSleepCallCount);
+    TEST_ASSERT_EQUAL_UINT32(1200, animation.lastSleepDurationMs);
 }
 
 // No main() here — test/test_native/test_main.cpp is the sole file with main()

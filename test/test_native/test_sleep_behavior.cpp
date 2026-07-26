@@ -6,15 +6,6 @@
 using eyesee::EyeState;
 using eyesee::SleepBehavior;
 
-void test_sleep_behavior_closes_eyes_on_enter() {
-    FakeAnimationEngine animation;
-    SleepBehavior behavior;
-
-    behavior.onEnter(animation);
-
-    TEST_ASSERT_EQUAL_INT(1, animation.animateSleepCallCount);
-}
-
 void test_sleep_behavior_update_does_nothing() {
     FakeAnimationEngine animation;
     SleepBehavior behavior;

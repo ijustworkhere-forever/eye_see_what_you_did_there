@@ -66,6 +66,16 @@ extern void test_unregistered_state_falls_back_to_fallback_behavior();
 extern void test_sleep_command_transitions_state_to_sleeping();
 extern void test_wake_command_transitions_state_to_idle();
 
+// IdleBehavior tests
+extern void test_idle_behavior_waits_for_full_interval_before_glancing();
+extern void test_idle_behavior_glance_stays_within_micro_saccade_range();
+extern void test_idle_behavior_reports_idle_state();
+
+// SleepBehavior tests
+extern void test_sleep_behavior_closes_eyes_on_enter();
+extern void test_sleep_behavior_update_does_nothing();
+extern void test_sleep_behavior_reports_sleeping_state();
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_default_eye_config_has_six_distinct_channels);
@@ -115,5 +125,11 @@ int main(int argc, char** argv) {
     RUN_TEST(test_unregistered_state_falls_back_to_fallback_behavior);
     RUN_TEST(test_sleep_command_transitions_state_to_sleeping);
     RUN_TEST(test_wake_command_transitions_state_to_idle);
+    RUN_TEST(test_idle_behavior_waits_for_full_interval_before_glancing);
+    RUN_TEST(test_idle_behavior_glance_stays_within_micro_saccade_range);
+    RUN_TEST(test_idle_behavior_reports_idle_state);
+    RUN_TEST(test_sleep_behavior_closes_eyes_on_enter);
+    RUN_TEST(test_sleep_behavior_update_does_nothing);
+    RUN_TEST(test_sleep_behavior_reports_sleeping_state);
     return UNITY_END();
 }

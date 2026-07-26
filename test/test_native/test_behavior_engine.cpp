@@ -1,16 +1,18 @@
 #include <unity.h>
 
 #include "BehaviorEngine.h"
-#include "IdleBehaviorStub.h"
+#include "IdleBehavior.h"
 #include "support/FakeAnimationEngine.h"
 #include "support/FakeBehavior.h"
+#include "support/FakeRandomSource.h"
 
 using namespace eyesee;
 
 void test_update_drains_queue_and_dispatches_look_command() {
     CommandQueue queue;
     FakeAnimationEngine animation;
-    IdleBehaviorStub idleBehavior;
+    FakeRandomSource random;
+    IdleBehavior idleBehavior(random);
     BehaviorEngine engine(animation, queue, idleBehavior);
 
     EyeCommand lookCommand;
@@ -30,7 +32,8 @@ void test_update_drains_queue_and_dispatches_look_command() {
 void test_update_dispatches_blink_command() {
     CommandQueue queue;
     FakeAnimationEngine animation;
-    IdleBehaviorStub idleBehavior;
+    FakeRandomSource random;
+    IdleBehavior idleBehavior(random);
     BehaviorEngine engine(animation, queue, idleBehavior);
 
     EyeCommand blinkCommand;
@@ -46,7 +49,8 @@ void test_update_dispatches_blink_command() {
 void test_update_dispatches_all_remaining_command_types() {
     CommandQueue queue;
     FakeAnimationEngine animation;
-    IdleBehaviorStub idleBehavior;
+    FakeRandomSource random;
+    IdleBehavior idleBehavior(random);
     BehaviorEngine engine(animation, queue, idleBehavior);
 
     EyeCommand winkLeft;
@@ -81,7 +85,8 @@ void test_update_dispatches_all_remaining_command_types() {
 void test_set_state_updates_reported_state() {
     CommandQueue queue;
     FakeAnimationEngine animation;
-    IdleBehaviorStub idleBehavior;
+    FakeRandomSource random;
+    IdleBehavior idleBehavior(random);
     BehaviorEngine engine(animation, queue, idleBehavior);
 
     engine.setState(EyeState::Manual);

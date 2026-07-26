@@ -161,6 +161,19 @@ extern void test_build_config_json_reports_all_six_channels_and_look_range();
 extern void test_fake_storage_round_trips_every_type();
 extern void test_fake_storage_missing_key_returns_false_and_leaves_output_untouched();
 
+// GamepadInputMapper tests
+extern void test_centered_stick_and_no_buttons_emits_nothing();
+extern void test_stick_beyond_deadzone_emits_look();
+extern void test_stick_within_deadzone_emits_nothing();
+extern void test_button_a_press_edge_emits_blink_once();
+extern void test_button_a_held_does_not_repeat();
+extern void test_left_bumper_press_emits_wink_left();
+extern void test_right_bumper_press_emits_wink_right();
+extern void test_button_y_press_emits_happy_expression();
+extern void test_button_b_press_emits_sleep();
+extern void test_button_x_press_emits_wake();
+extern void test_stick_and_two_buttons_pressed_simultaneously_emits_three_commands();
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_default_eye_config_has_six_distinct_channels);
@@ -283,5 +296,16 @@ int main(int argc, char** argv) {
     RUN_TEST(test_build_config_json_reports_all_six_channels_and_look_range);
     RUN_TEST(test_fake_storage_round_trips_every_type);
     RUN_TEST(test_fake_storage_missing_key_returns_false_and_leaves_output_untouched);
+    RUN_TEST(test_centered_stick_and_no_buttons_emits_nothing);
+    RUN_TEST(test_stick_beyond_deadzone_emits_look);
+    RUN_TEST(test_stick_within_deadzone_emits_nothing);
+    RUN_TEST(test_button_a_press_edge_emits_blink_once);
+    RUN_TEST(test_button_a_held_does_not_repeat);
+    RUN_TEST(test_left_bumper_press_emits_wink_left);
+    RUN_TEST(test_right_bumper_press_emits_wink_right);
+    RUN_TEST(test_button_y_press_emits_happy_expression);
+    RUN_TEST(test_button_b_press_emits_sleep);
+    RUN_TEST(test_button_x_press_emits_wake);
+    RUN_TEST(test_stick_and_two_buttons_pressed_simultaneously_emits_three_commands);
     return UNITY_END();
 }

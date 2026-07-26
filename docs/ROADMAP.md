@@ -44,8 +44,9 @@ For reference: [Will Cogley's EYEMECH ε3.2 adapted for ESP32 + PCA9685](https:/
 ## v1.0 — Stable release (complete)
 - API freeze: `/api/v1/`, the WebSocket protocol, and MQTT are all now
   additive-only-changes-under-the-same-version (see `docs/api-reference.md`'s
-  "Versioning & stability" section); every status response gained a
-  `firmwareVersion` field
+  "Versioning & stability" section); REST's `GET /api/v1/status` and MQTT's
+  `<prefix>/status` gained a `firmwareVersion` field (the WebSocket broadcast
+  deliberately does not, staying as lean as before)
 - Full documentation: `docs/api-reference.md` (full REST/WS/MQTT protocol
   reference), `docs/hardware.md` (wiring/BOM/power), `docs/known-limitations.md`
   (consolidated future-work notes), root `README.md` rewritten as a

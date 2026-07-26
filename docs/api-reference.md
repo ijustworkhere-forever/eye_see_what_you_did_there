@@ -15,8 +15,8 @@ renamed field, a changed type, changed status-code semantics) will ever
 land under the `v1` path. A breaking change ships as `/api/v2/` alongside
 the still-working `v1`. Additive, backward-compatible changes (a new
 optional request field, a new response field, a new route) may still land
-under `v1` — Task 1's `firmwareVersion` field is exactly this kind of
-change. The MQTT and WebSocket protocols follow the same policy even
+under `v1` — the `firmwareVersion` field added in v1.0 is exactly this kind
+of change. The MQTT and WebSocket protocols follow the same policy even
 though they have no path-based version literal: "frozen" for them means
 the same additive-only rule.
 

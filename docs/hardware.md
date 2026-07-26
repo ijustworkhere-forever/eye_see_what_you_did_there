@@ -13,8 +13,10 @@
 ## Wiring
 
 **I2C (ESP32 <-> PCA9685):** this firmware never calls `Wire.begin()` with
-explicit pins (verified by grep — see Task 3's Step 1 if this doc is ever
-updated), so it uses the ESP32 Arduino core's default `Wire` pins:
+explicit pins (confirmed via `grep -rn "Wire.begin\|SDA\|SCL" lib/ src/`
+returning no matches — re-run this before trusting the pin numbers below
+if the codebase changes), so it uses the ESP32 Arduino core's default
+`Wire` pins:
 **SDA = GPIO 21, SCL = GPIO 22** on most ESP32 DevKit boards. Connect the
 PCA9685's `SDA`/`SCL` to those pins, plus a shared `GND`.
 

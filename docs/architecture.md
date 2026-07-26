@@ -19,7 +19,7 @@ No code manipulates servos directly. All motion goes through
 single `CommandQueue` — no input source is allowed to fight another:
 
 ```
-Web UI / REST API / WebSocket / Bluetooth / Serial
+Web UI (via REST) / REST API / MQTT / Bluetooth gamepad
                 |  (push EyeCommand)
               CommandQueue
                 |  (drained each frame)

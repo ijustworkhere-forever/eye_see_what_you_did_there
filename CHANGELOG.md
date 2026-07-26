@@ -2,8 +2,9 @@
 
 ## v1.0 — Stable release
 API freeze (`/api/v1/`, the WebSocket protocol, and MQTT are now
-additive-only-changes-under-the-same-version; every status response gained
-a `firmwareVersion` field), full documentation (`docs/api-reference.md`,
+additive-only-changes-under-the-same-version; REST's `GET /api/v1/status`
+and MQTT's `<prefix>/status` gained a `firmwareVersion` field, but the
+WebSocket broadcast deliberately does not), full documentation (`docs/api-reference.md`,
 `docs/hardware.md`, `docs/known-limitations.md`, a rewritten
 getting-started `README.md`), and example configs (`examples/`:
 calibration, REST, and MQTT examples plus a disposable local MQTT broker

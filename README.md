@@ -21,7 +21,7 @@ No code manipulates servos directly. All motion goes through `EyeController`;
 all inputs are arbitrated by `BehaviorEngine` through a single command queue:
 
 ```
-Web UI / REST API / WebSocket / Bluetooth / Serial
+Web UI (via REST) / REST API / MQTT / Bluetooth gamepad
                 ↓ (EyeCommand)
               CommandQueue
                 ↓
@@ -119,6 +119,10 @@ mosquitto_pub -h <broker-host> -t eyesee/command -m '{"type": "look", "x": 0.5, 
 **Bluetooth gamepad:** pair an Xbox Wireless Controller with the device
 over BLE — see `lib/Integrations/README.md` for the button-to-command
 mapping.
+
+**Web UI:** open `http://<device-ip>/` in a browser once the filesystem
+image is flashed (see step 3 above) — it's a front-end built on the same
+REST and WebSocket APIs documented above, not an independent protocol.
 
 More examples of every command type for all three transports live in
 `examples/`.

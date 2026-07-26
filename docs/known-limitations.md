@@ -54,3 +54,17 @@ broker configured by a slow-to-resolve hostname, or one that accepts a TCP
 connection but never completes the MQTT handshake, can still stall the
 100Hz animation loop briefly. Deploy with the broker's IP literal, not a
 hostname, to avoid the worst case.
+
+## WiFi credentials are compile-time-only
+
+`WifiManager::begin()` is handed a plain `ssid`/`password` pair from
+`include/WifiCredentials.h` (gitignored, copied from
+`WifiCredentials.h.example` and filled in with real values that get baked
+into the binary at build time — see the root `README.md`'s Building
+section). There is no runtime reconfiguration, no AP-mode fallback, and no
+captive portal for first-time setup (see `lib/Networking/README.md`'s
+"Future work" section). Moving the device to a different network requires
+editing `WifiCredentials.h` and reflashing. This mirrors the project's
+`include/*Credentials.h.example` pattern already used for both WiFi and
+MQTT credentials, and matches this project's overall LAN-local-hobby-device
+posture already stated above for OTA/REST/WebSocket auth.

@@ -1,16 +1,21 @@
 #include <Arduino.h>
 
+#include "ArduinoRandomSource.h"
 #include "BehaviorEngine.h"
 #include "CalibrationManager.h"
 #include "CommandQueue.h"
+#include "CuriousBehavior.h"
 #include "EyeController.h"
-#include "IdleBehaviorStub.h"
+#include "IdleBehavior.h"
 #include "Logger.h"
 #include "OtaManager.h"
 #include "Pca9685ServoOutput.h"
 #include "PreferencesStore.h"
+#include "RandomBehavior.h"
 #include "RealAnimationEngine.h"
 #include "RestApi.h"
+#include "SleepBehavior.h"
+#include "TrackingBehavior.h"
 #include "WebServer.h"
 #include "WebSocketServer.h"
 
@@ -28,7 +33,14 @@ CalibrationManager calibration;
 EyeController eyeController(servoOutput, calibration);
 RealAnimationEngine animationEngine(eyeController, calibration);
 CommandQueue commandQueue;
-IdleBehaviorStub idleBehavior;
+
+ArduinoRandomSource randomSource;
+IdleBehavior idleBehavior(randomSource);
+SleepBehavior sleepBehavior;
+TrackingBehavior trackingBehavior;
+CuriousBehavior curiousBehavior(randomSource);  // built + tested, not registered — see docs/superpowers/specs/2026-07-25-v0.3-behavior-design.md
+RandomBehavior randomBehavior(randomSource);    // built + tested, not registered — same reason
+
 BehaviorEngine behaviorEngine(animationEngine, commandQueue, idleBehavior);
 
 PreferencesStore preferencesStore;
@@ -52,6 +64,10 @@ void setup() {
     restApi.begin();
     webSocketServer.begin();
     otaManager.begin();
+
+    behaviorEngine.registerBehavior(EyeState::Idle, idleBehavior);
+    behaviorEngine.registerBehavior(EyeState::Sleeping, sleepBehavior);
+    behaviorEngine.registerBehavior(EyeState::Tracking, trackingBehavior);
 
     behaviorEngine.setState(EyeState::Startup);
     eyeController.setIdle();

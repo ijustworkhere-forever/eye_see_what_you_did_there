@@ -97,6 +97,8 @@ extern void test_tracking_behavior_does_nothing_until_target_is_set();
 extern void test_tracking_behavior_animates_toward_target_once_set();
 extern void test_tracking_behavior_does_not_reissue_gaze_for_unchanged_target();
 extern void test_tracking_behavior_reports_tracking_state();
+extern void test_tracking_behavior_recenters_after_stale_timeout_without_hold();
+extern void test_tracking_behavior_holds_indefinitely_when_hold_true();
 
 // CuriousBehavior tests
 extern void test_curious_behavior_sets_curious_expression_on_enter();
@@ -218,6 +220,8 @@ int main(int argc, char** argv) {
     RUN_TEST(test_tracking_behavior_animates_toward_target_once_set);
     RUN_TEST(test_tracking_behavior_does_not_reissue_gaze_for_unchanged_target);
     RUN_TEST(test_tracking_behavior_reports_tracking_state);
+    RUN_TEST(test_tracking_behavior_recenters_after_stale_timeout_without_hold);
+    RUN_TEST(test_tracking_behavior_holds_indefinitely_when_hold_true);
     RUN_TEST(test_curious_behavior_sets_curious_expression_on_enter);
     RUN_TEST(test_curious_behavior_waits_for_full_interval_before_glancing);
     RUN_TEST(test_curious_behavior_reports_idle_state);

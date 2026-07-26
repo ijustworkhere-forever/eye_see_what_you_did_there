@@ -54,6 +54,20 @@ A side effect of invariant 2: swapping `IServoOutput` for a host-side
 implementation (e.g. an SDL window drawing the eyes) is a one-class change
 with zero impact on `EyeController`/`Animation`/`Behavior`.
 
+## Animation engine (v0.2)
+
+`RealAnimationEngine` (in `lib/Animation/`) replaces the v0.1
+`PassthroughAnimationEngine` placeholder. It runs two independent,
+per-frame-composed transitions — one for gaze (`lookX`/`lookY`), one for
+all four eyelids — each eased over its own duration via `Easing.h`'s three
+curves (`Linear`, `EaseInOut`, `Cubic`), assigned per animation intent
+(gaze uses Cubic; blink/wink/sleep/wake use EaseInOut; expression uses
+Linear). `GazeTarget.speed` (degrees/second) combines with
+`EyeConfig.lookRangeDegrees` to compute how long a gaze transition takes.
+See `docs/superpowers/specs/2026-07-25-v0.2-real-motion-design.md` for the
+full design and what's still deferred to v0.3 (blink auto-reopen,
+expression pose blending, `GazeTarget.hold`).
+
 ## Module dependency graph
 
 Two independent leaf modules sit at the bottom. `Configuration` and

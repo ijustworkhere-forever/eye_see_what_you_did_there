@@ -7,12 +7,11 @@
 - Animation/Behavior interfaces and skeletons
 - CI (build + native tests + formatting)
 
-## v0.2 — Real motion
+## v0.2 — Real motion (complete)
 - `EyeController::toServoOutput()` calibration math (scaling, invert, mirror, offset)
 - `IAnimationEngine` real interpolation: linear, ease-in/out, cubic
-- `GazeTarget` speed/hold honored
-- Frame-rate pacing in `loop()`: hold the documented 100Hz target via a delta
-  accumulator instead of running as fast as the scheduler allows
+- `GazeTarget` speed honored (degrees/second, using `lookRangeDegrees`); `hold` remains unused, deferred to v0.3
+- Frame-rate pacing in `loop()`: holds the documented 100Hz target via a fixed-period gate
 
 ## v0.3 — Behavior
 - `EyeState`-driven behavior switching in `BehaviorEngine`

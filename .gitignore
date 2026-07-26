@@ -1,3 +1,4 @@
 .pio/
 docs/api/
 .vscode/
+include/WifiCredentials.h

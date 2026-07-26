@@ -17,6 +17,9 @@ jobs:
       - name: Install PlatformIO
         run: pip install --upgrade platformio
 
+      - name: Provide placeholder WiFi credentials
+        run: cp include/WifiCredentials.h.example include/WifiCredentials.h
+
       - name: Build firmware (esp32dev)
         run: pio run -e esp32dev
 

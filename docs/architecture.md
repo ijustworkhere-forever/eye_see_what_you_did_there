@@ -61,10 +61,12 @@ with zero impact on `EyeController`/`Animation`/`Behavior`.
 per-frame-composed transitions — one for gaze (`lookX`/`lookY`), one for
 all four eyelids — each eased over its own duration via `Easing.h`'s three
 curves (`Linear`, `EaseInOut`, `Cubic`), assigned per animation intent
-(gaze uses Cubic; blink/wink/sleep/wake use EaseInOut; expression uses
-Linear). `GazeTarget.speed` (degrees/second) combines with
-`EyeConfig.lookRangeDegrees` to compute how long a gaze transition takes.
-See `docs/superpowers/specs/2026-07-25-v0.2-real-motion-design.md` for the
+(gaze uses Cubic; blink/wink/sleep/wake use EaseInOut); expression is
+currently a no-op passthrough with no interpolation applied at all (see
+Future work) — `EasingType::Linear` exists but has no caller yet. 
+`GazeTarget.speed` (degrees/second) combines with `EyeConfig.lookRangeDegrees` 
+to compute how long a gaze transition takes. See 
+`docs/superpowers/specs/2026-07-25-v0.2-real-motion-design.md` for the
 full design and what's still deferred to v0.3 (blink auto-reopen,
 expression pose blending, `GazeTarget.hold`).
 

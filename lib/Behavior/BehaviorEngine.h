@@ -21,7 +21,11 @@ public:
     BehaviorEngine(IAnimationEngine& animation, CommandQueue& commandQueue,
                    IBehavior& fallbackBehavior);
 
-    /** Associates a behavior instance with a state. Call once per behavior during setup(). */
+    /**
+     * Associates a behavior instance with a state. Call once per behavior during setup(),
+     * and always BEFORE the first setState() call that would resolve to it — registering a
+     * behavior for a state that's already active does not retroactively fire onEnter() on it.
+     */
     void registerBehavior(EyeState state, IBehavior& behavior);
 
     void setState(EyeState state) override;

@@ -2,6 +2,13 @@
 
 namespace eyesee {
 
+// Guards BehaviorEngine::kEyeStateCount (private, see BehaviorEngine.h) against silently
+// going stale if EyeState grows without updating it — registerBehavior()/behaviorForState()
+// index behaviorsByState_ with a raw static_cast<size_t>(state) and would go out-of-bounds
+// with no compiler error and no test failure otherwise.
+static_assert(static_cast<size_t>(EyeState::Error) == 7,
+              "EyeState grew — update BehaviorEngine::kEyeStateCount in BehaviorEngine.h to match");
+
 BehaviorEngine::BehaviorEngine(IAnimationEngine& animation, CommandQueue& commandQueue,
                                IBehavior& fallbackBehavior)
     : animation_(animation),
@@ -18,6 +25,8 @@ void BehaviorEngine::registerBehavior(EyeState state, IBehavior& behavior) {
 void BehaviorEngine::setState(EyeState state) {
     IBehavior& next = behaviorForState(state);
     if (activeBehavior_ != &next) {
+        // activeBehavior_ starts null (see constructor) so the very first transition always
+        // fires onEnter() exactly once, regardless of which instance it resolves to.
         if (activeBehavior_ != nullptr) {
             activeBehavior_->onExit(animation_);
         }

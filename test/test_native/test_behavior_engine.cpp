@@ -156,6 +156,7 @@ void test_sleep_command_transitions_state_to_sleeping() {
     queue.push(sleepCmd);
     engine.update(16);
 
+    TEST_ASSERT_EQUAL_INT(1, animation.animateSleepCallCount);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Sleeping), static_cast<int>(engine.state()));
 }
 
@@ -171,6 +172,7 @@ void test_wake_command_transitions_state_to_idle() {
     queue.push(wakeCmd);
     engine.update(16);
 
+    TEST_ASSERT_EQUAL_INT(1, animation.animateWakeCallCount);
     TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Idle), static_cast<int>(engine.state()));
 }
 

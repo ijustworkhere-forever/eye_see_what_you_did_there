@@ -7,11 +7,11 @@ or `EyeController` directly, so inputs never fight each other.
 **Responsibilities (this file):** `EyeState` (system-level state),
 `EyeCommand`/`CommandQueue` (fixed-capacity FIFO command buffer).
 
-**Planned features:** `IBehavior`/`BehaviorEngine` — see below, added in the
-next task.
-
 **Future work:** Command priority handling (currently stored but not acted
-on), `EyeState`-driven behavior switching (docs/ROADMAP.md v0.3).
+on — `CommandQueue` is strictly FIFO). Configurable/swappable idle
+personality (choosing between `IdleBehavior`/`CuriousBehavior`/
+`RandomBehavior` at runtime, e.g. via REST or persisted config) is v0.4+
+work — see docs/ROADMAP.md.
 
 **IBehaviorEngine / BehaviorEngine:** Drains `CommandQueue`, dispatches each
 `EyeCommand` to `IAnimationEngine`, then delegates per-frame `update` to

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Configuration.h"
+#include "IStorage.h"
 
 namespace eyesee {
 
@@ -34,6 +35,14 @@ public:
     const EyeConfig& eyeConfig() const;
     const ServoConfig& servoConfig(EyeChannel channel) const;
     void setServoConfig(EyeChannel channel, const ServoConfig& config);
+
+    /** Loads every persisted key that exists, leaving any missing key at its
+     * current value -- a first boot with an empty namespace is indistinguishable
+     * from "nothing persisted yet," not an error. Returns true if at least one
+     * key was found and loaded. */
+    bool loadFromStorage(IStorage& storage);
+    /** Writes every field of the current EyeConfig to storage. */
+    void saveToStorage(IStorage& storage) const;
 
 private:
     EyeConfig config_;

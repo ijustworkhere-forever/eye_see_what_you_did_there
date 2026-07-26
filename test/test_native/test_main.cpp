@@ -13,6 +13,10 @@ extern void test_default_servo_config_is_centered_and_uninverted();
 extern void test_default_calibration_reports_default_lr_channel();
 extern void test_set_servo_config_updates_stored_value();
 extern void test_set_servo_config_does_not_affect_other_channels();
+extern void test_save_and_load_round_trips_full_config();
+extern void test_save_and_load_round_trips_look_range();
+extern void test_load_from_empty_storage_returns_false_and_keeps_defaults();
+extern void test_save_persists_all_six_channels_independently();
 
 // EyeController tests
 extern void test_apply_pose_writes_calibrated_pulses_and_calls_write_once();
@@ -137,6 +141,10 @@ int main(int argc, char** argv) {
     RUN_TEST(test_default_calibration_reports_default_lr_channel);
     RUN_TEST(test_set_servo_config_updates_stored_value);
     RUN_TEST(test_set_servo_config_does_not_affect_other_channels);
+    RUN_TEST(test_save_and_load_round_trips_full_config);
+    RUN_TEST(test_save_and_load_round_trips_look_range);
+    RUN_TEST(test_load_from_empty_storage_returns_false_and_keeps_defaults);
+    RUN_TEST(test_save_persists_all_six_channels_independently);
     RUN_TEST(test_apply_pose_writes_calibrated_pulses_and_calls_write_once);
     RUN_TEST(test_gaze_channel_full_positive_maps_to_max_pulse);
     RUN_TEST(test_gaze_channel_full_negative_maps_to_min_pulse);

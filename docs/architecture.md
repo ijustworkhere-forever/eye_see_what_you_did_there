@@ -50,7 +50,7 @@ each frame; `EyeController` converts `EyePose` into a calibrated
    deal in `EyeCommand`/`GazeTarget`/`Expression` — never servo channels,
    pulse widths, calibration, or inversion.
 4. **`Networking` only writes via `CommandQueue`.** Every input source
-   (Web UI, REST, WebSocket, Bluetooth, Serial, MQTT) pushes an
+   (Web UI via REST, REST, MQTT, Bluetooth gamepad) pushes an
    `EyeCommand`; reads are limited to existing read-only getters
    (`IBehaviorEngine::state()`, `EyeController::currentPose()`,
    `WifiManager::isConnected()` -- used by `RestApi` since v0.5 and by

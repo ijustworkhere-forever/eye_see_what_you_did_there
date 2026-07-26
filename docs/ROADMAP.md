@@ -1,6 +1,6 @@
 # Roadmap
 
-## v0.1 — Firmware bootstrap (this milestone)
+## v0.1 — Firmware bootstrap (complete)
 - PlatformIO project structure, `esp32dev` + `native` test environments
 - MotionHardware (PCA9685) driver
 - EyeController, CalibrationManager, Configuration

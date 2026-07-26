@@ -2,9 +2,11 @@
 
 #include <cstdint>
 
+#include "CalibrationManager.h"
 #include "CommandQueue.h"
 #include "EyeController.h"
 #include "IBehaviorEngine.h"
+#include "IStorage.h"
 #include "WifiManager.h"
 
 class AsyncWebServer;
@@ -20,7 +22,8 @@ namespace eyesee {
 class RestApi {
 public:
     RestApi(CommandQueue& commandQueue, const IBehaviorEngine& behaviorEngine,
-            const EyeController& eyeController, const WifiManager& wifiManager);
+            const EyeController& eyeController, const WifiManager& wifiManager,
+            CalibrationManager& calibrationManager, IStorage& storage);
 
     /** Registers all routes. Call once from setup(), before server.begin(). */
     void begin(AsyncWebServer& server);
@@ -32,6 +35,8 @@ private:
     const IBehaviorEngine& behaviorEngine_;
     const EyeController& eyeController_;
     const WifiManager& wifiManager_;
+    CalibrationManager& calibrationManager_;
+    IStorage& storage_;
 };
 
 }  // namespace eyesee

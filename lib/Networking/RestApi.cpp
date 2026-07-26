@@ -3,6 +3,7 @@
 #include <ESPAsyncWebServer.h>
 
 #include "EyeCommandJson.h"
+#include "EyeConfigJson.h"
 #include "EyeStateJson.h"
 
 namespace eyesee {
@@ -27,11 +28,14 @@ void respondQueued(AsyncWebServerRequest* request, CommandQueue& queue, const Ey
 }  // namespace
 
 RestApi::RestApi(CommandQueue& commandQueue, const IBehaviorEngine& behaviorEngine,
-                  const EyeController& eyeController, const WifiManager& wifiManager)
+                  const EyeController& eyeController, const WifiManager& wifiManager,
+                  CalibrationManager& calibrationManager, IStorage& storage)
     : commandQueue_(commandQueue),
       behaviorEngine_(behaviorEngine),
       eyeController_(eyeController),
-      wifiManager_(wifiManager) {
+      wifiManager_(wifiManager),
+      calibrationManager_(calibrationManager),
+      storage_(storage) {
 }
 
 void RestApi::begin(AsyncWebServer& server) {
@@ -90,6 +94,23 @@ void RestApi::begin(AsyncWebServer& server) {
         command.durationMs = kSleepWakeDurationMs;
         respondQueued(request, commandQueue_, command);
     });
+
+    server.on("/api/v1/config", HTTP_GET, [this](AsyncWebServerRequest* request) {
+        const std::string body = buildConfigJson(calibrationManager_.eyeConfig());
+        request->send(200, "application/json", body.c_str());
+    });
+
+    server.on("/api/v1/config", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
+        const ConfigParseResult result = parseConfigUpdate(json);
+        if (!result.ok) {
+            request->send(400, "application/json", buildErrorJson(result.error).c_str());
+            return;
+        }
+        calibrationManager_.setServoConfig(result.channel, result.servoConfig);
+        calibrationManager_.saveToStorage(storage_);
+        const std::string body = buildConfigJson(calibrationManager_.eyeConfig());
+        request->send(200, "application/json", body.c_str());
+    }).setMaxContentLength(512);
 }
 
 void RestApi::update(uint32_t deltaMs) {

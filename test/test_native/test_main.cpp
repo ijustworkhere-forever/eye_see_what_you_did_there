@@ -102,6 +102,14 @@ extern void test_random_behavior_waits_for_full_interval_before_glancing();
 extern void test_random_behavior_glance_uses_wider_range_and_higher_speed();
 extern void test_random_behavior_reports_idle_state();
 
+// EyeStateJson tests
+extern void test_eye_state_to_string_covers_every_value();
+extern void test_expression_string_round_trips_every_value();
+extern void test_expression_from_string_rejects_unknown_name();
+extern void test_build_status_json_reports_state_pose_and_wifi();
+extern void test_build_broadcast_json_omits_wifi_field();
+extern void test_build_error_json_wraps_message();
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_default_eye_config_has_six_distinct_channels);
@@ -175,5 +183,11 @@ int main(int argc, char** argv) {
     RUN_TEST(test_random_behavior_waits_for_full_interval_before_glancing);
     RUN_TEST(test_random_behavior_glance_uses_wider_range_and_higher_speed);
     RUN_TEST(test_random_behavior_reports_idle_state);
+    RUN_TEST(test_eye_state_to_string_covers_every_value);
+    RUN_TEST(test_expression_string_round_trips_every_value);
+    RUN_TEST(test_expression_from_string_rejects_unknown_name);
+    RUN_TEST(test_build_status_json_reports_state_pose_and_wifi);
+    RUN_TEST(test_build_broadcast_json_omits_wifi_field);
+    RUN_TEST(test_build_error_json_wraps_message);
     return UNITY_END();
 }

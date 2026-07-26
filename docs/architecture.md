@@ -39,7 +39,7 @@ the command layer. `IAnimationEngine` converts that into a plain `EyePose`
 each frame; `EyeController` converts `EyePose` into a calibrated
 `ServoOutput`. Each stage does exactly one kind of conversion.
 
-## Three invariants
+## Four invariants
 
 1. **`EyeController` never owns time.** No delays, timers, easing, or
    animation — it holds only its current `EyePose` and converts it to a
@@ -49,6 +49,11 @@ each frame; `EyeController` converts `EyePose` into a calibrated
 3. **`Behavior` never knows hardware.** `BehaviorEngine`/`IBehavior` only
    deal in `EyeCommand`/`GazeTarget`/`Expression` — never servo channels,
    pulse widths, calibration, or inversion.
+4. **`Networking` only writes via `CommandQueue`.** Every input source
+   (Web UI, REST, WebSocket, Bluetooth, Serial) pushes an `EyeCommand`;
+   reads are limited to existing read-only getters
+   (`IBehaviorEngine::state()`, `EyeController::currentPose()`) — never
+   `IAnimationEngine` or hardware directly.
 
 A side effect of invariant 2: swapping `IServoOutput` for a host-side
 implementation (e.g. an SDL window drawing the eyes) is a one-class change
@@ -143,8 +148,18 @@ wire `lib/Protocol`'s pure functions to ESPAsyncWebServer, sharing one
 reads existing read-only state (`IBehaviorEngine::state()`,
 `EyeController::currentPose()`) or pushes an `EyeCommand` into the shared
 `CommandQueue` — Networking never touches `IAnimationEngine` or hardware
-directly, preserving invariant 3 the same way `Behavior` does. See
-`docs/superpowers/specs/2026-07-25-v0.4-connectivity-design.md` for the
+directly, preserving invariant 3 the same way `Behavior` does.
+
+`lib/Protocol`'s parse functions take an already-deserialized
+`JsonVariantConst` -- ESPAsyncWebServer's JSON route handler
+(`AsyncCallbackJsonWebHandler`) parses the raw request body itself and
+responds 400 automatically on malformed JSON before a route's callback (and
+therefore `lib/Protocol`) ever runs. `lib/Protocol`'s native tests cover
+every field-level validation this project's own code performs; the
+JSON-syntax layer above it is ESPAsyncWebServer's behavior, not
+independently tested here.
+
+See `docs/superpowers/specs/2026-07-25-v0.4-connectivity-design.md` for the
 full design, including why the REST surface covers `wink`/`sleep`/`wake`
 (not just the `look`/`blink`/`expression` this file's older "REST API
 versioning" section below originally scoped).

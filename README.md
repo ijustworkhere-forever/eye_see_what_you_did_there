@@ -55,7 +55,8 @@ pio test -e native        # run hardware-independent unit tests
 | `lib/MotionHardware` | Abstracts the PCA9685 (or future actuator hardware) |
 | `lib/Animation` | Timing/easing between behavior intent and eye pose |
 | `lib/Behavior` | Command arbitration, system state, pluggable behaviors |
-| `lib/Networking` | Web UI, REST API, WebSocket (placeholders) |
+| `lib/Protocol` | Native-testable JSON encode/decode for the Networking layer |
+| `lib/Networking` | Web UI, REST API, WebSocket |
 | `lib/Storage` | Flash-backed key/value persistence |
 | `lib/OTA` | Over-the-air updates (placeholder) |
 | `lib/Logger` | Serial logging |

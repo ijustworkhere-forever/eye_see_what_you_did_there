@@ -27,7 +27,9 @@ struct EyeConfig {
     float lookRangeDegrees = 30.0f;
 };
 
-/** Placeholder network settings — no networking implemented this pass. */
+/** Network settings: WiFi credentials (populated from include/WifiCredentials.h at startup --
+ * see docs/superpowers/specs/2026-07-25-v0.4-connectivity-design.md) and the web server's
+ * listen port. */
 struct NetworkConfig {
     const char* ssid = "";
     const char* password = "";

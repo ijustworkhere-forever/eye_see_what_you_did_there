@@ -1,10 +1,14 @@
 # Protocol
 
 **Purpose:** Pure JSON encode/decode for the Networking layer, with zero
-Arduino dependency (only ArduinoJson, which is portable C++) — so request
-parsing and response building are fully covered by native tests, unlike
-`lib/Networking`'s ESPAsyncWebServer-bound wiring, which can't run on the
-host.
+Arduino dependency (only ArduinoJson, which is portable C++) — so this
+library's own field-level validation (missing/wrong-type required fields,
+unrecognized enum names, clamping, defaulting) and all response building
+are fully covered by native tests. Raw JSON-syntax parsing of the HTTP
+request body (malformed input, wrong Content-Type, oversize payloads) is
+handled by ESPAsyncWebServer's `AsyncCallbackJsonWebHandler` before a
+request ever reaches this library -- that boundary is ESP32/library
+behavior, not exercised by native tests.
 
 **Responsibilities:** `EyeStateJson.h` — `EyeState`/`Expression` string
 mappings and response builders (`buildStatusJson`, `buildBroadcastJson`,
@@ -12,5 +16,6 @@ mappings and response builders (`buildStatusJson`, `buildBroadcastJson`,
 `EyeCommand` (`parseLookCommand`, `parseBlinkCommand`, `parseWinkCommand`,
 `parseExpressionCommand`), each returning a `ParseResult{ok, error}`.
 
-**Consumed by:** `lib/Networking/RestApi` (all six) and
+**Consumed by:** `lib/Networking/RestApi` (every `EyeCommandJson` and
+`EyeStateJson` function except `buildBroadcastJson`) and
 `lib/Networking/WebSocketServer` (`buildBroadcastJson` only).

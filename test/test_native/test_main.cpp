@@ -126,6 +126,10 @@ extern void test_parse_expression_command_reads_known_name();
 extern void test_parse_expression_command_rejects_unknown_name();
 extern void test_parse_expression_command_reads_custom_duration();
 
+// FakeStorage smoke tests
+extern void test_fake_storage_round_trips_every_type();
+extern void test_fake_storage_missing_key_returns_false();
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_default_eye_config_has_six_distinct_channels);
@@ -219,5 +223,7 @@ int main(int argc, char** argv) {
     RUN_TEST(test_parse_expression_command_reads_known_name);
     RUN_TEST(test_parse_expression_command_rejects_unknown_name);
     RUN_TEST(test_parse_expression_command_reads_custom_duration);
+    RUN_TEST(test_fake_storage_round_trips_every_type);
+    RUN_TEST(test_fake_storage_missing_key_returns_false);
     return UNITY_END();
 }

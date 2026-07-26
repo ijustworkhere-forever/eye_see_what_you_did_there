@@ -14,5 +14,10 @@ next task.
 on), `EyeState`-driven behavior switching (docs/ROADMAP.md v0.3).
 
 **IBehaviorEngine / BehaviorEngine:** Drains `CommandQueue`, dispatches each
-`EyeCommand` to `IAnimationEngine`, then delegates per-frame `update` to the
-active `IBehavior` (only `IdleBehaviorStub` exists this pass).
+`EyeCommand` to `IAnimationEngine`, then delegates per-frame `update` to
+whichever `IBehavior` is registered for the current `EyeState` (via
+`registerBehavior()`), calling `onExit`/`onEnter` on transition.
+`IdleBehavior`, `SleepBehavior`, and `TrackingBehavior` are registered in
+`main.cpp`; `CuriousBehavior`/`RandomBehavior` are built and tested as
+alternative idle personalities but not registered yet — see
+docs/superpowers/specs/2026-07-25-v0.3-behavior-design.md.

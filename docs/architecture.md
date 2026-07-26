@@ -70,6 +70,28 @@ to compute how long a gaze transition takes. See
 full design and what's still deferred to v0.3 (blink auto-reopen,
 expression pose blending, `GazeTarget.hold`).
 
+## Behavior switching (v0.3)
+
+`BehaviorEngine` now holds a fixed-size (`std::array<IBehavior*, 8>`)
+registration table mapping `EyeState` to a concrete `IBehavior`, set up via
+`registerBehavior()`. `setState()` looks up the table (falling back to a
+constructor-injected default if nothing's registered for that state), and
+calls the outgoing/incoming behavior's `onExit()`/`onEnter()` lifecycle
+hooks — both default no-ops on `IBehavior`, overridden only where a
+behavior needs a one-time transition action (`SleepBehavior` closes the
+eyes on entry; the glance-based behaviors reset their countdown timer).
+
+`Sleep`/`Wake` `EyeCommand`s now also drive the state transition
+(`BehaviorEngine::dispatch()` calls `setState(Sleeping)`/`setState(Idle)`
+in addition to the animation call) — see
+docs/superpowers/specs/2026-07-25-v0.3-behavior-design.md for why this
+lives in `BehaviorEngine` rather than a future REST layer.
+
+`IdleBehavior`, `CuriousBehavior`, and `RandomBehavior` all depend on an
+injectable `IRandomSource` (real: `ArduinoRandomSource`; test: a
+`FakeRandomSource` returning a pre-programmed sequence) so glance timing
+and direction stay deterministic in native tests.
+
 ## Module dependency graph
 
 Two independent leaf modules sit at the bottom. `Configuration` and

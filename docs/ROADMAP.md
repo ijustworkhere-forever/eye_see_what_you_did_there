@@ -13,11 +13,12 @@
 - `GazeTarget` speed honored (degrees/second, using `lookRangeDegrees`); `hold` remains unused, deferred to v0.3
 - Frame-rate pacing in `loop()`: holds the documented 100Hz target via a fixed-period gate
 
-## v0.3 — Behavior
-- `EyeState`-driven behavior switching in `BehaviorEngine`
-- `TrackingBehavior`, `CuriousBehavior`, `RandomBehavior`, `SleepBehavior`
-- Idle scanning / micro-saccades
-- Animated blink (close + reopen), expression pose blending
+## v0.3 — Behavior (complete)
+- `EyeState`-driven behavior switching in `BehaviorEngine` (registration table + onEnter/onExit lifecycle)
+- `IdleBehavior` (registered), `SleepBehavior` (registered), `TrackingBehavior` (registered) — `CuriousBehavior`/`RandomBehavior` built and tested as alternative idle personalities, not yet registered (a future config/REST choice)
+- Idle scanning / micro-saccades via `IdleBehavior` + injectable `IRandomSource`
+- Animated blink (close + reopen, symmetric duration); wink/sleep remain one-way
+- Expression pose blending via a shared `expressionEyelidTarget()` lookup table
 
 For reference: [Will Cogley's EYEMECH ε3.2 adapted for ESP32 + PCA9685](https://github.com/GerNavBet/Will-cogley-s-EYEMECH-3.2-control-code-adapted-for-ESP32-with-PCA9685-servo-controller) is a MicroPython implementation with the same PCA9685 channel layout (0=LR, 1=UD, 2=TL, 3=BL, 4=TR, 5=BR) and a similar auto-mode idle/blink behavior model — useful prior art for the v0.3 behavior work.
 

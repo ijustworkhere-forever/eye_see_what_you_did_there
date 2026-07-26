@@ -110,6 +110,20 @@ extern void test_build_status_json_reports_state_pose_and_wifi();
 extern void test_build_broadcast_json_omits_wifi_field();
 extern void test_build_error_json_wraps_message();
 
+// EyeCommandJson tests
+extern void test_parse_look_command_reads_required_and_optional_fields();
+extern void test_parse_look_command_defaults_optional_fields();
+extern void test_parse_look_command_clamps_out_of_range_xy();
+extern void test_parse_look_command_rejects_missing_x();
+extern void test_parse_blink_command_defaults_duration_when_absent();
+extern void test_parse_blink_command_reads_custom_duration();
+extern void test_parse_wink_command_left();
+extern void test_parse_wink_command_right();
+extern void test_parse_wink_command_rejects_invalid_side();
+extern void test_parse_wink_command_rejects_missing_side();
+extern void test_parse_expression_command_reads_known_name();
+extern void test_parse_expression_command_rejects_unknown_name();
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_default_eye_config_has_six_distinct_channels);
@@ -189,5 +203,17 @@ int main(int argc, char** argv) {
     RUN_TEST(test_build_status_json_reports_state_pose_and_wifi);
     RUN_TEST(test_build_broadcast_json_omits_wifi_field);
     RUN_TEST(test_build_error_json_wraps_message);
+    RUN_TEST(test_parse_look_command_reads_required_and_optional_fields);
+    RUN_TEST(test_parse_look_command_defaults_optional_fields);
+    RUN_TEST(test_parse_look_command_clamps_out_of_range_xy);
+    RUN_TEST(test_parse_look_command_rejects_missing_x);
+    RUN_TEST(test_parse_blink_command_defaults_duration_when_absent);
+    RUN_TEST(test_parse_blink_command_reads_custom_duration);
+    RUN_TEST(test_parse_wink_command_left);
+    RUN_TEST(test_parse_wink_command_right);
+    RUN_TEST(test_parse_wink_command_rejects_invalid_side);
+    RUN_TEST(test_parse_wink_command_rejects_missing_side);
+    RUN_TEST(test_parse_expression_command_reads_known_name);
+    RUN_TEST(test_parse_expression_command_rejects_unknown_name);
     return UNITY_END();
 }

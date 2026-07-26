@@ -15,6 +15,12 @@ not an Arduino sketch.
 See `docs/hardware.md` for wiring, I2C address, power-budget guidance, and
 the full servo channel mapping.
 
+**Physical eye mechanism:** this firmware controls the servos but doesn't
+include the mechanical design itself — the 3D-printable parts and
+assembly instructions this project builds on come from
+[Will Cogley's Animatronic Eye Mechanism on MakerWorld](https://makerworld.com/en/models/1184807-animatronic-eye-mechanism-e3-2)
+and its accompanying [Instructables build guide](https://www.instructables.com/Animatronic-Eye-Mechanism/).
+
 ## Architecture
 
 No code manipulates servos directly. All motion goes through `EyeController`;

@@ -80,19 +80,45 @@ void EyeController::update(uint32_t deltaMs) {
     // TODO: reserved. EyeController owns no timed state (docs/architecture.md invariant 1).
 }
 
+namespace {
+float clampf(float value, float lo, float hi) {
+    if (value < lo) return lo;
+    if (value > hi) return hi;
+    return value;
+}
+}  // namespace
+
+uint16_t EyeController::gazeChannelPulse(float input, const ServoConfig& config) {
+    float effective = input * (config.inverted ? -1.0f : 1.0f) * (config.mirrored ? -1.0f : 1.0f);
+    float pulse = effective >= 0.0f
+        ? static_cast<float>(config.neutralPulseUs) +
+              effective * static_cast<float>(config.maxPulseUs - config.neutralPulseUs)
+        : static_cast<float>(config.neutralPulseUs) +
+              effective * static_cast<float>(config.neutralPulseUs - config.minPulseUs);
+    pulse = clampf(pulse + static_cast<float>(config.mechanicalOffset), config.minPulseUs, config.maxPulseUs);
+    return static_cast<uint16_t>(pulse);
+}
+
+uint16_t EyeController::eyelidChannelPulse(float input, const ServoConfig& config) {
+    float effective = input;
+    if (config.inverted) effective = 1.0f - effective;
+    if (config.mirrored) effective = 1.0f - effective;
+    float pulse = clampf(static_cast<float>(config.minPulseUs) +
+                              effective * static_cast<float>(config.maxPulseUs - config.minPulseUs) +
+                              static_cast<float>(config.mechanicalOffset),
+                          config.minPulseUs, config.maxPulseUs);
+    return static_cast<uint16_t>(pulse);
+}
+
 ServoOutput EyeController::toServoOutput(const EyePose& pose) const {
-    (void)pose;
-    // TODO: real pose -> pulse conversion (pulse scaling, invert, mirror,
-    // mechanical offset) is out of scope this pass (docs/architecture.md).
-    // Every channel reports its calibrated neutral pulse for now.
     const EyeConfig& config = calibration_.eyeConfig();
     ServoOutput out;
-    out.lr = config.lr.neutralPulseUs;
-    out.ud = config.ud.neutralPulseUs;
-    out.tl = config.tl.neutralPulseUs;
-    out.bl = config.bl.neutralPulseUs;
-    out.tr = config.tr.neutralPulseUs;
-    out.br = config.br.neutralPulseUs;
+    out.lr = gazeChannelPulse(pose.lookX, config.lr);
+    out.ud = gazeChannelPulse(pose.lookY, config.ud);
+    out.tl = eyelidChannelPulse(pose.upperLeftLid, config.tl);
+    out.bl = eyelidChannelPulse(pose.lowerLeftLid, config.bl);
+    out.tr = eyelidChannelPulse(pose.upperRightLid, config.tr);
+    out.br = eyelidChannelPulse(pose.lowerRightLid, config.br);
     return out;
 }
 

@@ -47,6 +47,11 @@ private:
      */
     void closeAllLids();
 
+    /** Converts a normalized gaze input (-1..1) to a calibrated pulse width. */
+    static uint16_t gazeChannelPulse(float input, const ServoConfig& config);
+    /** Converts a normalized eyelid input (0=closed..1=open) to a calibrated pulse width. */
+    static uint16_t eyelidChannelPulse(float input, const ServoConfig& config);
+
     ServoOutput toServoOutput(const EyePose& pose) const;
 };
 

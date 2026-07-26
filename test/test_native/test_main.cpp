@@ -15,7 +15,13 @@ extern void test_set_servo_config_updates_stored_value();
 extern void test_set_servo_config_does_not_affect_other_channels();
 
 // EyeController tests
-extern void test_apply_pose_writes_neutral_pulses_and_calls_write_once();
+extern void test_apply_pose_writes_calibrated_pulses_and_calls_write_once();
+extern void test_gaze_channel_full_positive_maps_to_max_pulse();
+extern void test_gaze_channel_full_negative_maps_to_min_pulse();
+extern void test_inverted_channel_flips_gaze_direction();
+extern void test_inverted_and_mirrored_together_cancel_out();
+extern void test_eyelid_open_maps_to_max_pulse();
+extern void test_mechanical_offset_shifts_pulse_within_clamp();
 extern void test_look_updates_gaze_but_preserves_eyelids();
 extern void test_blink_closes_all_four_lids();
 extern void test_wink_left_closes_only_left_lids();
@@ -44,7 +50,13 @@ int main(int argc, char** argv) {
     RUN_TEST(test_default_calibration_reports_default_lr_channel);
     RUN_TEST(test_set_servo_config_updates_stored_value);
     RUN_TEST(test_set_servo_config_does_not_affect_other_channels);
-    RUN_TEST(test_apply_pose_writes_neutral_pulses_and_calls_write_once);
+    RUN_TEST(test_apply_pose_writes_calibrated_pulses_and_calls_write_once);
+    RUN_TEST(test_gaze_channel_full_positive_maps_to_max_pulse);
+    RUN_TEST(test_gaze_channel_full_negative_maps_to_min_pulse);
+    RUN_TEST(test_inverted_channel_flips_gaze_direction);
+    RUN_TEST(test_inverted_and_mirrored_together_cancel_out);
+    RUN_TEST(test_eyelid_open_maps_to_max_pulse);
+    RUN_TEST(test_mechanical_offset_shifts_pulse_within_clamp);
     RUN_TEST(test_look_updates_gaze_but_preserves_eyelids);
     RUN_TEST(test_blink_closes_all_four_lids);
     RUN_TEST(test_wink_left_closes_only_left_lids);

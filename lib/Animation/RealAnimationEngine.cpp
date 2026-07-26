@@ -142,6 +142,10 @@ void RealAnimationEngine::update(uint32_t deltaMs) {
         animateBlink(kDefaultBlinkDurationMs);
     }
     if (eyelidJustCompletedWithReopen) {
+        // animateWake() always targets fully open, regardless of what was closed. So a
+        // wink/sleep interrupted mid-flight by animateBlink() does not get restored after
+        // the blink's reopen completes — both eyes end up open, silently overriding
+        // whatever wink/sleep state preceded the blink.
         animateWake(reopenDurationMs);
     }
 }

@@ -234,6 +234,9 @@ void test_animate_blink_reopens_after_close_phase_completes() {
 
     animation.update(60);  // reopen completes (100ms reopen duration)
     TEST_ASSERT_EQUAL_FLOAT(1.0f, controller.currentPose().upperLeftLid);
+
+    animation.update(500);  // long after reopen completes: must not re-arm and reopen again
+    TEST_ASSERT_EQUAL_FLOAT(1.0f, controller.currentPose().upperLeftLid);
 }
 
 void test_animate_wink_left_does_not_auto_reopen() {

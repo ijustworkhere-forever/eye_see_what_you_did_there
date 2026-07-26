@@ -1,9 +1,12 @@
 # API Reference
 
 This is the single source of truth for EyeSee's three network APIs: REST,
-WebSocket, and MQTT. All three ultimately push `EyeCommand`s into the same
-`CommandQueue` (see `docs/architecture.md`) — the differences below are
-purely in transport and payload shape, not in what the device actually does.
+WebSocket, and MQTT. Most commands across REST and MQTT push `EyeCommand`s
+into the same `CommandQueue` (see `docs/architecture.md`), but WebSocket is
+broadcast-only and never processes client messages, and `POST /api/v1/config`
+routes directly to `CalibrationManager` for static servo tuning. The
+differences below are primarily in transport and payload shape; those that
+do use the `CommandQueue` execute the same underlying behaviors.
 
 ## Versioning & stability
 
@@ -24,9 +27,9 @@ confirm which frozen API version a given device is actually running.
 ## REST API
 
 All routes are under `/api/v1/`. Every route that accepts a JSON body caps
-it at 512 bytes; malformed JSON syntax (not just a wrong shape) is rejected
-by the underlying web server before any route handler runs, with no
-custom error body.
+it at 512 bytes; if exceeded, returns `413 Payload Too Large` with no body.
+Malformed JSON syntax (not just a wrong shape) is rejected by the underlying
+web server before any route handler runs, with no custom error body.
 
 ### `GET /api/v1/status`
 
@@ -50,7 +53,7 @@ No request body. `200 OK`:
 
 ### `POST /api/v1/look`
 
-Request body: `{"x": <float, required>, "y": <float, required>, "speed"?: <float>, "blinkOnArrival"?: <bool>, "hold"?: <bool, default false>}`.
+Request body: `{"x": <float, required>, "y": <float, required>, "speed"?: <float, default 300.0>, "blinkOnArrival"?: <bool, default false>, "hold"?: <bool, default false>}`.
 `x`/`y` are clamped to `[-1.0, 1.0]` server-side, not rejected if out of
 range.
 

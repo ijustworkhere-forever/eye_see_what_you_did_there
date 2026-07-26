@@ -51,7 +51,7 @@ NetworkConfig networkConfig{kWifiSsid, kWifiPassword, 80};
 AsyncWebServer server(networkConfig.webServerPort);
 WifiManager wifiManager;
 WebServer webServer;
-RestApi restApi(commandQueue, behaviorEngine, eyeController, wifiManager);
+RestApi restApi(commandQueue, behaviorEngine, eyeController, wifiManager, calibration, preferencesStore);
 WebSocketServer webSocketServer(behaviorEngine, eyeController);
 OtaManager otaManager;
 
@@ -66,6 +66,7 @@ void setup() {
 
     servoOutput.init();
     preferencesStore.begin("eyesee");
+    calibration.loadFromStorage(preferencesStore);
     wifiManager.begin(networkConfig.ssid, networkConfig.password);
     webServer.begin(server);
     restApi.begin(server);

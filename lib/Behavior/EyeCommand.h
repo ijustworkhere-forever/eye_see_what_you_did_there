@@ -17,7 +17,8 @@ enum class CommandType {
     WinkRight,
     Sleep,
     Wake,
-    SetExpression
+    SetExpression,
+    Track
 };
 
 /** Relative urgency of a queued command. Priority-aware arbitration is future work
@@ -36,7 +37,7 @@ struct EyeCommand {
     CommandType type = CommandType::Look;
     CommandPriority priority = CommandPriority::Normal;
     uint32_t durationMs = 0;
-    GazeTarget gazeTarget{};                      // valid when type == Look
+    GazeTarget gazeTarget{};                      // valid when type == Look or Track
     Expression expression = Expression::Neutral;  // valid when type == SetExpression
 };
 

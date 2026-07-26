@@ -11,6 +11,8 @@ public:
     int onEnterCallCount = 0;
     int onExitCallCount = 0;
     int updateCallCount = 0;
+    int receiveGazeTargetCallCount = 0;
+    eyesee::GazeTarget lastReceivedGazeTarget{};
 
     void onEnter(eyesee::IAnimationEngine& animation) override {
         (void)animation;
@@ -27,6 +29,10 @@ public:
     }
     eyesee::EyeState state() const override {
         return reportedState_;
+    }
+    void receiveGazeTarget(const eyesee::GazeTarget& target) override {
+        ++receiveGazeTargetCallCount;
+        lastReceivedGazeTarget = target;
     }
 
 private:

@@ -75,6 +75,10 @@ void BehaviorEngine::dispatch(const EyeCommand& command) {
         case CommandType::SetExpression:
             animation_.animateExpression(command.expression, command.durationMs);
             break;
+        case CommandType::Track:
+            setState(EyeState::Tracking);
+            activeBehavior_->receiveGazeTarget(command.gazeTarget);
+            break;
     }
 }
 

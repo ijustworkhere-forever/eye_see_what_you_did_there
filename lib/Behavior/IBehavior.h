@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "EyeState.h"
+#include "EyeTypes.h"
 
 namespace eyesee {
 
@@ -23,6 +24,12 @@ public:
     }
     virtual void update(uint32_t deltaMs, IAnimationEngine& animation) = 0;
     virtual EyeState state() const = 0;
+
+    /** Delivers a Track command's payload to whichever behavior is currently active.
+     * Default no-op -- only TrackingBehavior (docs/ROADMAP.md v0.6) overrides this. */
+    virtual void receiveGazeTarget(const GazeTarget& target) {
+        (void)target;
+    }
 };
 
 }  // namespace eyesee

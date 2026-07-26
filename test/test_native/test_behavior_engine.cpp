@@ -200,5 +200,45 @@ void test_sleep_command_uses_callers_duration_not_hardcoded_default() {
     TEST_ASSERT_EQUAL_UINT32(1200, animation.lastSleepDurationMs);
 }
 
+void test_track_command_switches_to_tracking_state_and_forwards_target() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    FakeBehavior trackingBehavior(EyeState::Tracking);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    engine.registerBehavior(EyeState::Tracking, trackingBehavior);
+
+    EyeCommand trackCmd;
+    trackCmd.type = CommandType::Track;
+    trackCmd.gazeTarget.x = 0.3f;
+    trackCmd.gazeTarget.y = -0.6f;
+    trackCmd.gazeTarget.hold = true;
+    queue.push(trackCmd);
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Tracking), static_cast<int>(engine.state()));
+    TEST_ASSERT_EQUAL_INT(1, trackingBehavior.receiveGazeTargetCallCount);
+    TEST_ASSERT_EQUAL_FLOAT(0.3f, trackingBehavior.lastReceivedGazeTarget.x);
+    TEST_ASSERT_EQUAL_FLOAT(-0.6f, trackingBehavior.lastReceivedGazeTarget.y);
+    TEST_ASSERT_TRUE(trackingBehavior.lastReceivedGazeTarget.hold);
+}
+
+void test_track_command_calls_on_enter_before_receiving_target() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    FakeBehavior trackingBehavior(EyeState::Tracking);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    engine.registerBehavior(EyeState::Tracking, trackingBehavior);
+
+    EyeCommand trackCmd;
+    trackCmd.type = CommandType::Track;
+    queue.push(trackCmd);
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(1, trackingBehavior.onEnterCallCount);
+    TEST_ASSERT_EQUAL_INT(1, trackingBehavior.receiveGazeTargetCallCount);
+}
+
 // No main() here — test/test_native/test_main.cpp is the sole file with main()
 // (see its own comment for why).

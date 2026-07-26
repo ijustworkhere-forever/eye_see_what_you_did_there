@@ -80,6 +80,8 @@ extern void test_unregistered_state_falls_back_to_fallback_behavior();
 extern void test_sleep_command_transitions_state_to_sleeping();
 extern void test_wake_command_transitions_state_to_idle();
 extern void test_sleep_command_uses_callers_duration_not_hardcoded_default();
+extern void test_track_command_switches_to_tracking_state_and_forwards_target();
+extern void test_track_command_calls_on_enter_before_receiving_target();
 
 // IdleBehavior tests
 extern void test_idle_behavior_waits_for_full_interval_before_glancing();
@@ -205,6 +207,8 @@ int main(int argc, char** argv) {
     RUN_TEST(test_sleep_command_transitions_state_to_sleeping);
     RUN_TEST(test_wake_command_transitions_state_to_idle);
     RUN_TEST(test_sleep_command_uses_callers_duration_not_hardcoded_default);
+    RUN_TEST(test_track_command_switches_to_tracking_state_and_forwards_target);
+    RUN_TEST(test_track_command_calls_on_enter_before_receiving_target);
     RUN_TEST(test_idle_behavior_waits_for_full_interval_before_glancing);
     RUN_TEST(test_idle_behavior_glance_stays_within_micro_saccade_range);
     RUN_TEST(test_idle_behavior_reports_idle_state);

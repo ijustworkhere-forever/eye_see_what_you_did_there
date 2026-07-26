@@ -2,15 +2,18 @@
 
 #include <cstdint>
 
+class AsyncWebServer;
+
 namespace eyesee {
 
-/**
- * Placeholder for the Web UI static asset server. No functionality this
- * pass — see docs/ROADMAP.md v0.4.
- */
+/** Serves data/'s static assets (the Web UI) from LittleFS. */
 class WebServer {
 public:
-    void begin();
+    /** Mounts LittleFS and registers the static file handler. Call once from setup(),
+     * before server.begin(). */
+    void begin(AsyncWebServer& server);
+    /** No-op -- ESPAsyncWebServer is request-driven; kept for the shared per-frame
+     * update() convention every Networking class follows. */
     void update(uint32_t deltaMs);
 };
 

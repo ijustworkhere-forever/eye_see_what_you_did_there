@@ -2,5 +2,6 @@
 docs/api/
 .vscode/
 include/WifiCredentials.h
+include/MqttCredentials.h
 compile_commands.json
 .cache/

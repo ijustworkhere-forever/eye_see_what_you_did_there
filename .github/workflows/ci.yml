@@ -20,6 +20,9 @@ jobs:
       - name: Provide placeholder WiFi credentials
         run: cp include/WifiCredentials.h.example include/WifiCredentials.h
 
+      - name: Provide placeholder MQTT credentials
+        run: cp include/MqttCredentials.h.example include/MqttCredentials.h
+
       - name: Build firmware (esp32dev)
         run: pio run -e esp32dev
 

@@ -13,6 +13,12 @@ namespace eyesee {
  * Real interpolation: an independent gaze transition and eyelid transition
  * are each eased over their own duration and composed into one EyePose per
  * frame. See docs/superpowers/specs/2026-07-25-v0.2-real-motion-design.md.
+ *
+ * `gaze_`/`eyelid_` cache the full pose from construction onward and are
+ * the sole intended writer to `EyeController` for as long as this engine is
+ * in use — any direct `EyeController` calls (`look()`, `blink()`, etc.) made
+ * elsewhere while this engine is active will be silently overwritten on the
+ * next `update()`.
  */
 class RealAnimationEngine : public IAnimationEngine {
 public:

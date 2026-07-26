@@ -33,8 +33,12 @@ void RealAnimationEngine::animateGaze(const GazeTarget& target) {
     uint32_t durationMs = 0;
     if (target.speed > 0.0f) {
         const float lookRangeDegrees = calibration_.eyeConfig().lookRangeDegrees;
-        durationMs =
-            static_cast<uint32_t>((deltaNormalized * lookRangeDegrees / target.speed) * 1000.0f);
+        // Clamp to a small positive floor so a pathologically tiny speed can't blow up the
+        // division, and round (rather than truncate toward zero) so the result matches the
+        // real-valued duration instead of always underestimating it.
+        const float safeSpeed = std::max(target.speed, 0.001f);
+        durationMs = static_cast<uint32_t>(
+            std::lround((deltaNormalized * lookRangeDegrees / safeSpeed) * 1000.0f));
     }
     startGazeTransition(target.x, target.y, durationMs, target.blinkOnArrival);
 }

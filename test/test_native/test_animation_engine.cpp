@@ -55,9 +55,44 @@ void test_animate_gaze_uses_cubic_easing_not_linear() {
     target.speed = 300.0f;  // 100ms duration
     animation.animateGaze(target);
 
-    animation.update(25);  // 25% of the way through — cubic ease-in-out starts slow
+    animation.update(25);  // 25% of the way through: cubic(0.25) = 0.0625, ease-in-out(0.25) =
+                           // 0.125, linear(0.25) = 0.25 — 0.10 is below both non-cubic values, so
+                           // this actually pins Cubic rather than merely ruling out Linear.
 
-    TEST_ASSERT_TRUE(controller.currentPose().lookX < 0.20f);
+    TEST_ASSERT_TRUE(controller.currentPose().lookX < 0.10f);
+}
+
+void test_eyelid_transition_uses_ease_in_out_not_cubic_or_linear() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    animation.animateBlink(200);
+    animation.update(50);  // 25% of the way through: ease-in-out(0.25) = 0.125, so lid = 0.875.
+                           // cubic(0.25) = 0.0625 -> lid = 0.9375 (fails high); linear(0.25) =
+                           // 0.25 -> lid = 0.75 (fails low). This pins EaseInOut specifically.
+
+    TEST_ASSERT_TRUE(controller.currentPose().upperLeftLid > 0.80f);
+    TEST_ASSERT_TRUE(controller.currentPose().upperLeftLid < 0.90f);
+}
+
+void test_interrupting_mid_flight_transition_continues_from_current_value() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    animation.animateBlink(100);
+    animation.update(50);  // lid now at 0.5, blink half-closed
+
+    animation.animateWinkLeft(100);  // interrupts mid-flight; new start must be current (0.5),
+                                     // not the old target (1.0, which would make the lid jump
+                                     // back up before continuing down)
+    animation.update(50);
+
+    TEST_ASSERT_TRUE(controller.currentPose().upperLeftLid >= 0.0f);
+    TEST_ASSERT_TRUE(controller.currentPose().upperLeftLid < 0.5f);
 }
 
 void test_animate_blink_closes_lids_only_after_full_duration() {

@@ -2,3 +2,5 @@
 docs/api/
 .vscode/
 include/WifiCredentials.h
+compile_commands.json
+.cache/

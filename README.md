@@ -33,9 +33,10 @@ Web UI / REST API / WebSocket / Bluetooth / Serial
               PCA9685
 ```
 
-See `docs/architecture.md` for the full design, including the three core
+See `docs/architecture.md` for the full design, including the four core
 invariants (EyeController owns no time; MotionHardware owns no state;
-Behavior never knows hardware) and `docs/ROADMAP.md` for what's planned.
+Behavior never knows hardware; Networking only writes via CommandQueue)
+and `docs/ROADMAP.md` for what's planned.
 
 ## Building
 

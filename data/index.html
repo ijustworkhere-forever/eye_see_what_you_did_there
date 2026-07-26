@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EyeSee Control Panel</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <h1>EyeSee</h1>
+
+    <section id="joystick-section">
+        <h2>Look</h2>
+        <div id="joystick-pad"><div id="joystick-knob"></div></div>
+    </section>
+
+    <section id="actions-section">
+        <h2>Actions</h2>
+        <button id="blink-btn">Blink</button>
+        <button id="wink-left-btn">Wink Left</button>
+        <button id="wink-right-btn">Wink Right</button>
+        <button id="sleep-btn">Sleep</button>
+        <button id="wake-btn">Wake</button>
+    </section>
+
+    <section id="expression-section">
+        <h2>Expression</h2>
+        <button data-expression="Neutral">Neutral</button>
+        <button data-expression="Happy">Happy</button>
+        <button data-expression="Curious">Curious</button>
+        <button data-expression="Sleepy">Sleepy</button>
+        <button data-expression="Angry">Angry</button>
+        <button data-expression="Surprised">Surprised</button>
+    </section>
+
+    <section id="diagnostics-section">
+        <h2>Diagnostics</h2>
+        <dl>
+            <dt>Connection</dt>
+            <dd id="diag-connection">disconnected</dd>
+            <dt>State</dt>
+            <dd id="diag-state">-</dd>
+            <dt>Look</dt>
+            <dd id="diag-look">-</dd>
+            <dt>Lids (UL / LL / UR / LR)</dt>
+            <dd id="diag-lids">-</dd>
+            <dt>Uptime</dt>
+            <dd id="diag-uptime">-</dd>
+        </dl>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>

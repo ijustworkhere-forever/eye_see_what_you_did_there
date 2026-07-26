@@ -1,0 +1,61 @@
+:root {
+    color-scheme: light dark;
+    font-family: system-ui, sans-serif;
+}
+
+body {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+h1 {
+    text-align: center;
+}
+
+section {
+    margin-bottom: 1.5rem;
+}
+
+#joystick-pad {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    touch-action: none;
+}
+
+#joystick-knob {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    left: 100px;
+    top: 100px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+#actions-section button,
+#expression-section button {
+    margin: 0.25rem;
+    padding: 0.5rem 1rem;
+}
+
+dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+}
+
+dt {
+    font-weight: bold;
+}
+
+dd {
+    margin: 0;
+}

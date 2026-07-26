@@ -3,6 +3,10 @@
 #include "Configuration.h"
 #include "IStorage.h"
 
+#ifdef ARDUINO
+#include <freertos/FreeRTOS.h>
+#endif
+
 namespace eyesee {
 
 /**
@@ -28,14 +32,24 @@ enum class EyeChannel {
  * below (see `docs/superpowers/specs/2026-07-26-v0.5-persistence-ota-design.md`).
  * `setServoConfig()` itself stays storage-agnostic; callers (currently `RestApi`'s
  * config route) explicitly call `saveToStorage()` after mutating.
+ *
+ * Thread-safe on ESP32: every public method is guarded by a FreeRTOS critical
+ * section, since `RestApi`'s `POST /api/v1/config` route (which calls
+ * `setServoConfig()`) runs on AsyncTCP's own task while `EyeController` reads
+ * `eyeConfig()` every frame from the Arduino `loop()` task -- the same
+ * cross-task hazard `CommandQueue` already guards against (see
+ * `lib/Behavior/CommandQueue.h`). `eyeConfig()`/`servoConfig()` return by value
+ * (a locked snapshot copy), not by reference, so the lock actually protects the
+ * data the caller reads, not just the accessor call itself. Native tests are
+ * single-threaded, so the guard compiles away to nothing there.
  */
 class CalibrationManager {
 public:
     CalibrationManager();
     explicit CalibrationManager(const EyeConfig& initialConfig);
 
-    const EyeConfig& eyeConfig() const;
-    const ServoConfig& servoConfig(EyeChannel channel) const;
+    EyeConfig eyeConfig() const;
+    ServoConfig servoConfig(EyeChannel channel) const;
     void setServoConfig(EyeChannel channel, const ServoConfig& config);
 
     /** Loads every persisted key that exists, leaving any missing key at its
@@ -49,6 +63,10 @@ public:
 private:
     EyeConfig config_;
     ServoConfig& mutableServoConfig(EyeChannel channel);
+    const ServoConfig& constServoConfig(EyeChannel channel) const;
+#ifdef ARDUINO
+    mutable portMUX_TYPE mux_ = portMUX_INITIALIZER_UNLOCKED;
+#endif
 };
 
 }  // namespace eyesee

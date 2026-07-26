@@ -27,17 +27,41 @@ constexpr const char* kLookRangeKey = "lookRange";
 
 }  // namespace
 
+#ifdef ARDUINO
+namespace {
+/** RAII critical-section guard around the ESP32 portMUX spinlock (same pattern
+ * as lib/Behavior/CommandQueue.cpp). */
+class CriticalSection {
+public:
+    explicit CriticalSection(portMUX_TYPE& mux) : mux_(mux) { portENTER_CRITICAL(&mux_); }
+    ~CriticalSection() { portEXIT_CRITICAL(&mux_); }
+
+private:
+    portMUX_TYPE& mux_;
+};
+}  // namespace
+#define EYESEE_CALIBRATION_LOCK() CriticalSection lock(mux_)
+#else
+#define EYESEE_CALIBRATION_LOCK()
+#endif
+
 CalibrationManager::CalibrationManager() : config_(makeDefaultEyeConfig()) {
 }
 
 CalibrationManager::CalibrationManager(const EyeConfig& initialConfig) : config_(initialConfig) {
 }
 
-const EyeConfig& CalibrationManager::eyeConfig() const {
+EyeConfig CalibrationManager::eyeConfig() const {
+    EYESEE_CALIBRATION_LOCK();
     return config_;
 }
 
-const ServoConfig& CalibrationManager::servoConfig(EyeChannel channel) const {
+ServoConfig CalibrationManager::servoConfig(EyeChannel channel) const {
+    EYESEE_CALIBRATION_LOCK();
+    return constServoConfig(channel);
+}
+
+const ServoConfig& CalibrationManager::constServoConfig(EyeChannel channel) const {
     switch (channel) {
         case EyeChannel::Lr: return config_.lr;
         case EyeChannel::Ud: return config_.ud;
@@ -50,8 +74,8 @@ const ServoConfig& CalibrationManager::servoConfig(EyeChannel channel) const {
 }
 
 void CalibrationManager::setServoConfig(EyeChannel channel, const ServoConfig& config) {
+    EYESEE_CALIBRATION_LOCK();
     mutableServoConfig(channel) = config;
-    // TODO: persist via IStorage (docs/ROADMAP.md v0.5) — in-memory only this pass.
 }
 
 ServoConfig& CalibrationManager::mutableServoConfig(EyeChannel channel) {
@@ -67,9 +91,10 @@ ServoConfig& CalibrationManager::mutableServoConfig(EyeChannel channel) {
 }
 
 bool CalibrationManager::loadFromStorage(IStorage& storage) {
+    EYESEE_CALIBRATION_LOCK();
     bool loadedAny = false;
     for (const ChannelKeys& keys : kChannelKeys) {
-        ServoConfig config = servoConfig(keys.channel);
+        ServoConfig config = mutableServoConfig(keys.channel);
         if (storage.getUInt16(keys.minKey, config.minPulseUs)) loadedAny = true;
         if (storage.getUInt16(keys.maxKey, config.maxPulseUs)) loadedAny = true;
         if (storage.getUInt16(keys.neutralKey, config.neutralPulseUs)) loadedAny = true;
@@ -83,8 +108,9 @@ bool CalibrationManager::loadFromStorage(IStorage& storage) {
 }
 
 void CalibrationManager::saveToStorage(IStorage& storage) const {
+    EYESEE_CALIBRATION_LOCK();
     for (const ChannelKeys& keys : kChannelKeys) {
-        const ServoConfig& config = servoConfig(keys.channel);
+        const ServoConfig& config = constServoConfig(keys.channel);
         storage.putUInt16(keys.minKey, config.minPulseUs);
         storage.putUInt16(keys.maxKey, config.maxPulseUs);
         storage.putUInt16(keys.neutralKey, config.neutralPulseUs);

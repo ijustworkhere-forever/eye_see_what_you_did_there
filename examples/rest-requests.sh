@@ -3,7 +3,7 @@
 # Usage: EYESEE_HOST=192.168.1.50 ./rest-requests.sh
 set -euo pipefail
 
-HOST="${EYESEE_HOST:?Set EYESEE_HOST to the device's IP or hostname, e.g. EYESEE_HOST=192.168.1.50 ./rest-requests.sh}"
+HOST="${EYESEE_HOST:?Set EYESEE_HOST to the device IP or hostname, e.g. EYESEE_HOST=192.168.1.50 ./rest-requests.sh}"
 BASE="http://${HOST}/api/v1"
 
 # Full diagnostics snapshot: state, wifi status, firmware version, current pose.

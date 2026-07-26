@@ -22,11 +22,13 @@
 
 For reference: [Will Cogley's EYEMECH ε3.2 adapted for ESP32 + PCA9685](https://github.com/GerNavBet/Will-cogley-s-EYEMECH-3.2-control-code-adapted-for-ESP32-with-PCA9685-servo-controller) is a MicroPython implementation with the same PCA9685 channel layout (0=LR, 1=UD, 2=TL, 3=BL, 4=TR, 5=BR) and a similar auto-mode idle/blink behavior model — useful prior art for the v0.3 behavior work.
 
-## v0.4 — Connectivity
-- `RestApi`: `/api/v1/*` endpoints wired to `CommandQueue`
-- `WebServer`: serves `data/` control panel assets
-- `WebSocketServer`: 30-60Hz state broadcast
-- Web UI: joystick, blink, expressions, diagnostics
+## v0.4 — Connectivity (complete)
+- `RestApi`: `/api/v1/*` endpoints wired to `CommandQueue` — `status`, `look`, `blink`, `wink`, `expression`, `sleep`, `wake` (`GET`/`POST /api/v1/config` deferred to v0.5)
+- `WebServer`: serves `data/` control panel assets from LittleFS
+- `WebSocketServer`: ~30Hz state broadcast at `/ws`
+- `WifiManager`: STA connect with retry backoff; credentials via gitignored `include/WifiCredentials.h`
+- Web UI: joystick, blink/wink/sleep/wake, expressions, live diagnostics
+- New native-testable `lib/Protocol` module: JSON request parsing and response building, zero Arduino dependency
 
 ## v0.5 — Persistence & OTA
 - `CalibrationManager` <-> `PreferencesStore` persistence

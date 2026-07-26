@@ -132,15 +132,34 @@ Configuration                          MotionHardware
 Logger, Storage, Networking, OTA: leaf modules, no dependency on the above.
 ```
 
+## Connectivity (v0.4)
+
+`lib/Protocol` is a new leaf library: pure JSON encode/decode (via the
+portable ArduinoJson), zero Arduino dependency, fully native-tested.
+`lib/Networking`'s `WifiManager`/`WebServer`/`RestApi`/`WebSocketServer`
+stay Arduino-only and native-ignored (unchanged `lib_ignore` entry) — they
+wire `lib/Protocol`'s pure functions to ESPAsyncWebServer, sharing one
+`AsyncWebServer` instance constructed in `main.cpp`. Every route either
+reads existing read-only state (`IBehaviorEngine::state()`,
+`EyeController::currentPose()`) or pushes an `EyeCommand` into the shared
+`CommandQueue` — Networking never touches `IAnimationEngine` or hardware
+directly, preserving invariant 3 the same way `Behavior` does. See
+`docs/superpowers/specs/2026-07-25-v0.4-connectivity-design.md` for the
+full design, including why the REST surface covers `wink`/`sleep`/`wake`
+(not just the `look`/`blink`/`expression` this file's older "REST API
+versioning" section below originally scoped).
+
 ## Namespace
 
 All firmware code lives under `namespace eyesee`.
 
 ## REST API versioning
 
-All REST routes (not implemented yet) are versioned under `/api/v1/`:
-`GET /api/v1/status`, `POST /api/v1/look`, `POST /api/v1/blink`,
-`POST /api/v1/expression`, `POST /api/v1/config`, `GET /api/v1/config`.
+All REST routes are versioned under `/api/v1/`: `GET /api/v1/status`,
+`POST /api/v1/look`, `POST /api/v1/blink`, `POST /api/v1/wink`,
+`POST /api/v1/expression`, `POST /api/v1/sleep`, `POST /api/v1/wake`.
+`GET`/`POST /api/v1/config` is not implemented yet — v0.5, once
+`CalibrationManager` persists via `PreferencesStore`.
 
 ## Testing strategy
 
@@ -149,6 +168,11 @@ All REST routes (not implemented yet) are versioned under `/api/v1/`:
 `native` PlatformIO environment (`pio test -e native`). `Logger`,
 `MotionHardware` (specifically `Pca9685ServoOutput`), and `Storage`
 (`PreferencesStore`) depend on Arduino/hardware headers and are verified only
-by `pio run -e esp32dev` compiling successfully. `Networking` and `OTA` are
-Arduino-free today (they only include `<cstdint>`) — they will gain hardware
-dependencies once their bodies are implemented.
+by `pio run -e esp32dev` compiling successfully.
+
+`Protocol` (JSON encode/decode) is Arduino-free (only ArduinoJson, which is
+portable) and unit-tested on the host alongside `Configuration`,
+`CalibrationManager`, `EyeController`, `Animation`, and `Behavior`.
+`Networking` (`WifiManager`, `WebServer`, `RestApi`, `WebSocketServer`) is
+Arduino/ESPAsyncWebServer-bound and verified only by `pio run -e esp32dev`,
+same as `Logger`/`MotionHardware`/`Storage`/`OTA`.

@@ -36,10 +36,10 @@ For reference: [Will Cogley's EYEMECH ε3.2 adapted for ESP32 + PCA9685](https:/
 - Config REST endpoints: `GET`/`POST /api/v1/config` (one channel per POST; `RestApi`'s one carve-out to mutate state outside `CommandQueue`, since calibration isn't a live-motion command)
 - `clang-tidy` in CI (informational this pass, not a hard gate — first-ever lint pass on this codebase)
 
-## v0.6 — Integrations
-- Face-tracking bridge
-- MQTT
-- Bluetooth gamepad control
+## v0.6 — Integrations (complete)
+- Face-tracking bridge: `POST /api/v1/track`, a new `CommandType::Track`, and a `TrackingBehavior` stale-timeout redesign (recenters if a tracked face goes unseen for 3s without `hold: true`)
+- MQTT: `lib/Integrations/MqttBridge` subscribes to `<prefix>/command` (reusing every existing `lib/Protocol` parser via one new type-dispatch function) and publishes `<prefix>/status` at 1Hz
+- Bluetooth gamepad control: `lib/Integrations/GamepadBridge` on `tbekas/BLE-Gamepad-Client` (BLE HID host, Xbox Wireless Controller), mapped via a pure, native-tested `GamepadInputMapper`
 
 ## v1.0 — Stable release
 - API freeze

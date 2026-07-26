@@ -59,6 +59,7 @@ pio test -e native        # run hardware-independent unit tests
 | `lib/Protocol` | Native-testable JSON encode/decode for the Networking layer |
 | `lib/Networking` | Web UI, REST API, WebSocket |
 | `lib/Storage` | Flash-backed key/value persistence |
+| `lib/Integrations` | MQTT and Bluetooth gamepad input, native-tested mapping logic |
 | `lib/OTA` | Over-the-air updates (placeholder) |
 | `lib/Logger` | Serial logging |
 | `lib/Configuration` | Typed config structs + `CalibrationManager` |

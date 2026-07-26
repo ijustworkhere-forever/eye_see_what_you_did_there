@@ -191,6 +191,33 @@ architectural surface. See
 full design, including the exact persistence key table (every key ≤15
 characters, ESP32 NVS's hard limit).
 
+## Integrations (v0.6)
+
+Face-tracking reuses the existing REST/Protocol/Behavior machinery rather
+than a new external protocol: a new `CommandType::Track` and
+`IBehavior::receiveGazeTarget()` hook let `BehaviorEngine::dispatch()`
+forward a `Track` command's payload to whichever behavior is active
+(today, always `TrackingBehavior`, since `Track` also calls
+`setState(EyeState::Tracking)`). `TrackingBehavior` now recenters once if
+no new target arrives within 3 seconds, unless the last-received target's
+`hold` field is `true` — implementing the "auto-return to center" decision
+the original v0.2 spec always meant `GazeTarget.hold` to drive.
+
+MQTT and Bluetooth gamepad are genuinely new external-protocol
+integrations, living in a new leaf library, `lib/Integrations`. Both
+follow the same rule `Networking` established in v0.4: every input source
+only ever pushes an `EyeCommand` into the shared `CommandQueue`, never
+touching `IAnimationEngine` or hardware directly. `MqttBridge` reuses
+every existing `lib/Protocol` JSON parser (no new per-command parsing
+logic — only one small type-dispatch wrapper, `parseMqttCommand`).
+`GamepadBridge` uses `tbekas/BLE-Gamepad-Client` as a BLE HID *host*
+(the ESP32 connects to a real Xbox controller) — deliberately not
+Bluepad32, which requires swapping this project's Arduino framework
+entirely. `GamepadInputMapper` (the actual button/stick-to-`EyeCommand`
+mapping) is pure and native-tested; only the BLE wiring itself is
+Arduino-bound and native-ignored (via `#ifdef ARDUINO`, matching
+`lib/Storage`'s v0.5 pattern — `lib/Integrations` is not folder-ignored).
+
 ## Namespace
 
 All firmware code lives under `namespace eyesee`.
@@ -199,8 +226,8 @@ All firmware code lives under `namespace eyesee`.
 
 All REST routes are versioned under `/api/v1/`: `GET /api/v1/status`,
 `POST /api/v1/look`, `POST /api/v1/blink`, `POST /api/v1/wink`,
-`POST /api/v1/expression`, `POST /api/v1/sleep`, `POST /api/v1/wake`,
-`GET`/`POST /api/v1/config`.
+`POST /api/v1/expression`, `POST /api/v1/track`, `POST /api/v1/sleep`,
+`POST /api/v1/wake`, `GET`/`POST /api/v1/config`.
 
 ## Testing strategy
 

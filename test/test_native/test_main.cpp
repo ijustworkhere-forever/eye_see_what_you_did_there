@@ -36,8 +36,13 @@ extern void test_cubic_starts_slower_than_linear_and_ease_in_out();
 extern void test_ease_clamps_out_of_range_t();
 
 // Animation tests
-extern void test_animate_gaze_applies_pose_immediately();
-extern void test_animate_blink_closes_eyelids_immediately();
+extern void test_animate_gaze_does_not_reach_target_before_duration_elapses();
+extern void test_animate_gaze_reaches_target_after_full_duration();
+extern void test_animate_gaze_uses_cubic_easing_not_linear();
+extern void test_animate_blink_closes_lids_only_after_full_duration();
+extern void test_gaze_and_eyelid_transitions_compose_in_the_same_frame();
+extern void test_wink_left_preserves_right_eyelids();
+extern void test_blink_on_arrival_triggers_blink_after_gaze_completes();
 
 // CommandQueue tests (Behavior module)
 extern void test_push_pop_preserves_fifo_order();
@@ -74,8 +79,13 @@ int main(int argc, char** argv) {
     RUN_TEST(test_cubic_starts_and_ends_at_bounds);
     RUN_TEST(test_cubic_starts_slower_than_linear_and_ease_in_out);
     RUN_TEST(test_ease_clamps_out_of_range_t);
-    RUN_TEST(test_animate_gaze_applies_pose_immediately);
-    RUN_TEST(test_animate_blink_closes_eyelids_immediately);
+    RUN_TEST(test_animate_gaze_does_not_reach_target_before_duration_elapses);
+    RUN_TEST(test_animate_gaze_reaches_target_after_full_duration);
+    RUN_TEST(test_animate_gaze_uses_cubic_easing_not_linear);
+    RUN_TEST(test_animate_blink_closes_lids_only_after_full_duration);
+    RUN_TEST(test_gaze_and_eyelid_transitions_compose_in_the_same_frame);
+    RUN_TEST(test_wink_left_preserves_right_eyelids);
+    RUN_TEST(test_blink_on_arrival_triggers_blink_after_gaze_completes);
     RUN_TEST(test_push_pop_preserves_fifo_order);
     RUN_TEST(test_push_fails_when_full);
     RUN_TEST(test_clear_empties_queue);

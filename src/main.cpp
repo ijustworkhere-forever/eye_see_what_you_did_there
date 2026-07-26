@@ -8,7 +8,7 @@
 #include "Logger.h"
 #include "OtaManager.h"
 #include "Pca9685ServoOutput.h"
-#include "PassthroughAnimationEngine.h"
+#include "RealAnimationEngine.h"
 #include "PreferencesStore.h"
 #include "RestApi.h"
 #include "WebServer.h"
@@ -26,7 +26,7 @@ constexpr const char* kLogTag = "main";
 Pca9685ServoOutput servoOutput;
 CalibrationManager calibration;
 EyeController eyeController(servoOutput, calibration);
-PassthroughAnimationEngine animationEngine(eyeController);
+RealAnimationEngine animationEngine(eyeController, calibration);
 CommandQueue commandQueue;
 IdleBehaviorStub idleBehavior;
 BehaviorEngine behaviorEngine(animationEngine, commandQueue, idleBehavior);

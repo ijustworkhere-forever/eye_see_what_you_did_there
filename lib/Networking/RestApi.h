@@ -2,22 +2,36 @@
 
 #include <cstdint>
 
+#include "CommandQueue.h"
+#include "EyeController.h"
+#include "IBehaviorEngine.h"
+#include "WifiManager.h"
+
+class AsyncWebServer;
+
 namespace eyesee {
 
 /**
- * Placeholder REST API. Planned versioned routes (docs/ROADMAP.md v0.4),
- * each pushing an EyeCommand into the shared CommandQueue:
- *   GET  /api/v1/status
- *   POST /api/v1/look
- *   POST /api/v1/blink
- *   POST /api/v1/expression
- *   POST /api/v1/config
- *   GET  /api/v1/config
+ * Registers /api/v1/* routes on the shared AsyncWebServer. Every route
+ * either reads existing read-only state (status) or pushes an EyeCommand
+ * into CommandQueue (everything else) -- never touches IAnimationEngine or
+ * hardware directly.
  */
 class RestApi {
 public:
-    void begin();
+    RestApi(CommandQueue& commandQueue, const IBehaviorEngine& behaviorEngine,
+            const EyeController& eyeController, const WifiManager& wifiManager);
+
+    /** Registers all routes. Call once from setup(), before server.begin(). */
+    void begin(AsyncWebServer& server);
+    /** No-op -- request-driven; kept for the shared per-frame update() convention. */
     void update(uint32_t deltaMs);
+
+private:
+    CommandQueue& commandQueue_;
+    const IBehaviorEngine& behaviorEngine_;
+    const EyeController& eyeController_;
+    const WifiManager& wifiManager_;
 };
 
 }  // namespace eyesee

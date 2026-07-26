@@ -38,14 +38,7 @@ WebSocketServer webSocketServer;
 OtaManager otaManager;
 
 uint32_t lastFrameMillis = 0;
-
-uint32_t tickDeltaMs() {
-    const uint32_t nowMillis = millis();
-    const uint32_t deltaMs =
-        nowMillis - lastFrameMillis;  // wraps correctly via unsigned arithmetic
-    lastFrameMillis = nowMillis;
-    return deltaMs;
-}
+constexpr uint32_t kFramePeriodMs = 10;  // 100Hz target
 
 }  // namespace
 
@@ -69,17 +62,20 @@ void setup() {
 }
 
 void loop() {
-    // TODO: enforce ~100Hz frame pacing (docs/ROADMAP.md v0.2) — currently runs
-    // as fast as the scheduler allows
-    const uint32_t deltaMs = tickDeltaMs();
+    const uint32_t nowMillis = millis();
+    const uint32_t elapsed = nowMillis - lastFrameMillis;  // wraps correctly via unsigned arithmetic
+    if (elapsed < kFramePeriodMs) {
+        return;
+    }
+    lastFrameMillis = nowMillis;
 
-    behaviorEngine.update(deltaMs);
-    animationEngine.update(deltaMs);
-    eyeController.update(deltaMs);
-    servoOutput.update(deltaMs);
+    behaviorEngine.update(elapsed);
+    animationEngine.update(elapsed);
+    eyeController.update(elapsed);
+    servoOutput.update(elapsed);
 
-    webServer.update(deltaMs);
-    restApi.update(deltaMs);
-    webSocketServer.update(deltaMs);
-    otaManager.update(deltaMs);
+    webServer.update(elapsed);
+    restApi.update(elapsed);
+    webSocketServer.update(elapsed);
+    otaManager.update(elapsed);
 }

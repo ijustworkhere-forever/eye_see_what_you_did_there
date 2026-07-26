@@ -24,8 +24,10 @@ enum class EyeChannel {
  * Owns the in-memory EyeConfig: per-servo limits, neutral position,
  * inversion, mirroring, and mechanical offset.
  *
- * Persistence to flash (via IStorage) is not implemented this pass —
- * see docs/ROADMAP.md v0.5.
+ * Persistence to flash is implemented via `loadFromStorage`/`saveToStorage`
+ * below (see `docs/superpowers/specs/2026-07-26-v0.5-persistence-ota-design.md`).
+ * `setServoConfig()` itself stays storage-agnostic; callers (currently `RestApi`'s
+ * config route) explicitly call `saveToStorage()` after mutating.
  */
 class CalibrationManager {
 public:

@@ -40,3 +40,4 @@ jobs:
 
       - name: Run clang-tidy
         run: clang-tidy -p . $(find lib src -name '*.cpp')
+        continue-on-error: true

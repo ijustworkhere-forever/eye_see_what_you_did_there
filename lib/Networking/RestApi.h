@@ -17,7 +17,10 @@ namespace eyesee {
  * Registers /api/v1/* routes on the shared AsyncWebServer. Every route
  * either reads existing read-only state (status) or pushes an EyeCommand
  * into CommandQueue (everything else) -- never touches IAnimationEngine or
- * hardware directly.
+ * hardware directly. One exception: `POST /api/v1/config` calls
+ * `CalibrationManager::setServoConfig()` directly — calibration is static
+ * tuning, not a live-motion command, so it doesn't belong in the CommandQueue
+ * pipeline; see `docs/architecture.md`'s Persistence & OTA section.
  */
 class RestApi {
 public:

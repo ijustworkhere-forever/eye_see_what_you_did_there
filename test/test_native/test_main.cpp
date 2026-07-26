@@ -130,6 +130,14 @@ extern void test_parse_expression_command_reads_known_name();
 extern void test_parse_expression_command_rejects_unknown_name();
 extern void test_parse_expression_command_reads_custom_duration();
 
+// EyeConfigJson tests
+extern void test_channel_string_round_trips_every_value();
+extern void test_channel_from_string_rejects_unknown_name();
+extern void test_parse_config_update_reads_all_fields();
+extern void test_parse_config_update_rejects_unknown_channel();
+extern void test_parse_config_update_rejects_missing_required_field();
+extern void test_build_config_json_reports_all_six_channels_and_look_range();
+
 // FakeStorage smoke tests
 extern void test_fake_storage_round_trips_every_type();
 extern void test_fake_storage_missing_key_returns_false();
@@ -231,6 +239,12 @@ int main(int argc, char** argv) {
     RUN_TEST(test_parse_expression_command_reads_known_name);
     RUN_TEST(test_parse_expression_command_rejects_unknown_name);
     RUN_TEST(test_parse_expression_command_reads_custom_duration);
+    RUN_TEST(test_channel_string_round_trips_every_value);
+    RUN_TEST(test_channel_from_string_rejects_unknown_name);
+    RUN_TEST(test_parse_config_update_reads_all_fields);
+    RUN_TEST(test_parse_config_update_rejects_unknown_channel);
+    RUN_TEST(test_parse_config_update_rejects_missing_required_field);
+    RUN_TEST(test_build_config_json_reports_all_six_channels_and_look_range);
     RUN_TEST(test_fake_storage_round_trips_every_type);
     RUN_TEST(test_fake_storage_missing_key_returns_false);
     return UNITY_END();

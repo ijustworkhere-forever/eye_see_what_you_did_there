@@ -28,6 +28,13 @@ extern void test_wink_left_closes_only_left_lids();
 extern void test_set_expression_does_not_change_pose();
 extern void test_set_idle_resets_to_default_pose();
 
+// Easing tests
+extern void test_linear_easing_is_identity();
+extern void test_ease_in_out_starts_and_ends_at_bounds();
+extern void test_cubic_starts_and_ends_at_bounds();
+extern void test_cubic_starts_slower_than_linear_and_ease_in_out();
+extern void test_ease_clamps_out_of_range_t();
+
 // Animation tests
 extern void test_animate_gaze_applies_pose_immediately();
 extern void test_animate_blink_closes_eyelids_immediately();
@@ -62,6 +69,11 @@ int main(int argc, char** argv) {
     RUN_TEST(test_wink_left_closes_only_left_lids);
     RUN_TEST(test_set_expression_does_not_change_pose);
     RUN_TEST(test_set_idle_resets_to_default_pose);
+    RUN_TEST(test_linear_easing_is_identity);
+    RUN_TEST(test_ease_in_out_starts_and_ends_at_bounds);
+    RUN_TEST(test_cubic_starts_and_ends_at_bounds);
+    RUN_TEST(test_cubic_starts_slower_than_linear_and_ease_in_out);
+    RUN_TEST(test_ease_clamps_out_of_range_t);
     RUN_TEST(test_animate_gaze_applies_pose_immediately);
     RUN_TEST(test_animate_blink_closes_eyelids_immediately);
     RUN_TEST(test_push_pop_preserves_fifo_order);

@@ -231,10 +231,21 @@ All firmware code lives under `namespace eyesee`.
 
 ## REST API versioning
 
-All REST routes are versioned under `/api/v1/`: `GET /api/v1/status`,
-`POST /api/v1/look`, `POST /api/v1/blink`, `POST /api/v1/wink`,
-`POST /api/v1/expression`, `POST /api/v1/track`, `POST /api/v1/sleep`,
-`POST /api/v1/wake`, `GET`/`POST /api/v1/config`.
+All REST routes are versioned under `/api/v1/`. As of v1.0, this is a
+frozen API: no breaking change lands under `v1` (a breaking change ships
+as `v2` alongside the still-working `v1`); additive changes (new optional
+fields, new routes) may still land under `v1`. The MQTT and WebSocket
+protocols follow the same additive-only policy despite having no
+path-based version literal. See `docs/api-reference.md` for the full route
+list, request/response shapes, and status codes — this section is no
+longer the source of truth for that detail.
+
+Every `GET /api/v1/status` response and MQTT `<prefix>/status` publish
+includes a `firmwareVersion` field (`include/Version.h`'s
+`kFirmwareVersion`) so a client can confirm which frozen API version a
+device is running. The WebSocket broadcast omits it, matching that
+payload's existing bandwidth-motivated leanness (it already omits
+`wifiConnected` for the same reason).
 
 ## Testing strategy
 

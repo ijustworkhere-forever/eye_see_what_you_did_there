@@ -47,6 +47,7 @@ void RealAnimationEngine::animateGaze(const GazeTarget& target) {
 
 void RealAnimationEngine::animateBlink(uint32_t durationMs) {
     startEyelidTransition(0.0f, 0.0f, 0.0f, 0.0f, durationMs);
+    eyelid_.autoReopenOnComplete = true;
 }
 
 void RealAnimationEngine::animateWinkLeft(uint32_t durationMs) {
@@ -80,6 +81,8 @@ void RealAnimationEngine::update(uint32_t deltaMs) {
     }
 
     bool gazeJustCompletedWithBlink = false;
+    bool eyelidJustCompletedWithReopen = false;
+    uint32_t reopenDurationMs = 0;
 
     if (gaze_.active) {
         gaze_.elapsedMs += deltaMs;
@@ -120,6 +123,9 @@ void RealAnimationEngine::update(uint32_t deltaMs) {
             eyelid_.currentUpperRightLid = eyelid_.targetUpperRightLid;
             eyelid_.currentLowerRightLid = eyelid_.targetLowerRightLid;
             eyelid_.active = false;
+            eyelidJustCompletedWithReopen = eyelid_.autoReopenOnComplete;
+            reopenDurationMs = eyelid_.durationMs;
+            eyelid_.autoReopenOnComplete = false;
         }
     }
 
@@ -134,6 +140,9 @@ void RealAnimationEngine::update(uint32_t deltaMs) {
 
     if (gazeJustCompletedWithBlink) {
         animateBlink(kDefaultBlinkDurationMs);
+    }
+    if (eyelidJustCompletedWithReopen) {
+        animateWake(reopenDurationMs);
     }
 }
 
@@ -163,6 +172,7 @@ void RealAnimationEngine::startEyelidTransition(float targetUpperLeftLid, float 
     eyelid_.elapsedMs = 0;
     eyelid_.durationMs = durationMs;
     eyelid_.active = true;
+    eyelid_.autoReopenOnComplete = false;
 }
 
 }  // namespace eyesee

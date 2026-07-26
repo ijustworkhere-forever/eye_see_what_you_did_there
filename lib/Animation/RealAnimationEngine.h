@@ -69,6 +69,7 @@ private:
         uint32_t elapsedMs = 0;
         uint32_t durationMs = 0;
         bool active = false;
+        bool autoReopenOnComplete = false;  // only animateBlink() sets this
     };
 
     EyeController& eyeController_;

@@ -218,5 +218,49 @@ void test_animate_blink_with_zero_duration_completes_in_one_frame() {
     TEST_ASSERT_EQUAL_FLOAT(0.0f, controller.currentPose().upperLeftLid);
 }
 
+void test_animate_blink_reopens_after_close_phase_completes() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    animation.animateBlink(100);
+    animation.update(100);  // completes close phase
+    TEST_ASSERT_EQUAL_FLOAT(0.0f, controller.currentPose().upperLeftLid);
+
+    animation.update(50);  // reopen in progress
+    TEST_ASSERT_TRUE(controller.currentPose().upperLeftLid > 0.0f);
+    TEST_ASSERT_TRUE(controller.currentPose().upperLeftLid < 1.0f);
+
+    animation.update(60);  // reopen completes (100ms reopen duration)
+    TEST_ASSERT_EQUAL_FLOAT(1.0f, controller.currentPose().upperLeftLid);
+}
+
+void test_animate_wink_left_does_not_auto_reopen() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    animation.animateWinkLeft(100);
+    animation.update(100);
+    animation.update(500);  // long after completion
+
+    TEST_ASSERT_EQUAL_FLOAT(0.0f, controller.currentPose().upperLeftLid);
+}
+
+void test_animate_sleep_does_not_auto_reopen() {
+    FakeServoOutput output;
+    CalibrationManager calibration;
+    EyeController controller(output, calibration);
+    RealAnimationEngine animation(controller, calibration);
+
+    animation.animateSleep(100);
+    animation.update(100);
+    animation.update(500);
+
+    TEST_ASSERT_EQUAL_FLOAT(0.0f, controller.currentPose().upperLeftLid);
+}
+
 // No main() here — test/test_native/test_main.cpp is the sole file with
 // main() (see its own comment for why).

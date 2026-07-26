@@ -14,10 +14,9 @@ design.
 live in `Behavior` (docs/ROADMAP.md v0.3), not here — this module only
 executes whatever gaze/eyelid targets it's given.
 
-**Future work:** Expression pose blending (v0.3), caller-selectable easing
-per call (currently fixed per intent — gaze uses Cubic, eyelid moves use
-EaseInOut; expression is a no-op with no interpolation). `animateBlink()`/
-`animateWinkLeft()`/`animateWinkRight()`/`animateSleep()` only close — they
-never auto-reopen. This is more consequential now that `blinkOnArrival` can
-auto-trigger a blink; something upstream (behavior logic, v0.3) needs to call
-`wake()` afterward, or eyes stay shut indefinitely.
+**Future work:** Expression pose blending is done (v0.3). `winkLeft()`/
+`winkRight()`/`sleep()` still only close — they never auto-reopen (only
+`animateBlink()` does, symmetrically, over the same duration as the
+close phase). Caller-selectable easing per call (currently fixed per
+intent — gaze uses Cubic, eyelid moves use EaseInOut, expression uses
+Linear).

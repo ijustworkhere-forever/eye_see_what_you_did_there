@@ -10,7 +10,16 @@ function postJson(path, body) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body || {}),
-    });
+    })
+        .then((response) => {
+            if (!response.ok) {
+                console.error(`${path} failed: HTTP ${response.status}`);
+            }
+            return response;
+        })
+        .catch((error) => {
+            console.error(`${path} failed: ${error}`);
+        });
 }
 
 function sendLook(normalizedX, normalizedY) {

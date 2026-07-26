@@ -47,6 +47,9 @@ void test_build_status_json_reports_state_pose_and_wifi() {
     pose.lookX = 0.25f;
     pose.lookY = -0.5f;
     pose.upperLeftLid = 0.9f;
+    pose.lowerLeftLid = 0.8f;
+    pose.upperRightLid = 0.7f;
+    pose.lowerRightLid = 0.6f;
 
     const std::string json = buildStatusJson(EyeState::Tracking, pose, true);
 
@@ -57,6 +60,9 @@ void test_build_status_json_reports_state_pose_and_wifi() {
     TEST_ASSERT_EQUAL_FLOAT(0.25f, doc["pose"]["lookX"].as<float>());
     TEST_ASSERT_EQUAL_FLOAT(-0.5f, doc["pose"]["lookY"].as<float>());
     TEST_ASSERT_EQUAL_FLOAT(0.9f, doc["pose"]["upperLeftLid"].as<float>());
+    TEST_ASSERT_EQUAL_FLOAT(0.8f, doc["pose"]["lowerLeftLid"].as<float>());
+    TEST_ASSERT_EQUAL_FLOAT(0.7f, doc["pose"]["upperRightLid"].as<float>());
+    TEST_ASSERT_EQUAL_FLOAT(0.6f, doc["pose"]["lowerRightLid"].as<float>());
 }
 
 void test_build_broadcast_json_omits_wifi_field() {

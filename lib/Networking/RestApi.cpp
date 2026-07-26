@@ -49,13 +49,13 @@ void RestApi::begin(AsyncWebServer& server) {
             return;
         }
         respondQueued(request, commandQueue_, command);
-    });
+    }).setMaxContentLength(512);
 
     server.on("/api/v1/blink", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
         EyeCommand command;
         parseBlinkCommand(json, command);  // always succeeds
         respondQueued(request, commandQueue_, command);
-    });
+    }).setMaxContentLength(512);
 
     server.on("/api/v1/wink", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
         EyeCommand command;
@@ -65,7 +65,7 @@ void RestApi::begin(AsyncWebServer& server) {
             return;
         }
         respondQueued(request, commandQueue_, command);
-    });
+    }).setMaxContentLength(512);
 
     server.on("/api/v1/expression", HTTP_POST, [this](AsyncWebServerRequest* request, JsonVariant& json) {
         EyeCommand command;
@@ -75,7 +75,7 @@ void RestApi::begin(AsyncWebServer& server) {
             return;
         }
         respondQueued(request, commandQueue_, command);
-    });
+    }).setMaxContentLength(512);
 
     server.on("/api/v1/sleep", HTTP_POST, [this](AsyncWebServerRequest* request) {
         EyeCommand command;

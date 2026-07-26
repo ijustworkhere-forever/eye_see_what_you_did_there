@@ -13,7 +13,6 @@ void WebSocketServer::begin(AsyncWebServer& server) {
 }
 
 void WebSocketServer::update(uint32_t deltaMs) {
-    uptimeMs_ += deltaMs;
     ws_.cleanupClients();
 
     msSinceLastBroadcast_ += deltaMs;
@@ -22,8 +21,12 @@ void WebSocketServer::update(uint32_t deltaMs) {
     }
     msSinceLastBroadcast_ = 0;
 
+    if (ws_.count() == 0) {
+        return;
+    }
+
     const std::string payload =
-        buildBroadcastJson(behaviorEngine_.state(), eyeController_.currentPose(), uptimeMs_);
+        buildBroadcastJson(behaviorEngine_.state(), eyeController_.currentPose(), millis());
     ws_.textAll(payload.c_str());
 }
 

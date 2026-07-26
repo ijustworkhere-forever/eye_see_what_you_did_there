@@ -4,6 +4,7 @@
 #include <ArduinoJson.h>
 
 #include "EyeStateJson.h"
+#include "Version.h"
 
 using eyesee::buildBroadcastJson;
 using eyesee::buildErrorJson;
@@ -14,6 +15,7 @@ using eyesee::Expression;
 using eyesee::eyeStateToString;
 using eyesee::expressionFromString;
 using eyesee::expressionToString;
+using eyesee::kFirmwareVersion;
 
 void test_eye_state_to_string_covers_every_value() {
     TEST_ASSERT_EQUAL_STRING("Startup", eyeStateToString(EyeState::Startup));
@@ -57,6 +59,7 @@ void test_build_status_json_reports_state_pose_and_wifi() {
     TEST_ASSERT_FALSE(deserializeJson(doc, json));
     TEST_ASSERT_EQUAL_STRING("Tracking", doc["state"].as<const char*>());
     TEST_ASSERT_TRUE(doc["wifiConnected"].as<bool>());
+    TEST_ASSERT_EQUAL_STRING(kFirmwareVersion, doc["firmwareVersion"].as<const char*>());
     TEST_ASSERT_EQUAL_FLOAT(0.25f, doc["pose"]["lookX"].as<float>());
     TEST_ASSERT_EQUAL_FLOAT(-0.5f, doc["pose"]["lookY"].as<float>());
     TEST_ASSERT_EQUAL_FLOAT(0.9f, doc["pose"]["upperLeftLid"].as<float>());
@@ -74,6 +77,15 @@ void test_build_broadcast_json_omits_wifi_field() {
     TEST_ASSERT_EQUAL_STRING("Idle", doc["state"].as<const char*>());
     TEST_ASSERT_EQUAL_UINT32(12345, doc["uptimeMs"].as<uint32_t>());
     TEST_ASSERT_TRUE(doc["wifiConnected"].isNull());
+}
+
+void test_build_broadcast_json_omits_firmware_version_field() {
+    EyePose pose;
+    const std::string json = buildBroadcastJson(EyeState::Idle, pose, 12345);
+
+    JsonDocument doc;
+    TEST_ASSERT_FALSE(deserializeJson(doc, json));
+    TEST_ASSERT_TRUE(doc["firmwareVersion"].isNull());
 }
 
 void test_build_error_json_wraps_message() {

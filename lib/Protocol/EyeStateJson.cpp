@@ -1,4 +1,5 @@
 #include "EyeStateJson.h"
+#include "Version.h"
 
 #define ARDUINOJSON_ENABLE_STD_STRING 1
 #include <ArduinoJson.h>
@@ -56,6 +57,7 @@ std::string buildStatusJson(EyeState state, const EyePose& pose, bool wifiConnec
     JsonDocument doc;
     doc["state"] = eyeStateToString(state);
     doc["wifiConnected"] = wifiConnected;
+    doc["firmwareVersion"] = kFirmwareVersion;
     JsonObject poseObj = doc["pose"].to<JsonObject>();
     writePose(poseObj, pose);
     std::string output;

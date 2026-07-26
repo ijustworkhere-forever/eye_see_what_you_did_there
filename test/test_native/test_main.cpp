@@ -118,6 +118,7 @@ extern void test_expression_string_round_trips_every_value();
 extern void test_expression_from_string_rejects_unknown_name();
 extern void test_build_status_json_reports_state_pose_and_wifi();
 extern void test_build_broadcast_json_omits_wifi_field();
+extern void test_build_broadcast_json_omits_firmware_version_field();
 extern void test_build_error_json_wraps_message();
 
 // EyeCommandJson tests
@@ -264,6 +265,7 @@ int main(int argc, char** argv) {
     RUN_TEST(test_expression_from_string_rejects_unknown_name);
     RUN_TEST(test_build_status_json_reports_state_pose_and_wifi);
     RUN_TEST(test_build_broadcast_json_omits_wifi_field);
+    RUN_TEST(test_build_broadcast_json_omits_firmware_version_field);
     RUN_TEST(test_build_error_json_wraps_message);
     RUN_TEST(test_parse_look_command_reads_required_and_optional_fields);
     RUN_TEST(test_parse_look_command_defaults_optional_fields);

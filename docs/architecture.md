@@ -53,7 +53,8 @@ each frame; `EyeController` converts `EyePose` into a calibrated
    (Web UI, REST, WebSocket, Bluetooth, Serial) pushes an `EyeCommand`;
    reads are limited to existing read-only getters
    (`IBehaviorEngine::state()`, `EyeController::currentPose()`) — never
-   `IAnimationEngine` or hardware directly.
+   `IAnimationEngine` or hardware directly. One documented exception: see
+   "Persistence & OTA (v0.5)" below for `RestApi`'s config route.
 
 A side effect of invariant 2: swapping `IServoOutput` for a host-side
 implementation (e.g. an SDL window drawing the eyes) is a one-class change
@@ -134,7 +135,12 @@ Configuration                          MotionHardware
                                            EyeController itself, so hardware and
                                            calibration types stay out of scope)
 
-Logger, Storage, Networking, OTA: leaf modules, no dependency on the above.
+Logger, OTA: leaf modules, no dependency on the above. Storage
+(`IStorage`) is also a leaf, but `Configuration` now depends on it
+(`CalibrationManager::loadFromStorage`/`saveToStorage`, v0.5) — the
+dependency runs Configuration -> Storage, not the reverse. Networking
+depends on Protocol (v0.4) and, as of v0.5, on Configuration and Storage
+too (`RestApi`'s config route).
 ```
 
 ## Connectivity (v0.4)

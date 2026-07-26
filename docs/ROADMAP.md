@@ -31,7 +31,7 @@ For reference: [Will Cogley's EYEMECH ε3.2 adapted for ESP32 + PCA9685](https:/
 - New native-testable `lib/Protocol` module: JSON request parsing and response building, zero Arduino dependency
 
 ## v0.5 — Persistence & OTA (complete)
-- `CalibrationManager` <-> `PreferencesStore` persistence (`loadFromStorage`/`saveToStorage`, one flash write per config change)
+- `CalibrationManager` <-> `PreferencesStore` persistence (`loadFromStorage`/`saveToStorage`; `saveToStorage` writes all 37 keys unconditionally on every config change -- NVS itself skips no-op writes to unchanged keys, so in practice only the ~6 keys for the one changed channel actually hit flash)
 - `OtaManager`: real `ArduinoOTA` wiring — reflash over WiFi, no USB required
 - Config REST endpoints: `GET`/`POST /api/v1/config` (one channel per POST; `RestApi`'s one carve-out to mutate state outside `CommandQueue`, since calibration isn't a live-motion command)
 - `clang-tidy` in CI (informational this pass, not a hard gate — first-ever lint pass on this codebase)

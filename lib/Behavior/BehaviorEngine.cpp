@@ -3,17 +3,28 @@
 namespace eyesee {
 
 BehaviorEngine::BehaviorEngine(IAnimationEngine& animation, CommandQueue& commandQueue,
-                               IBehavior& defaultBehavior)
+                               IBehavior& fallbackBehavior)
     : animation_(animation),
       commandQueue_(commandQueue),
-      activeBehavior_(defaultBehavior),
+      fallbackBehavior_(fallbackBehavior),
+      activeBehavior_(nullptr),
       state_(EyeState::Startup) {
 }
 
+void BehaviorEngine::registerBehavior(EyeState state, IBehavior& behavior) {
+    behaviorsByState_[static_cast<size_t>(state)] = &behavior;
+}
+
 void BehaviorEngine::setState(EyeState state) {
+    IBehavior& next = behaviorForState(state);
+    if (activeBehavior_ != &next) {
+        if (activeBehavior_ != nullptr) {
+            activeBehavior_->onExit(animation_);
+        }
+        activeBehavior_ = &next;
+        activeBehavior_->onEnter(animation_);
+    }
     state_ = state;
-    // TODO: swap activeBehavior_ based on state once more IBehavior
-    // implementations exist (docs/ROADMAP.md v0.3). Single behavior this pass.
 }
 
 EyeState BehaviorEngine::state() const {
@@ -25,21 +36,42 @@ void BehaviorEngine::update(uint32_t deltaMs) {
     while (commandQueue_.pop(command)) {
         dispatch(command);
     }
-    activeBehavior_.update(deltaMs, animation_);
+    if (activeBehavior_ != nullptr) {
+        activeBehavior_->update(deltaMs, animation_);
+    }
 }
 
 void BehaviorEngine::dispatch(const EyeCommand& command) {
     switch (command.type) {
-        case CommandType::Look: animation_.animateGaze(command.gazeTarget); break;
-        case CommandType::Blink: animation_.animateBlink(command.durationMs); break;
-        case CommandType::WinkLeft: animation_.animateWinkLeft(command.durationMs); break;
-        case CommandType::WinkRight: animation_.animateWinkRight(command.durationMs); break;
-        case CommandType::Sleep: animation_.animateSleep(command.durationMs); break;
-        case CommandType::Wake: animation_.animateWake(command.durationMs); break;
+        case CommandType::Look:
+            animation_.animateGaze(command.gazeTarget);
+            break;
+        case CommandType::Blink:
+            animation_.animateBlink(command.durationMs);
+            break;
+        case CommandType::WinkLeft:
+            animation_.animateWinkLeft(command.durationMs);
+            break;
+        case CommandType::WinkRight:
+            animation_.animateWinkRight(command.durationMs);
+            break;
+        case CommandType::Sleep:
+            animation_.animateSleep(command.durationMs);
+            setState(EyeState::Sleeping);
+            break;
+        case CommandType::Wake:
+            animation_.animateWake(command.durationMs);
+            setState(EyeState::Idle);
+            break;
         case CommandType::SetExpression:
             animation_.animateExpression(command.expression, command.durationMs);
             break;
     }
+}
+
+IBehavior& BehaviorEngine::behaviorForState(EyeState state) const {
+    IBehavior* registered = behaviorsByState_[static_cast<size_t>(state)];
+    return registered != nullptr ? *registered : fallbackBehavior_;
 }
 
 }  // namespace eyesee

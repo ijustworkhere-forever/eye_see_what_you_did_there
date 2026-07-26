@@ -59,6 +59,12 @@ extern void test_update_drains_queue_and_dispatches_look_command();
 extern void test_update_dispatches_blink_command();
 extern void test_update_dispatches_all_remaining_command_types();
 extern void test_set_state_updates_reported_state();
+extern void test_register_behavior_and_set_state_switches_active_behavior();
+extern void test_set_state_calls_on_exit_then_on_enter();
+extern void test_set_state_to_same_state_does_not_retrigger_lifecycle();
+extern void test_unregistered_state_falls_back_to_fallback_behavior();
+extern void test_sleep_command_transitions_state_to_sleeping();
+extern void test_wake_command_transitions_state_to_idle();
 
 int main(int argc, char** argv) {
     UNITY_BEGIN();
@@ -103,5 +109,11 @@ int main(int argc, char** argv) {
     RUN_TEST(test_update_dispatches_blink_command);
     RUN_TEST(test_update_dispatches_all_remaining_command_types);
     RUN_TEST(test_set_state_updates_reported_state);
+    RUN_TEST(test_register_behavior_and_set_state_switches_active_behavior);
+    RUN_TEST(test_set_state_calls_on_exit_then_on_enter);
+    RUN_TEST(test_set_state_to_same_state_does_not_retrigger_lifecycle);
+    RUN_TEST(test_unregistered_state_falls_back_to_fallback_behavior);
+    RUN_TEST(test_sleep_command_transitions_state_to_sleeping);
+    RUN_TEST(test_wake_command_transitions_state_to_idle);
     return UNITY_END();
 }

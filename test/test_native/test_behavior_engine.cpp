@@ -3,6 +3,7 @@
 #include "BehaviorEngine.h"
 #include "IdleBehaviorStub.h"
 #include "support/FakeAnimationEngine.h"
+#include "support/FakeBehavior.h"
 
 using namespace eyesee;
 
@@ -86,6 +87,91 @@ void test_set_state_updates_reported_state() {
     engine.setState(EyeState::Manual);
 
     TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Manual), static_cast<int>(engine.state()));
+}
+
+void test_register_behavior_and_set_state_switches_active_behavior() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    FakeBehavior trackingBehavior(EyeState::Tracking);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    engine.registerBehavior(EyeState::Tracking, trackingBehavior);
+
+    engine.setState(EyeState::Tracking);
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(1, trackingBehavior.updateCallCount);
+    TEST_ASSERT_EQUAL_INT(0, idleBehavior.updateCallCount);
+}
+
+void test_set_state_calls_on_exit_then_on_enter() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    FakeBehavior trackingBehavior(EyeState::Tracking);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    engine.registerBehavior(EyeState::Idle, idleBehavior);
+    engine.registerBehavior(EyeState::Tracking, trackingBehavior);
+
+    engine.setState(EyeState::Idle);
+    engine.setState(EyeState::Tracking);
+
+    TEST_ASSERT_EQUAL_INT(1, idleBehavior.onExitCallCount);
+    TEST_ASSERT_EQUAL_INT(1, trackingBehavior.onEnterCallCount);
+}
+
+void test_set_state_to_same_state_does_not_retrigger_lifecycle() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    engine.registerBehavior(EyeState::Idle, idleBehavior);
+
+    engine.setState(EyeState::Idle);
+    engine.setState(EyeState::Idle);
+
+    TEST_ASSERT_EQUAL_INT(1, idleBehavior.onEnterCallCount);
+}
+
+void test_unregistered_state_falls_back_to_fallback_behavior() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+
+    engine.setState(EyeState::Calibration);  // never registered
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(1, idleBehavior.updateCallCount);
+}
+
+void test_sleep_command_transitions_state_to_sleeping() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+
+    EyeCommand sleepCmd;
+    sleepCmd.type = CommandType::Sleep;
+    queue.push(sleepCmd);
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Sleeping), static_cast<int>(engine.state()));
+}
+
+void test_wake_command_transitions_state_to_idle() {
+    CommandQueue queue;
+    FakeAnimationEngine animation;
+    FakeBehavior idleBehavior(EyeState::Idle);
+    BehaviorEngine engine(animation, queue, idleBehavior);
+    engine.setState(EyeState::Sleeping);
+
+    EyeCommand wakeCmd;
+    wakeCmd.type = CommandType::Wake;
+    queue.push(wakeCmd);
+    engine.update(16);
+
+    TEST_ASSERT_EQUAL_INT(static_cast<int>(EyeState::Idle), static_cast<int>(engine.state()));
 }
 
 // No main() here — test/test_native/test_main.cpp is the sole file with main()

@@ -30,11 +30,11 @@ For reference: [Will Cogley's EYEMECH ε3.2 adapted for ESP32 + PCA9685](https:/
 - Web UI: joystick, blink/wink/sleep/wake, expressions, live diagnostics
 - New native-testable `lib/Protocol` module: JSON request parsing and response building, zero Arduino dependency
 
-## v0.5 — Persistence & OTA
-- `CalibrationManager` <-> `PreferencesStore` persistence
-- `OtaManager`: `ArduinoOTA` wiring
-- Config REST endpoints (`GET`/`POST /api/v1/config`)
-- `clang-tidy` in CI
+## v0.5 — Persistence & OTA (complete)
+- `CalibrationManager` <-> `PreferencesStore` persistence (`loadFromStorage`/`saveToStorage`, one flash write per config change)
+- `OtaManager`: real `ArduinoOTA` wiring — reflash over WiFi, no USB required
+- Config REST endpoints: `GET`/`POST /api/v1/config` (one channel per POST; `RestApi`'s one carve-out to mutate state outside `CommandQueue`, since calibration isn't a live-motion command)
+- `clang-tidy` in CI (informational this pass, not a hard gate — first-ever lint pass on this codebase)
 
 ## v0.6 — Integrations
 - Face-tracking bridge

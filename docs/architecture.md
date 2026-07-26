@@ -164,6 +164,27 @@ full design, including why the REST surface covers `wink`/`sleep`/`wake`
 (not just the `look`/`blink`/`expression` this file's older "REST API
 versioning" section below originally scoped).
 
+## Persistence & OTA (v0.5)
+
+`IStorage` gained `int16_t`/`bool`/`float` accessors alongside the existing
+`uint16_t` pair, matching what `ServoConfig`/`EyeConfig` actually need.
+`CalibrationManager` gained `loadFromStorage(IStorage&)`/
+`saveToStorage(IStorage&) const` — explicit methods, not constructor
+injection, so its existing constructors and every existing native test
+stay unchanged. `main.cpp` calls `loadFromStorage()` once at boot;
+`RestApi`'s new `POST /api/v1/config` route calls `setServoConfig()` then
+`saveToStorage()` on every write, making persistence automatic from a
+client's point of view without `CalibrationManager` itself needing to know
+about flash. This is the one place `RestApi` mutates state outside
+`CommandQueue` — calibration is static per-servo tuning, not a live-motion
+`EyeCommand`, so routing it through the same queue that arbitrates gaze/
+expression timing would misuse a mechanism built for a different purpose.
+`OtaManager` wraps the global `ArduinoOTA` singleton with no new
+architectural surface. See
+`docs/superpowers/specs/2026-07-26-v0.5-persistence-ota-design.md` for the
+full design, including the exact persistence key table (every key ≤15
+characters, ESP32 NVS's hard limit).
+
 ## Namespace
 
 All firmware code lives under `namespace eyesee`.
@@ -172,9 +193,8 @@ All firmware code lives under `namespace eyesee`.
 
 All REST routes are versioned under `/api/v1/`: `GET /api/v1/status`,
 `POST /api/v1/look`, `POST /api/v1/blink`, `POST /api/v1/wink`,
-`POST /api/v1/expression`, `POST /api/v1/sleep`, `POST /api/v1/wake`.
-`GET`/`POST /api/v1/config` is not implemented yet — v0.5, once
-`CalibrationManager` persists via `PreferencesStore`.
+`POST /api/v1/expression`, `POST /api/v1/sleep`, `POST /api/v1/wake`,
+`GET`/`POST /api/v1/config`.
 
 ## Testing strategy
 
@@ -188,6 +208,12 @@ by `pio run -e esp32dev` compiling successfully.
 `Protocol` (JSON encode/decode) is Arduino-free (only ArduinoJson, which is
 portable) and unit-tested on the host alongside `Configuration`,
 `CalibrationManager`, `EyeController`, `Animation`, and `Behavior`.
+`lib/Protocol/EyeConfigJson` and `CalibrationManager::loadFromStorage`/
+`saveToStorage` (via a `FakeStorage` test double, the same pattern as
+`FakeAnimationEngine`/`FakeRandomSource`) are native-tested the same way;
+`PreferencesStore`'s new accessors and `OtaManager` stay Arduino-only,
+verified only by `pio run -e esp32dev`.
+
 `Networking` (`WifiManager`, `WebServer`, `RestApi`, `WebSocketServer`) is
 Arduino/ESPAsyncWebServer-bound and verified only by `pio run -e esp32dev`,
 same as `Logger`/`MotionHardware`/`Storage`/`OTA`.

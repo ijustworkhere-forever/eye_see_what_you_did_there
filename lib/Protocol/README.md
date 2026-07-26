@@ -15,7 +15,9 @@ mappings and response builders (`buildStatusJson`, `buildBroadcastJson`,
 `buildErrorJson`). `EyeCommandJson.h` — request body parsing into
 `EyeCommand` (`parseLookCommand`, `parseBlinkCommand`, `parseWinkCommand`,
 `parseExpressionCommand`), each returning a `ParseResult{ok, error}`.
+`EyeConfigJson.h` — `EyeChannel` string mappings and calibration request/
+response handling (`parseConfigUpdate`, `buildConfigJson`).
 
-**Consumed by:** `lib/Networking/RestApi` (every `EyeCommandJson` and
-`EyeStateJson` function except `buildBroadcastJson`) and
+**Consumed by:** `lib/Networking/RestApi` (every `EyeCommandJson`/
+`EyeStateJson`/`EyeConfigJson` function except `buildBroadcastJson`) and
 `lib/Networking/WebSocketServer` (`buildBroadcastJson` only).

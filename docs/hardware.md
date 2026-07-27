@@ -63,3 +63,27 @@ for your specific hardware rather than assuming the defaults are correct
 for your servos.
 
 PWM frequency: 50Hz (standard for analog hobby servos).
+
+## Physical build: 3D-printed parts and print settings
+
+The eye mechanism itself is not designed in this repo — it's built from
+[Will Cogley's Animatronic Eye Mechanism on MakerWorld](https://makerworld.com/en/models/1184807-animatronic-eye-mechanism-e3-2)
+and its [Instructables build guide](https://www.instructables.com/Animatronic-Eye-Mechanism/)
+(see the root `README.md`). `hardware/EyeMech_sled_compact.stl` in this
+repo is a custom addition: a sled that mounts an ESP32 mini and the
+PCA9685 board alongside the mechanism, not part of the original design.
+
+**Print settings notes (from this project's own build, sliced for a
+Bambu Lab X1 Carbon on the "0.12mm High Quality" profile):** getting a
+clean print of the mechanism's fine support geometry in PLA required a
+different material for the support base vs. the support interface —
+PLA for the support/raft base, PETG for the support/raft interface — with
+a rectilinear base pattern (2.5mm spacing, 0° angle), 90% initial layer
+density, and 0.12mm top/bottom Z distance with 2 top interface layers.
+Mixing support materials this way is a real trade-off, not a minor
+tweak: it forced the slicer to split what would otherwise be a single
+print plate into three, and added many hours to the total print time.
+If a single-material PLA print isn't giving you clean support removal on
+the fine eyelid/eye-socket geometry, this combination is what fixed it
+for this build — but expect the same plate-splitting and time cost if
+you use it too.

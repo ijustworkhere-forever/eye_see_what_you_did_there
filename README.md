@@ -20,6 +20,9 @@ include the mechanical design itself — the 3D-printable parts and
 assembly instructions this project builds on come from
 [Will Cogley's Animatronic Eye Mechanism on MakerWorld](https://makerworld.com/en/models/1184807-animatronic-eye-mechanism-e3-2)
 and its accompanying [Instructables build guide](https://www.instructables.com/Animatronic-Eye-Mechanism/).
+`hardware/` in this repo holds one addition to that design — a custom
+sled for mounting the ESP32 and PCA9685 — plus print-settings notes from
+this project's own build; see `docs/hardware.md`.
 
 ## Architecture
 

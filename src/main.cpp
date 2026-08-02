@@ -73,16 +73,29 @@ void setup() {
     Logger::info(kLogTag, "EyeSee firmware booting");
 
     servoOutput.init();
+    Logger::info(kLogTag, "servoOutput.init() done");
+
     preferencesStore.begin("eyesee");
     calibration.loadFromStorage(preferencesStore);
+    Logger::info(kLogTag, "storage/calibration loaded");
+
     wifiManager.begin(networkConfig.ssid, networkConfig.password);
+    Logger::info(kLogTag, "wifiManager.begin() done");
+
     webServer.begin(server);
     restApi.begin(server);
     webSocketServer.begin(server);
     server.begin();
+    Logger::info(kLogTag, "web server/REST/WebSocket begin() done");
+
     otaManager.begin();
+    Logger::info(kLogTag, "otaManager.begin() done");
+
     mqttBridge.begin(kMqttBrokerHost, kMqttBrokerPort, kMqttTopicPrefix);
+    Logger::info(kLogTag, "mqttBridge.begin() done");
+
     gamepadBridge.begin();
+    Logger::info(kLogTag, "gamepadBridge.begin() done");
 
     behaviorEngine.registerBehavior(EyeState::Idle, idleBehavior);
     behaviorEngine.registerBehavior(EyeState::Sleeping, sleepBehavior);
@@ -90,6 +103,7 @@ void setup() {
 
     behaviorEngine.setState(EyeState::Startup);
     eyeController.setIdle();
+    Logger::info(kLogTag, "eyeController.setIdle() done (all 6 servos commanded)");
     behaviorEngine.setState(EyeState::Idle);
 
     lastFrameMillis = millis();

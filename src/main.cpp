@@ -79,13 +79,23 @@ void setup() {
     calibration.loadFromStorage(preferencesStore);
     Logger::info(kLogTag, "storage/calibration loaded");
 
-    // TEMPORARY DIAGNOSTIC: WiFi radio power-on alone (WiFi.mode(), before any
-    // connect attempt) already trips the brownout -- confirmed by a prior test.
-    // This is now a hardware power-delivery problem, not something WiFi/BLE
-    // tuning can fix. Skip the entire networking + BLE stack here so the rest
-    // of the system (servos/PCA9685/mechanism) can be verified independently
-    // while that gets sorted. Revert this whole block once power is fixed.
-    Logger::info(kLogTag, "networking/BLE stack SKIPPED for diagnostic test");
+    wifiManager.begin(networkConfig.ssid, networkConfig.password);
+    Logger::info(kLogTag, "wifiManager.begin() done");
+
+    webServer.begin(server);
+    restApi.begin(server);
+    webSocketServer.begin(server);
+    server.begin();
+    Logger::info(kLogTag, "web server/REST/WebSocket begin() done");
+
+    otaManager.begin();
+    Logger::info(kLogTag, "otaManager.begin() done");
+
+    mqttBridge.begin(kMqttBrokerHost, kMqttBrokerPort, kMqttTopicPrefix);
+    Logger::info(kLogTag, "mqttBridge.begin() done");
+
+    gamepadBridge.begin();
+    Logger::info(kLogTag, "gamepadBridge.begin() done");
 
     behaviorEngine.registerBehavior(EyeState::Idle, idleBehavior);
     behaviorEngine.registerBehavior(EyeState::Sleeping, sleepBehavior);
@@ -115,13 +125,11 @@ void loop() {
     eyeController.update(elapsed);
     servoOutput.update(elapsed);
 
-    // TEMPORARY DIAGNOSTIC: matching skip for setup()'s networking/BLE skip --
-    // none of these had begin() called, so don't call update() on them either.
-    // wifiManager.update(elapsed);
-    // webServer.update(elapsed);
-    // restApi.update(elapsed);
-    // webSocketServer.update(elapsed);
-    // otaManager.update(elapsed);
-    // mqttBridge.update(elapsed);
-    // gamepadBridge.update(elapsed);
+    wifiManager.update(elapsed);
+    webServer.update(elapsed);
+    restApi.update(elapsed);
+    webSocketServer.update(elapsed);
+    otaManager.update(elapsed);
+    mqttBridge.update(elapsed);
+    gamepadBridge.update(elapsed);
 }

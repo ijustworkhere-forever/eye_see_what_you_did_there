@@ -79,15 +79,14 @@ void setup() {
     calibration.loadFromStorage(preferencesStore);
     Logger::info(kLogTag, "storage/calibration loaded");
 
-    // TEMPORARY DIAGNOSTIC: skip bringing up WiFi at all, to isolate whether
-    // its radio power-on burst is the sole cause of the brownout seen at this
-    // exact step. Revert both this and the matching skip in loop() once
-    // confirmed either way. Never call wifiManager.update() while this is
-    // skipped -- its retry logic calls WiFi.reconnect() every 5s regardless,
-    // which would silently re-trigger the same radio power-on this is meant
-    // to rule out.
-    // wifiManager.begin(networkConfig.ssid, networkConfig.password);
-    Logger::info(kLogTag, "wifiManager.begin() SKIPPED for diagnostic test");
+    // TEMPORARY DIAGNOSTIC: WifiManager::begin() itself now skips only the
+    // actual WiFi.begin() connect call (see WifiManager.cpp) -- WiFi.mode()
+    // still runs, so the TCP/IP stack AsyncTCP/ESPAsyncWebServer need below
+    // is still initialized. wifiManager.update() stays disabled in loop()
+    // (its retry logic would call WiFi.reconnect() every 5s otherwise,
+    // re-triggering the same connect attempt this is meant to rule out).
+    wifiManager.begin(networkConfig.ssid, networkConfig.password);
+    Logger::info(kLogTag, "wifiManager.begin() done");
 
     webServer.begin(server);
     restApi.begin(server);

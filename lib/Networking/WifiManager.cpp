@@ -19,18 +19,8 @@ void WifiManager::begin(const char* ssid, const char* password) {
     // toward WIFI_POWER_19_5dBm if you've since fixed power delivery (a bulk
     // capacitor across 5V/GND, or a better-quality supply) and want full range.
     WiFi.setTxPower(WIFI_POWER_11dBm);
-
-    // TEMPORARY DIAGNOSTIC: skip only the actual connection attempt, not
-    // WiFi.mode() above -- that call alone brings up the TCP/IP stack (lwIP)
-    // that AsyncTCP/ESPAsyncWebServer need at server.begin(), which a full
-    // WiFi skip broke (assert failed: tcpip_api_call, "Invalid mbox"). This
-    // isolates whether it's specifically WiFi.begin()'s RF connect/probe
-    // burst -- not just the radio/network stack existing at all -- that
-    // trips the brownout. Revert once confirmed either way.
-    (void)ssid;
-    (void)password;
-    // WiFi.begin(ssid, password);
-    Logger::info(kLogTag, "WiFi.begin() SKIPPED for diagnostic test (mode set, not connecting)");
+    WiFi.begin(ssid, password);
+    Logger::info(kLogTag, "Connecting to WiFi");
 }
 
 void WifiManager::update(uint32_t deltaMs) {

@@ -33,6 +33,28 @@
         <button data-expression="Surprised">Surprised</button>
     </section>
 
+    <section id="calibration-section">
+        <h2>Calibration</h2>
+        <div id="calibration-channels">
+            <button data-channel="lr">LR</button>
+            <button data-channel="ud">UD</button>
+            <button data-channel="tl">TL</button>
+            <button data-channel="bl">BL</button>
+            <button data-channel="tr">TR</button>
+            <button data-channel="br">BR</button>
+        </div>
+        <form id="calibration-form">
+            <label>Min pulse (µs) <input type="number" id="cal-min" min="500" max="2500" required /></label>
+            <label>Max pulse (µs) <input type="number" id="cal-max" min="500" max="2500" required /></label>
+            <label>Neutral pulse (µs) <input type="number" id="cal-neutral" min="500" max="2500" required /></label>
+            <label>Mechanical offset <input type="number" id="cal-offset" required /></label>
+            <label><input type="checkbox" id="cal-inverted" /> Inverted</label>
+            <label><input type="checkbox" id="cal-mirrored" /> Mirrored</label>
+            <button type="submit" id="cal-save-btn">Save</button>
+        </form>
+        <p id="calibration-status"></p>
+    </section>
+
     <section id="diagnostics-section">
         <h2>Diagnostics</h2>
         <dl>

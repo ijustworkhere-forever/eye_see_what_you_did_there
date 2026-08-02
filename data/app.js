@@ -76,6 +76,82 @@ document.querySelectorAll('#expression-section button').forEach((button) => {
     });
 });
 
+const calibrationButtons = document.querySelectorAll('#calibration-channels button');
+const calibrationForm = document.getElementById('calibration-form');
+const calibrationStatus = document.getElementById('calibration-status');
+const calMin = document.getElementById('cal-min');
+const calMax = document.getElementById('cal-max');
+const calNeutral = document.getElementById('cal-neutral');
+const calOffset = document.getElementById('cal-offset');
+const calInverted = document.getElementById('cal-inverted');
+const calMirrored = document.getElementById('cal-mirrored');
+
+let selectedChannel = null;
+
+function selectChannel(channel) {
+    selectedChannel = channel;
+    calibrationButtons.forEach((button) => {
+        button.classList.toggle('selected', button.dataset.channel === channel);
+    });
+    calibrationStatus.textContent = 'Loading...';
+    fetch('/api/v1/config')
+        .then((response) => response.json())
+        .then((config) => {
+            const servo = config[channel];
+            calMin.value = servo.minPulseUs;
+            calMax.value = servo.maxPulseUs;
+            calNeutral.value = servo.neutralPulseUs;
+            calOffset.value = servo.mechanicalOffset;
+            calInverted.checked = servo.inverted;
+            calMirrored.checked = servo.mirrored;
+            calibrationStatus.textContent = '';
+        })
+        .catch((error) => {
+            calibrationStatus.textContent = `Failed to load: ${error}`;
+        });
+}
+
+calibrationButtons.forEach((button) => {
+    button.addEventListener('click', () => selectChannel(button.dataset.channel));
+});
+
+calibrationForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!selectedChannel) {
+        return;
+    }
+    const body = {
+        channel: selectedChannel,
+        minPulseUs: Number(calMin.value),
+        maxPulseUs: Number(calMax.value),
+        neutralPulseUs: Number(calNeutral.value),
+        mechanicalOffset: Number(calOffset.value),
+        inverted: calInverted.checked,
+        mirrored: calMirrored.checked,
+    };
+    calibrationStatus.textContent = 'Saving...';
+    fetch('/api/v1/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+        .then((response) => {
+            if (!response.ok) {
+                return response.json().then((error) => {
+                    throw new Error(error.error || `HTTP ${response.status}`);
+                });
+            }
+            calibrationStatus.textContent = 'Saved -- change is live and persisted to flash.';
+        })
+        .catch((error) => {
+            calibrationStatus.textContent = `Save failed: ${error.message}`;
+        });
+});
+
+// Default to LR selected so the form shows real values immediately, matching
+// the rest of this page's no-click-required-to-see-state convention.
+selectChannel('lr');
+
 const diagConnection = document.getElementById('diag-connection');
 const diagState = document.getElementById('diag-state');
 const diagLook = document.getElementById('diag-look');

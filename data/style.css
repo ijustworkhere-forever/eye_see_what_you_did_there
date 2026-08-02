@@ -46,6 +46,39 @@ section {
     padding: 0.5rem 1rem;
 }
 
+#calibration-channels button {
+    margin: 0.25rem;
+    padding: 0.5rem 1rem;
+}
+
+#calibration-channels button.selected {
+    outline: 2px solid currentColor;
+}
+
+#calibration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 300px;
+    margin-top: 0.75rem;
+}
+
+#calibration-form label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#calibration-form input[type='number'] {
+    width: 6rem;
+}
+
+#calibration-status {
+    min-height: 1.2em;
+    font-size: 0.9rem;
+}
+
 dl {
     display: grid;
     grid-template-columns: max-content 1fr;

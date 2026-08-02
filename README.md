@@ -97,7 +97,21 @@ On first boot every channel uses `Configuration.h`'s defaults, which are
 unlikely to be exactly right for your physical servos. Calibrate each of
 the six channels (`lr`, `ud`, `tl`, `bl`, `tr`, `br`) with
 `POST /api/v1/config` — see `docs/api-reference.md` for the full field
-list. Example, calibrating the left/right look channel:
+list.
+
+The Web UI's **Calibration** section is the easiest way to do this: pick a
+channel, edit its min/max/neutral pulse, mechanical offset, and
+inverted/mirrored flags, and hit Save — no manual `curl` needed. Note
+there's no live preview without saving (each Save persists immediately,
+same as the REST call below), so the normal workflow is: adjust, Save,
+then use the Look/Actions/Expression buttons to see the effect, and repeat.
+One case worth knowing about upfront: if a blink or wink moves one eye's
+lids in the opposite direction from the other, that eye's `tl`/`bl` (or
+`tr`/`br`) channels almost certainly need `inverted` toggled — these
+mechanisms are often physically mirrored left-to-right, so the same pulse
+direction that closes one eye's lids can open the other's.
+
+Or via `curl` directly — example, calibrating the left/right look channel:
 
 ```bash
 curl -X POST http://<device-ip>/api/v1/config \

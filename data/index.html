@@ -35,23 +35,38 @@
 
     <section id="calibration-section">
         <h2>Calibration</h2>
+        <p class="help-text">
+            <strong>LR/UD</strong> move the eyes (used by the Look joystick above).
+            <strong>TL/BL</strong> are the left eye's upper/lower eyelids;
+            <strong>TR/BR</strong> are the right eye's — these are what Blink,
+            Wink, Sleep, Wake, and Expression actually move. If one eye's
+            eyelids move the wrong direction (e.g. closing on one side while
+            opening on the other during Blink), toggle <strong>Inverted</strong>
+            on that eye's TL/BL or TR/BR channels, not LR/UD.
+        </p>
         <div id="calibration-channels">
-            <button data-channel="lr">LR</button>
-            <button data-channel="ud">UD</button>
-            <button data-channel="tl">TL</button>
-            <button data-channel="bl">BL</button>
-            <button data-channel="tr">TR</button>
-            <button data-channel="br">BR</button>
+            <button data-channel="lr">LR — eye look, left/right</button>
+            <button data-channel="ud">UD — eye look, up/down</button>
+            <button data-channel="tl">TL — left eye, upper lid</button>
+            <button data-channel="bl">BL — left eye, lower lid</button>
+            <button data-channel="tr">TR — right eye, upper lid</button>
+            <button data-channel="br">BR — right eye, lower lid</button>
         </div>
         <form id="calibration-form">
             <label>Min pulse (µs) <input type="number" id="cal-min" min="500" max="2500" required /></label>
             <label>Max pulse (µs) <input type="number" id="cal-max" min="500" max="2500" required /></label>
             <label>Neutral pulse (µs) <input type="number" id="cal-neutral" min="500" max="2500" required /></label>
             <label>Mechanical offset <input type="number" id="cal-offset" required /></label>
-            <label><input type="checkbox" id="cal-inverted" /> Inverted</label>
-            <label><input type="checkbox" id="cal-mirrored" /> Mirrored</label>
+            <label><input type="checkbox" id="cal-inverted" /> Inverted — reverses this servo's direction of travel</label>
+            <label><input type="checkbox" id="cal-mirrored" /> Mirrored — swaps this servo's min/max meaning</label>
             <button type="submit" id="cal-save-btn">Save</button>
         </form>
+        <p class="help-text">
+            Save persists immediately and applies right away — there's no
+            preview-without-saving. Workflow: adjust a value, Save, then use
+            the Look joystick or Actions/Expression buttons above to see the
+            effect, and repeat.
+        </p>
         <p id="calibration-status"></p>
     </section>
 

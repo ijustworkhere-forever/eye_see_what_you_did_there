@@ -46,9 +46,22 @@ section {
     padding: 0.5rem 1rem;
 }
 
+.help-text {
+    font-size: 0.85rem;
+    opacity: 0.75;
+    line-height: 1.4;
+}
+
+#calibration-channels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0.5rem 0;
+}
+
 #calibration-channels button {
-    margin: 0.25rem;
     padding: 0.5rem 1rem;
+    text-align: left;
 }
 
 #calibration-channels button.selected {
@@ -59,7 +72,6 @@ section {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    max-width: 300px;
     margin-top: 0.75rem;
 }
 
@@ -72,6 +84,7 @@ section {
 
 #calibration-form input[type='number'] {
     width: 6rem;
+    flex-shrink: 0;
 }
 
 #calibration-status {

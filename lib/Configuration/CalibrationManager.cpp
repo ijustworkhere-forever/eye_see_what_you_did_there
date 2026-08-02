@@ -25,6 +25,30 @@ constexpr ChannelKeys kChannelKeys[] = {
 
 constexpr const char* kLookRangeKey = "lookRange";
 
+ServoConfig& channelConfig(EyeConfig& config, EyeChannel channel) {
+    switch (channel) {
+        case EyeChannel::Lr: return config.lr;
+        case EyeChannel::Ud: return config.ud;
+        case EyeChannel::Tl: return config.tl;
+        case EyeChannel::Bl: return config.bl;
+        case EyeChannel::Tr: return config.tr;
+        case EyeChannel::Br: return config.br;
+    }
+    return config.lr;
+}
+
+const ServoConfig& channelConfig(const EyeConfig& config, EyeChannel channel) {
+    switch (channel) {
+        case EyeChannel::Lr: return config.lr;
+        case EyeChannel::Ud: return config.ud;
+        case EyeChannel::Tl: return config.tl;
+        case EyeChannel::Bl: return config.bl;
+        case EyeChannel::Tr: return config.tr;
+        case EyeChannel::Br: return config.br;
+    }
+    return config.lr;
+}
+
 }  // namespace
 
 #ifdef ARDUINO
@@ -66,15 +90,7 @@ ServoConfig CalibrationManager::servoConfig(EyeChannel channel) const {
 }
 
 const ServoConfig& CalibrationManager::constServoConfig(EyeChannel channel) const {
-    switch (channel) {
-        case EyeChannel::Lr: return config_.lr;
-        case EyeChannel::Ud: return config_.ud;
-        case EyeChannel::Tl: return config_.tl;
-        case EyeChannel::Bl: return config_.bl;
-        case EyeChannel::Tr: return config_.tr;
-        case EyeChannel::Br: return config_.br;
-    }
-    return config_.lr;
+    return channelConfig(config_, channel);
 }
 
 void CalibrationManager::setServoConfig(EyeChannel channel, const ServoConfig& config) {
@@ -83,38 +99,65 @@ void CalibrationManager::setServoConfig(EyeChannel channel, const ServoConfig& c
 }
 
 ServoConfig& CalibrationManager::mutableServoConfig(EyeChannel channel) {
-    switch (channel) {
-        case EyeChannel::Lr: return config_.lr;
-        case EyeChannel::Ud: return config_.ud;
-        case EyeChannel::Tl: return config_.tl;
-        case EyeChannel::Bl: return config_.bl;
-        case EyeChannel::Tr: return config_.tr;
-        case EyeChannel::Br: return config_.br;
-    }
-    return config_.lr;
+    return channelConfig(config_, channel);
 }
 
 bool CalibrationManager::loadFromStorage(IStorage& storage) {
-    EYESEE_CALIBRATION_LOCK();
+    // Snapshot config_ under a short lock, do all flash I/O against the local
+    // copy with no lock held, then apply the result back under a second short
+    // lock -- see saveToStorage()'s comment for why holding the lock across
+    // flash I/O is unsafe. This method only ever runs once at boot before
+    // WiFi/BLE are active, but it's kept symmetric with saveToStorage() rather
+    // than relying on that being true forever.
+    EyeConfig localConfig;
+    {
+        EYESEE_CALIBRATION_LOCK();
+        localConfig = config_;
+    }
+
     bool loadedAny = false;
     for (const ChannelKeys& keys : kChannelKeys) {
-        ServoConfig config = mutableServoConfig(keys.channel);
+        ServoConfig config = channelConfig(localConfig, keys.channel);
         if (storage.getUInt16(keys.minKey, config.minPulseUs)) loadedAny = true;
         if (storage.getUInt16(keys.maxKey, config.maxPulseUs)) loadedAny = true;
         if (storage.getUInt16(keys.neutralKey, config.neutralPulseUs)) loadedAny = true;
         if (storage.getInt16(keys.offsetKey, config.mechanicalOffset)) loadedAny = true;
         if (storage.getBool(keys.invertedKey, config.inverted)) loadedAny = true;
         if (storage.getBool(keys.mirroredKey, config.mirrored)) loadedAny = true;
-        mutableServoConfig(keys.channel) = config;
+        channelConfig(localConfig, keys.channel) = config;
     }
-    if (storage.getFloat(kLookRangeKey, config_.lookRangeDegrees)) loadedAny = true;
+    if (storage.getFloat(kLookRangeKey, localConfig.lookRangeDegrees)) loadedAny = true;
+
+    EYESEE_CALIBRATION_LOCK();
+    config_ = localConfig;
     return loadedAny;
 }
 
 void CalibrationManager::saveToStorage(IStorage& storage) const {
-    EYESEE_CALIBRATION_LOCK();
+    // Snapshot config_ under a short lock, then do all flash I/O outside it.
+    // portENTER_CRITICAL disables interrupts (and spins the other core) on
+    // ESP32 -- holding it across 37 sequential flash writes (each of
+    // PreferencesStore's put*() calls commits to NVS individually) starves
+    // WiFi/BLE's interrupt-driven timing for the whole duration. Confirmed on
+    // real hardware: saving calibration while WiFi/BLE were active hung the
+    // device badly enough to need a hard power cycle, not just a reset. This
+    // lock's only job is protecting config_ itself, matching
+    // eyeConfig()/servoConfig()'s existing by-value-snapshot pattern -- it
+    // must never wrap I/O.
+    //
+    // Trade-off: a concurrent setServoConfig() between the snapshot and the
+    // writes below would persist a stale value. Nothing in this codebase
+    // calls setServoConfig() concurrently with saveToStorage() today (both
+    // run sequentially on RestApi's single config-POST handler), so this is
+    // an acceptable, deliberate trade against the alternative of freezing the
+    // radio stack.
+    EyeConfig snapshot;
+    {
+        EYESEE_CALIBRATION_LOCK();
+        snapshot = config_;
+    }
     for (const ChannelKeys& keys : kChannelKeys) {
-        const ServoConfig& config = constServoConfig(keys.channel);
+        const ServoConfig& config = channelConfig(snapshot, keys.channel);
         storage.putUInt16(keys.minKey, config.minPulseUs);
         storage.putUInt16(keys.maxKey, config.maxPulseUs);
         storage.putUInt16(keys.neutralKey, config.neutralPulseUs);
@@ -122,7 +165,7 @@ void CalibrationManager::saveToStorage(IStorage& storage) const {
         storage.putBool(keys.invertedKey, config.inverted);
         storage.putBool(keys.mirroredKey, config.mirrored);
     }
-    storage.putFloat(kLookRangeKey, config_.lookRangeDegrees);
+    storage.putFloat(kLookRangeKey, snapshot.lookRangeDegrees);
 }
 
 }  // namespace eyesee

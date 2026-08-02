@@ -38,6 +38,25 @@ tied to the ESP32's ground. Powering servos directly from the ESP32 dev
 board's onboard 5V regulator is a common cause of brownouts/resets under
 load and is not recommended.
 
+**A separate, WiFi-specific brownout, unrelated to servo power:** on some
+boards/supplies, `WiFi.mode(WIFI_STA)` alone — before any connection
+attempt or servo movement — trips the ESP32's brownout detector, causing
+an infinite crash-reboot loop right at boot. This was isolated on this
+project's own build via targeted testing (skipping the WiFi connect call
+alone didn't help; skipping `WiFi.mode()` entirely did), confirming it's
+the radio's power-on transient itself, not TX power or the connection
+handshake. This matches widely-reported ESP32 behavior for this exact
+scenario (see
+[espressif/arduino-esp32#863](https://github.com/espressif/arduino-esp32/issues/863)).
+`lib/Networking/WifiManager.cpp` works around it by disabling the
+brownout detector only around that one `WiFi.mode()` call and restoring
+it immediately after — not a blanket disable, so a genuine sustained
+undervoltage later (heavy servo load, an actual supply fault) is still
+caught and still resets cleanly. If you see a reset *during* normal
+operation rather than at boot, that's real undervoltage this workaround
+doesn't address — the servo power-budget guidance above is the fix for
+that case, not this one.
+
 **Servo channel mapping** (PCA9685 channel -> role), consistent throughout
 this firmware's code (`lib/Configuration/Configuration.h`,
 `lib/MotionHardware/Pca9685ServoOutput.h`):
@@ -69,9 +88,10 @@ PWM frequency: 50Hz (standard for analog hobby servos).
 The eye mechanism itself is not designed in this repo — it's built from
 [Will Cogley's Animatronic Eye Mechanism on MakerWorld](https://makerworld.com/en/models/1184807-animatronic-eye-mechanism-e3-2)
 and its [Instructables build guide](https://www.instructables.com/Animatronic-Eye-Mechanism/)
-(see the root `README.md`). `hardware/EyeMech_sled_compact.stl` in this
+(see the root `README.md`). `hardware/EyeMech_sled_FINAL_v7.stl` in this
 repo is a custom addition: a sled that mounts an ESP32 mini and the
-PCA9685 board alongside the mechanism, not part of the original design.
+PCA9685 board alongside the mechanism, not part of the original design
+(see `hardware/README.md` for earlier superseded iterations).
 
 **Print settings notes (from this project's own build, sliced for a
 Bambu Lab X1 Carbon on the "0.12mm High Quality" profile):** getting a
